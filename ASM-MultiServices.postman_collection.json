@@ -1,0 +1,391 @@
+{
+  "info": {
+    "name": "ASM Multi-Services - API Collection",
+    "description": "Collection complète des endpoints de l'API de gestion de location de véhicules ASM Multi-Services",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if(pm.response.code === 200) {",
+                "  const data = pm.response.json().data;",
+                "  pm.collectionVariables.set('accessToken', data.accessToken);",
+                "  pm.collectionVariables.set('refreshToken', data.refreshToken);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"admin@asm.sn\", \"motDePasse\": \"Admin123!\"}"
+            }
+          }
+        },
+        {
+          "name": "Me (Profil)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/auth/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/refresh",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"refreshToken\": \"{{refreshToken}}\"}" }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/logout",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"refreshToken\": \"{{refreshToken}}\"}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Véhicules",
+      "item": [
+        {
+          "name": "Liste véhicules",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/vehicules?page=1&limit=10", "query": [
+              { "key": "page", "value": "1" },
+              { "key": "limit", "value": "10" },
+              { "key": "statut", "value": "DISPONIBLE", "disabled": true },
+              { "key": "categorie", "value": "SUV", "disabled": true }
+            ]},
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Créer véhicule",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/vehicules",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"marque\": \"Hyundai\", \"modele\": \"Tucson\", \"annee\": 2023, \"immatriculation\": \"DK-0001-ZZ\", \"couleur\": \"Argent\", \"categorie\": \"SUV\", \"prixJournalier\": 18000, \"prixSemaine\": 90000}"
+            }
+          }
+        },
+        {
+          "name": "Vérifier disponibilité",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/vehicules/:id/disponibilite?debut=2024-03-01&fin=2024-03-07",
+              "variable": [{ "key": "id", "value": "vehicule-id-ici" }],
+              "query": [
+                { "key": "debut", "value": "2024-03-01" },
+                { "key": "fin", "value": "2024-03-07" }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "item": [
+        {
+          "name": "Liste clients",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/clients?page=1&limit=10", "query": [
+              { "key": "page", "value": "1" },
+              { "key": "search", "value": "Ba", "disabled": true }
+            ]},
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Créer client",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/clients",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nom\": \"Konaté\", \"prenom\": \"Alpha\", \"telephone\": \"+221 77 888 99 00\", \"email\": \"alpha.konate@gmail.com\", \"adresse\": \"Médina, Dakar\", \"numeroCNI\": \"1-01-0099999-0\"}"
+            }
+          }
+        },
+        {
+          "name": "Historique client",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/clients/:id/historique", "variable": [{ "key": "id", "value": "client-id-ici" }]},
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Réservations",
+      "item": [
+        {
+          "name": "Liste réservations",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/reservations?page=1&limit=10", "query": [
+              { "key": "statut", "value": "EN_COURS", "disabled": true }
+            ]},
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Créer réservation",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/reservations",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"clientId\": \"client-id\", \"vehiculeId\": \"vehicule-id\", \"dateDebut\": \"2024-04-01\", \"dateFin\": \"2024-04-08\", \"lieuPriseEnCharge\": \"Agence ASM\", \"lieuRetour\": \"Agence ASM\", \"typeTrajet\": \"LOCATION\", \"avance\": 50000}"
+            }
+          }
+        },
+        {
+          "name": "Calendrier réservations",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/reservations/calendrier?mois=3&annee=2024", "query": [
+              { "key": "mois", "value": "3" },
+              { "key": "annee", "value": "2024" }
+            ]},
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Mettre à jour statut",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/reservations/:id/statut", "variable": [{ "key": "id", "value": "reservation-id" }]},
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"statut\": \"CONFIRMEE\"}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contrats",
+      "item": [
+        {
+          "name": "Liste contrats",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/contrats",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Créer contrat",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/contrats",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reservationId\": \"reservation-id\", \"kilometrageDepart\": 45000, \"etatDepart\": \"Bon état général\", \"caution\": 100000}"
+            }
+          }
+        },
+        {
+          "name": "Générer PDF",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/contrats/:id/pdf", "variable": [{ "key": "id", "value": "contrat-id" }]},
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Clôturer contrat",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/contrats/:id/cloture", "variable": [{ "key": "id", "value": "contrat-id" }]},
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"kilometrageRetour\": 45750, \"etatRetour\": \"Bon état\", \"cautionRendue\": true}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Paiements",
+      "item": [
+        {
+          "name": "Liste paiements",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/paiements",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Enregistrer paiement",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/paiements",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contratId\": \"contrat-id\", \"montant\": 50000, \"methode\": \"WAVE\", \"reference\": \"WAVE-2024-001\", \"notes\": \"Premier versement\"}"
+            }
+          }
+        },
+        {
+          "name": "Stats par méthode",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/paiements/stats",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Valider paiement",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/paiements/:id/valider", "variable": [{ "key": "id", "value": "paiement-id" }]},
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"valide\": true}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Statistiques générales",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/stats",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Revenus par période",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/dashboard/revenus?periode=mois", "query": [
+              { "key": "periode", "value": "mois" }
+            ]},
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Performance véhicules",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/vehicules/performance",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Alertes système",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/alertes",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Maintenances",
+      "item": [
+        {
+          "name": "Liste maintenances",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/maintenances",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Créer maintenance",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/maintenances",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"vehiculeId\": \"vehicule-id\", \"type\": \"Vidange\", \"description\": \"Vidange complète + filtres\", \"cout\": 45000, \"dateDebut\": \"2024-03-15\"}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Santé API",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          }
+        }
+      ]
+    }
+  ]
+}

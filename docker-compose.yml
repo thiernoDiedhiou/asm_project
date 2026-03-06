@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # ---- Base de données PostgreSQL ----
+  postgres:
+    image: postgres:16-alpine
+    container_name: asm-postgres
+    environment:
+      POSTGRES_USER: asm_user
+      POSTGRES_PASSWORD: asm_password
+      POSTGRES_DB: asm_location
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U asm_user -d asm_location"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - asm-network
+
+  # ---- pgAdmin (Interface administration BDD) ----
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: asm-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@asm.sn
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_LISTEN_PORT: 5050
+    ports:
+      - "5050:5050"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - asm-network
+
+  # ---- Backend Node.js ----
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: asm-backend
+    environment:
+      DATABASE_URL: postgresql://asm_user:asm_password@postgres:5432/asm_location
+      JWT_SECRET: dev_jwt_secret_change_in_production_very_long_string
+      JWT_REFRESH_SECRET: dev_refresh_secret_change_in_production_different
+      JWT_EXPIRY: 15m
+      REFRESH_EXPIRY: 7d
+      PORT: 5000
+      NODE_ENV: development
+      FRONTEND_URL: http://localhost:3000
+      UPLOAD_DIR: /app/uploads
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/prisma:/app/prisma
+      - uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - asm-network
+    command: npm run dev
+
+  # ---- Frontend React ----
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: asm-frontend
+    environment:
+      VITE_API_URL: http://localhost:5000/api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
+    networks:
+      - asm-network
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads:
+    driver: local
+
+networks:
+  asm-network:
+    driver: bridge

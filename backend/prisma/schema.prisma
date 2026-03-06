@@ -1,0 +1,303 @@
+// ============================================================
+// SCHÉMA PRISMA - ASM Multi-Services Location de Véhicules
+// Base de données: PostgreSQL
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---- Enums ----
+
+enum Role {
+  ADMIN
+  AGENT
+  COMPTABLE
+}
+
+enum Categorie {
+  ECONOMIQUE
+  STANDARD
+  SUV
+  LUXE
+  UTILITAIRE
+}
+
+enum StatutVehicule {
+  DISPONIBLE
+  LOUE
+  EN_MAINTENANCE
+  HORS_SERVICE
+}
+
+enum TypeClient {
+  PARTICULIER
+  ENTREPRISE
+  VIP
+}
+
+enum StatutReservation {
+  EN_ATTENTE
+  CONFIRMEE
+  EN_COURS
+  TERMINEE
+  ANNULEE
+}
+
+enum TypeTrajet {
+  LOCATION
+  TRANSFERT_AEROPORT
+  LONGUE_DUREE
+}
+
+enum StatutContrat {
+  ACTIF
+  TERMINE
+  LITIGE
+}
+
+enum MethodePaiement {
+  ESPECES
+  WAVE
+  ORANGE_MONEY
+  FREE_MONEY
+  VIREMENT
+  CHEQUE
+}
+
+enum StatutMaintenance {
+  PLANIFIEE
+  EN_COURS
+  TERMINEE
+}
+
+// ---- Modèles ----
+
+model User {
+  id           String        @id @default(uuid())
+  nom          String
+  prenom       String
+  email        String        @unique
+  motDePasse   String
+  telephone    String?
+  role         Role          @default(AGENT)
+  actif        Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  reservations Reservation[]
+  contrats     Contrat[]
+
+  @@map("users")
+}
+
+model Vehicule {
+  id              String         @id @default(uuid())
+  marque          String
+  modele          String
+  annee           Int
+  immatriculation String         @unique
+  couleur         String
+  categorie       Categorie
+  kilometrage     Int            @default(0)
+  prixJournalier  Decimal        @db.Decimal(10, 2)
+  prixSemaine     Decimal        @db.Decimal(10, 2)
+  statut          StatutVehicule @default(DISPONIBLE)
+  photos          String[]
+  description     String?
+  reservations    Reservation[]
+  maintenances    Maintenance[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@map("vehicules")
+}
+
+model Client {
+  id              String        @id @default(uuid())
+  nom             String
+  prenom          String
+  email           String?
+  telephone       String
+  adresse         String?
+  typeClient      TypeClient    @default(PARTICULIER)
+  societe         String?
+  numeroCNI       String?
+  numeroPasseport String?
+  permisConduire  String?
+  notes           String?
+  reservations    Reservation[]
+  contrats        Contrat[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("clients")
+}
+
+model Reservation {
+  id                 String            @id @default(uuid())
+  numeroReservation  String            @unique
+  client             Client            @relation(fields: [clientId], references: [id])
+  clientId           String
+  vehicule           Vehicule          @relation(fields: [vehiculeId], references: [id])
+  vehiculeId         String
+  dateDebut          DateTime
+  dateFin            DateTime
+  lieuPriseEnCharge  String
+  lieuRetour         String
+  nombreJours        Int
+  prixTotal          Decimal           @db.Decimal(10, 2)
+  avance             Decimal           @default(0) @db.Decimal(10, 2)
+  statut             StatutReservation @default(EN_ATTENTE)
+  typeTrajet         TypeTrajet        @default(LOCATION)
+  notes              String?
+  agentId            String
+  agent              User              @relation(fields: [agentId], references: [id])
+  zoneId             String?
+  zone               TarifZone?        @relation(fields: [zoneId], references: [id])
+  contrat            Contrat?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@map("reservations")
+}
+
+model Contrat {
+  id                String        @id @default(uuid())
+  numeroContrat     String        @unique
+  reservation       Reservation   @relation(fields: [reservationId], references: [id])
+  reservationId     String        @unique
+  client            Client        @relation(fields: [clientId], references: [id])
+  clientId          String
+  agent             User          @relation(fields: [agentId], references: [id])
+  agentId           String
+  dateSignature     DateTime      @default(now())
+  kilometrageDepart Int
+  kilometrageRetour Int?
+  etatDepart        String
+  etatRetour        String?
+  caution           Decimal       @db.Decimal(10, 2)
+  cautionRendue     Boolean       @default(false)
+  notes             String?
+  paiements         Paiement[]
+  statut            StatutContrat @default(ACTIF)
+  pdfUrl            String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@map("contrats")
+}
+
+model Paiement {
+  id           String          @id @default(uuid())
+  contrat      Contrat         @relation(fields: [contratId], references: [id])
+  contratId    String
+  montant      Decimal         @db.Decimal(10, 2)
+  methode      MethodePaiement
+  reference    String?
+  datePaiement DateTime        @default(now())
+  notes        String?
+  valide       Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@map("paiements")
+}
+
+model Maintenance {
+  id          String            @id @default(uuid())
+  vehicule    Vehicule          @relation(fields: [vehiculeId], references: [id])
+  vehiculeId  String
+  type        String
+  description String
+  cout        Decimal?          @db.Decimal(10, 2)
+  dateDebut   DateTime
+  dateFin     DateTime?
+  statut      StatutMaintenance @default(EN_COURS)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@map("maintenances")
+}
+
+// Journal d'activité — traçabilité des actions utilisateurs
+model JournalActivite {
+  id        String   @id @default(uuid())
+  userId    String
+  userNom   String   // Snapshot du nom (conservé même si l'utilisateur est supprimé)
+  userRole  String   // Snapshot du rôle
+  action    String   // Ex: RESERVATION_CREEE, LOGIN, PAIEMENT_ENREGISTRE
+  entite    String   // Ex: RESERVATION, CONTRAT, VEHICULE, AUTH
+  entiteId  String?  // ID de l'entité concernée
+  details   Json?    // Informations supplémentaires (JSON libre)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+  @@map("journal_activite")
+}
+
+// Zones tarifaires — zones géographiques de déplacement
+model TarifZone {
+  id             String          @id @default(uuid())
+  nom            String          @unique
+  actif          Boolean         @default(true)
+  reservations   Reservation[]
+  prixCategories PrixCategorie[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@map("tarif_zones")
+}
+
+// Grille tarifaire — prix par catégorie de véhicule × zone géographique
+model PrixCategorie {
+  id             String    @id @default(uuid())
+  categorie      Categorie
+  zone           TarifZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  zoneId         String
+  prixJournalier Decimal   @db.Decimal(10, 2)
+  prixSemaine    Decimal?  @db.Decimal(10, 2)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([categorie, zoneId])
+  @@map("prix_categories")
+}
+
+// Paramètres de l'entreprise — ligne unique (id = 1)
+model Parametre {
+  id            Int      @id @default(1)
+  nomEntreprise String   @default("ASM Multi-Services")
+  slogan        String   @default("Location de Véhicules")
+  activite      String   @default("Vente et location de voitures — Import/Export")
+  telephone     String   @default("+221 77 418 05 32")
+  telephone2    String   @default("+221 76 474 90 92")
+  email         String   @default("contact@asm-location.sn")
+  adresse       String   @default("Grand Yoff — Zone de Captage")
+  ville         String   @default("Dakar, Sénégal")
+  rccm          String   @default("SN.DKR.2024.A.53708")
+  ninea         String   @default("011803633")
+  heuresLunVen  String   @default("08h00 – 18h00")
+  heuresSamedi  String   @default("09h00 – 15h00")
+  noteTransfert String   @default("Transfert aéroport disponible 24h/24 sur réservation")
+  bannierePromo String?
+  updatedAt     DateTime @updatedAt
+
+  @@map("parametres")
+}
+
+// Table pour les sessions / tokens révoqués (logout)
+model TokenBlacklist {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("token_blacklist")
+}
