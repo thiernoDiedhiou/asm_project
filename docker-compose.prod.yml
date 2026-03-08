@@ -1,0 +1,79 @@
+version: '3.8'
+
+# Architecture: Nginx host (existant) → conteneurs Docker
+# - frontend sur 127.0.0.1:3001
+# - backend  sur 127.0.0.1:5001
+# - postgres uniquement en interne
+
+services:
+  # ---- Base de données PostgreSQL ----
+  postgres:
+    image: postgres:16-alpine
+    container_name: asm-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - asm-network
+
+  # ---- Backend Node.js ----
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: asm-backend
+    restart: always
+    ports:
+      - "127.0.0.1:5001:5000"
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_EXPIRY: ${JWT_EXPIRY}
+      REFRESH_EXPIRY: ${REFRESH_EXPIRY}
+      PORT: 5000
+      NODE_ENV: production
+      FRONTEND_URL: https://${FRONTEND_DOMAIN}
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - asm-network
+
+  # ---- Frontend React ----
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: https://${BACKEND_DOMAIN}/api
+    container_name: asm-frontend
+    restart: always
+    ports:
+      - "127.0.0.1:3001:80"
+    depends_on:
+      - backend
+    networks:
+      - asm-network
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads:
+    driver: local
+
+networks:
+  asm-network:
+    driver: bridge
