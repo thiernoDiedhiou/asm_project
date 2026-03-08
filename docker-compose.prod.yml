@@ -1,12 +1,6 @@
 version: '3.8'
 
-# Architecture: Nginx host (existant) → conteneurs Docker
-# - frontend sur 127.0.0.1:3001
-# - backend  sur 127.0.0.1:5001
-# - postgres uniquement en interne
-
 services:
-  # ---- Base de données PostgreSQL ----
   postgres:
     image: postgres:16-alpine
     container_name: asm-postgres
@@ -25,7 +19,6 @@ services:
     networks:
       - asm-network
 
-  # ---- Backend Node.js ----
   backend:
     build:
       context: ./backend
@@ -52,7 +45,6 @@ services:
     networks:
       - asm-network
 
-  # ---- Frontend React ----
   frontend:
     build:
       context: ./frontend
@@ -70,9 +62,7 @@ services:
 
 volumes:
   postgres_data:
-    driver: local
   uploads:
-    driver: local
 
 networks:
   asm-network:
