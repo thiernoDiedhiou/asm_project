@@ -10,8 +10,22 @@ import {
   Plane,
   Calendar,
   CheckCircle2,
+  Tag,
+  CalendarClock,
 } from 'lucide-react';
 import { publicApi } from '../../services/api';
+
+interface PromoSettings {
+  bannierePromo?: string;
+  promoSousTexte?: string;
+  promoReduction?: string;
+  promoDateFin?: string;
+}
+
+function formatDateFin(dateStr: string) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
 
 interface VehiculePublic {
   id: string;
@@ -89,13 +103,21 @@ function VehiculeCard({ v, onReserver }: { v: VehiculePublic; onReserver: () => 
 export function LandingPage() {
   const navigate = useNavigate();
   const [vehicules, setVehicules] = useState<VehiculePublic[]>([]);
+  const [promo, setPromo] = useState<PromoSettings>({});
 
   useEffect(() => {
     publicApi.getVehicules().then((res) => {
       const data = res.data?.data || [];
       setVehicules(data.slice(0, 3));
     }).catch(() => {});
+
+    publicApi.getSettings().then((res) => {
+      if (res.data?.data) setPromo(res.data.data);
+    }).catch(() => {});
   }, []);
+
+  const promoActive = Boolean(promo.bannierePromo) &&
+    (!promo.promoDateFin || new Date(promo.promoDateFin) >= new Date());
 
   const services = [
     {
@@ -165,6 +187,86 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ===== SECTION PROMO ===== */}
+      {promoActive && (
+        <section className="relative overflow-hidden bg-gradient-to-br from-[#0d3d12] via-asm-vert to-[#1a5c20]">
+          {/* Décors géométriques */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-asm-or/10" />
+            <div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-white/5" />
+            <div className="absolute top-1/2 right-1/4 w-2 h-2 rounded-full bg-asm-or/60" />
+            <div className="absolute top-8 right-1/3 w-1 h-1 rounded-full bg-white/40" />
+          </div>
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-16">
+            <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+
+              {/* ── Colonne gauche : badge réduction ── */}
+              <div className="flex-shrink-0 flex flex-col items-center">
+                <div className="relative">
+                  {/* Badge extérieur */}
+                  <div className="w-44 h-44 rounded-full border-4 border-asm-or/40 flex items-center justify-center bg-asm-or/10">
+                    <div className="w-36 h-36 rounded-full bg-asm-or flex items-center justify-center flex-col shadow-2xl">
+                      {promo.promoReduction ? (
+                        <>
+                          <span className="text-4xl font-black text-asm-vert leading-none">
+                            {promo.promoReduction}
+                          </span>
+                          <span className="text-xs font-bold text-asm-vert/70 uppercase tracking-widest mt-1">réduction</span>
+                        </>
+                      ) : (
+                        <Tag className="h-12 w-12 text-asm-vert" />
+                      )}
+                    </div>
+                  </div>
+                  {/* Étoile déco */}
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg">
+                    <Star className="h-4 w-4 text-asm-or fill-asm-or" />
+                  </div>
+                </div>
+                <span className="mt-4 text-xs font-bold text-asm-or uppercase tracking-[0.2em]">Offre limitée</span>
+              </div>
+
+              {/* ── Colonne droite : texte + CTA ── */}
+              <div className="flex-1 text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 bg-white/10 text-white/90 text-xs font-semibold px-3 py-1.5 rounded-full mb-4 uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-asm-or animate-pulse" />
+                  Promotion en cours
+                </div>
+
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight mb-3">
+                  {promo.bannierePromo}
+                </h2>
+
+                {promo.promoSousTexte && (
+                  <p className="text-white/70 text-base sm:text-lg leading-relaxed mb-6 max-w-xl">
+                    {promo.promoSousTexte}
+                  </p>
+                )}
+
+                <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4">
+                  <button
+                    onClick={() => navigate('/reserver')}
+                    className="inline-flex items-center gap-2 px-8 py-3.5 bg-asm-or text-asm-vert font-bold rounded-xl shadow-lg hover:bg-yellow-400 transition-colors text-base"
+                  >
+                    Réserver maintenant
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+
+                  {promo.promoDateFin && (
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <CalendarClock className="h-4 w-4 text-asm-or flex-shrink-0" />
+                      <span>Jusqu'au <span className="text-white font-semibold">{formatDateFin(promo.promoDateFin)}</span></span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ===== SERVICES ===== */}
       <section className="py-16 bg-gray-50">

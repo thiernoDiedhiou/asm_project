@@ -286,8 +286,11 @@ model Parametre {
   heuresLunVen  String   @default("08h00 – 18h00")
   heuresSamedi  String   @default("09h00 – 15h00")
   noteTransfert String   @default("Transfert aéroport disponible 24h/24 sur réservation")
-  bannierePromo String?
-  updatedAt     DateTime @updatedAt
+  bannierePromo  String?
+  promoSousTexte String?
+  promoReduction String?
+  promoDateFin   String?
+  updatedAt      DateTime @updatedAt
 
   @@map("parametres")
 }
