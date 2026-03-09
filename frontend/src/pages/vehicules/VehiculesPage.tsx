@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Plus, Search, Filter, Car, Edit, Trash2, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '../../components/hooks/useQuery';
-import { vehiculesApi } from '../../services/api';
+import { vehiculesApi, getUploadUrl } from '../../services/api';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import {
   formatFCFA,
@@ -147,7 +147,7 @@ export function VehiculesPage() {
               <div className="h-36 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative">
                 {vehicule.photos?.[0] ? (
                   <img
-                    src={vehicule.photos[0]}
+                    src={getUploadUrl(vehicule.photos[0])}
                     alt={`${vehicule.marque} ${vehicule.modele}`}
                     className="h-full w-full object-cover"
                   />

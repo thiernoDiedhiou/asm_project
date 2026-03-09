@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { ArrowLeft, Edit, Trash2, Car, Wrench, Calendar, ChevronLeft, ChevronRight, Image } from 'lucide-react';
-import { vehiculesApi } from '../../services/api';
+import { vehiculesApi, getUploadUrl } from '../../services/api';
 import { useQuery } from '../../components/hooks/useQuery';
 import { formatFCFA, formatDate, getStatutVehiculeColor, STATUT_LABELS, CATEGORIE_LABELS } from '../../utils/format';
 import { useIsAdmin } from '../../store/authStore';
@@ -78,7 +78,7 @@ export function VehiculeDetailPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="relative h-64 bg-gray-100">
             <img
-              src={photos[photoIndex]}
+              src={getUploadUrl(photos[photoIndex])}
               alt={`${v.marque} ${v.modele} - photo ${photoIndex + 1}`}
               className="h-full w-full object-cover"
             />
@@ -130,7 +130,7 @@ export function VehiculeDetailPage() {
                     i === photoIndex ? 'border-asm-vert' : 'border-transparent opacity-60 hover:opacity-100'
                   }`}
                 >
-                  <img src={url} alt={`Miniature ${i + 1}`} className="h-full w-full object-cover" />
+                  <img src={getUploadUrl(url)} alt={`Miniature ${i + 1}`} className="h-full w-full object-cover" />
                 </button>
               ))}
             </div>

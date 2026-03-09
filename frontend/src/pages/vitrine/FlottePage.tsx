@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Car, ChevronRight, Filter, SlidersHorizontal } from 'lucide-react';
-import { publicApi } from '../../services/api';
+import { publicApi, getUploadUrl } from '../../services/api';
 
 interface VehiculePublic {
   id: string;
@@ -182,7 +182,7 @@ export function FlottePage() {
                 <div className="aspect-video bg-gray-100 overflow-hidden relative">
                   {v.photos?.[0] ? (
                     <img
-                      src={v.photos[0]}
+                      src={getUploadUrl(v.photos[0])}
                       alt={`${v.marque} ${v.modele}`}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />

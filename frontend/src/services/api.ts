@@ -7,6 +7,14 @@ import axios, {
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
+// Convertit un chemin relatif /uploads/... en URL absolue vers le backend
+export const getUploadUrl = (path: string): string => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  const backendBase = BASE_URL.replace(/\/api$/, '');
+  return `${backendBase}${path}`;
+};
+
 // Instance Axios principale
 const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,

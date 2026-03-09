@@ -11,7 +11,7 @@ import {
   Calendar,
   CheckCircle2,
 } from 'lucide-react';
-import { publicApi } from '../../services/api';
+import { publicApi, getUploadUrl } from '../../services/api';
 
 interface VehiculePublic {
   id: string;
@@ -45,7 +45,7 @@ function VehiculeCard({ v, onReserver }: { v: VehiculePublic; onReserver: () => 
       <div className="aspect-video bg-gray-100 overflow-hidden relative">
         {photo ? (
           <img
-            src={photo}
+            src={getUploadUrl(photo)}
             alt={`${v.marque} ${v.modele}`}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />

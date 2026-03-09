@@ -18,7 +18,7 @@ import {
   Navigation,
   Check,
 } from 'lucide-react';
-import { publicApi } from '../../services/api';
+import { publicApi, getUploadUrl } from '../../services/api';
 
 interface VehiculePublic {
   id: string;
@@ -474,7 +474,7 @@ export function DemandeReservationPage() {
                   <div className="flex items-center gap-4 p-4 bg-asm-vert/5 border-2 border-asm-vert rounded-xl">
                     {vehiculeSelectionne.photos?.[0] ? (
                       <img
-                        src={vehiculeSelectionne.photos[0]}
+                        src={getUploadUrl(vehiculeSelectionne.photos[0])}
                         alt={`${vehiculeSelectionne.marque} ${vehiculeSelectionne.modele}`}
                         className="h-16 w-24 object-cover rounded-lg flex-shrink-0"
                       />
@@ -524,7 +524,7 @@ export function DemandeReservationPage() {
                         >
                           {v.photos?.[0] ? (
                             <img
-                              src={v.photos[0]}
+                              src={getUploadUrl(v.photos[0])}
                               alt={`${v.marque} ${v.modele}`}
                               className="w-full h-24 object-cover group-hover:scale-105 transition-transform duration-300"
                             />

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Car, Save, Upload, X, Image } from 'lucide-react';
-import { vehiculesApi } from '../../services/api';
+import { vehiculesApi, getUploadUrl } from '../../services/api';
 
 const CATEGORIES = ['ECONOMIQUE', 'STANDARD', 'SUV', 'LUXE', 'UTILITAIRE'];
 const CAT_LABELS: Record<string, string> = {
@@ -166,7 +166,7 @@ export function VehiculeFormPage() {
             {/* Photos existantes */}
             {existingPhotos.map((url, i) => (
               <div key={i} className="relative h-24 w-24 rounded-lg overflow-hidden border border-gray-200">
-                <img src={url} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+                <img src={getUploadUrl(url)} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
                 <button
                   type="button"
                   title="Supprimer cette photo"
