@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Car, User, Calendar, FileText, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Car, User, Calendar, FileText, CheckCircle, XCircle, CalendarPlus } from 'lucide-react';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { reservationsApi, contratsApi } from '../../services/api';
+import { reservationsApi } from '../../services/api';
 import { useQuery } from '../../components/hooks/useQuery';
 import { formatFCFA, formatDate, getStatutReservationColor, STATUT_LABELS, TYPE_TRAJET_LABELS } from '../../utils/format';
 import { useIsAdmin, useIsAgent } from '../../store/authStore';
@@ -15,6 +15,10 @@ export function ReservationDetailPage() {
   const canEdit = isAdmin || isAgent;
 
   const [pendingStatut, setPendingStatut] = useState<string | null>(null);
+  const [showProlonger, setShowProlonger] = useState(false);
+  const [nouvelleDataFin, setNouvelleDataFin] = useState('');
+  const [prolongerLoading, setProlongerLoading] = useState(false);
+  const [prolongerError, setProlongerError] = useState('');
 
   const { data, isLoading, refetch } = useQuery(
     ['reservation', id],
@@ -23,6 +27,21 @@ export function ReservationDetailPage() {
   );
 
   const r = data?.data;
+
+  // Estimation côté client (prixJournalier du véhicule × nouveaux jours)
+  const prixEstime = useMemo(() => {
+    if (!r || !nouvelleDataFin) return null;
+    const fin = new Date(nouvelleDataFin);
+    const debut = new Date(r.dateDebut);
+    const actuelle = new Date(r.dateFin);
+    if (fin <= actuelle) return null;
+    const totalJours = Math.max(1, Math.ceil((fin.getTime() - debut.getTime()) / 86400000));
+    const prixJ = Number(r.vehicule?.prixJournalier ?? 0);
+    const prixS = Number(r.vehicule?.prixSemaine ?? prixJ * 6);
+    const semaines = Math.floor(totalJours / 7);
+    const joursRestants = totalJours % 7;
+    return semaines * prixS + joursRestants * prixJ;
+  }, [r, nouvelleDataFin]);
 
   const TRANSITIONS: Record<string, { label: string; next: string; icon: React.ElementType; color: string }[]> = {
     EN_ATTENTE: [
@@ -54,6 +73,28 @@ export function ReservationDetailPage() {
     }
   }
 
+  function openProlonger() {
+    setNouvelleDataFin('');
+    setProlongerError('');
+    setShowProlonger(true);
+  }
+
+  async function handleProlonger() {
+    if (!nouvelleDataFin) { setProlongerError('Veuillez sélectionner une date.'); return; }
+    setProlongerLoading(true);
+    setProlongerError('');
+    try {
+      await reservationsApi.prolonger(id!, nouvelleDataFin);
+      setShowProlonger(false);
+      refetch();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur lors de la prolongation';
+      setProlongerError((err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? msg);
+    } finally {
+      setProlongerLoading(false);
+    }
+  }
+
   function handleCreerContrat() {
     navigate(`/contrats/nouveau?reservationId=${id}`);
   }
@@ -73,11 +114,19 @@ export function ReservationDetailPage() {
   }
 
   const transitions = TRANSITIONS[r.statut] || [];
+  const canProlonger = canEdit && ['CONFIRMEE', 'EN_COURS'].includes(r.statut);
+
+  // Date minimale pour la prolongation : lendemain de la date de fin actuelle
+  const minDateProlonger = (() => {
+    const d = new Date(r.dateFin);
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  })();
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* En-tête */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <button aria-label="Retour" onClick={() => navigate('/reservations')} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <ArrowLeft className="h-5 w-5 text-gray-600" />
@@ -93,15 +142,21 @@ export function ReservationDetailPage() {
           </div>
         </div>
 
-        {/* Actions de transition */}
-        {canEdit && transitions.length > 0 && (
-          <div className="flex gap-2">
+        {/* Actions */}
+        {canEdit && (
+          <div className="flex flex-wrap gap-2 justify-end">
             {transitions.map(({ label, next, icon: Icon, color }) => (
               <button key={next} onClick={() => handleStatut(next)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${color}`}>
                 <Icon className="h-4 w-4" /> {label}
               </button>
             ))}
+            {canProlonger && (
+              <button onClick={openProlonger}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-asm-or text-asm-vert hover:bg-yellow-400 transition-colors">
+                <CalendarPlus className="h-4 w-4" /> Prolonger
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -146,6 +201,7 @@ export function ReservationDetailPage() {
           {[
             { label: 'Date de début', value: formatDate(r.dateDebut) },
             { label: 'Date de fin', value: formatDate(r.dateFin) },
+            { label: 'Durée', value: `${r.nombreJours} jour${r.nombreJours > 1 ? 's' : ''}` },
             { label: 'Type de trajet', value: TYPE_TRAJET_LABELS[r.typeTrajet] || r.typeTrajet },
             { label: 'Lieu de départ', value: r.lieuPriseEnCharge },
             { label: 'Lieu de retour', value: r.lieuRetour },
@@ -210,6 +266,7 @@ export function ReservationDetailPage() {
         </div>
       )}
 
+      {/* Dialog changement de statut */}
       <ConfirmDialog
         open={!!pendingStatut}
         title="Changer le statut"
@@ -219,6 +276,92 @@ export function ReservationDetailPage() {
         onConfirm={confirmStatut}
         onCancel={() => setPendingStatut(null)}
       />
+
+      {/* Modal prolongation */}
+      {showProlonger && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-5">
+            {/* Header */}
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-asm-or/20 flex items-center justify-center">
+                <CalendarPlus className="h-5 w-5 text-asm-vert" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Prolonger la réservation</h2>
+                <p className="text-xs text-gray-500">#{r.id?.slice(-8).toUpperCase()}</p>
+              </div>
+            </div>
+
+            {/* Durée actuelle */}
+            <div className="bg-gray-50 rounded-xl p-4 text-sm space-y-1">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Date de début</span>
+                <span className="font-medium">{formatDate(r.dateDebut)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Date de fin actuelle</span>
+                <span className="font-medium text-orange-600">{formatDate(r.dateFin)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Durée actuelle</span>
+                <span className="font-medium">{r.nombreJours} jour{r.nombreJours > 1 ? 's' : ''}</span>
+              </div>
+            </div>
+
+            {/* Sélecteur nouvelle date de fin */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Nouvelle date de fin <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={nouvelleDataFin}
+                min={minDateProlonger}
+                onChange={e => { setNouvelleDataFin(e.target.value); setProlongerError(''); }}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
+              />
+            </div>
+
+            {/* Estimation du nouveau prix */}
+            {nouvelleDataFin && prixEstime !== null && (
+              <div className="bg-asm-vert/5 border border-asm-vert/20 rounded-xl p-4 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Nouveau montant estimé</span>
+                  <span className="text-xl font-bold text-asm-vert">{formatFCFA(prixEstime)}</span>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  Le prix exact est calculé par le serveur (remises éventuelles comprises).
+                </p>
+              </div>
+            )}
+
+            {/* Erreur */}
+            {prolongerError && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                {prolongerError}
+              </p>
+            )}
+
+            {/* Boutons */}
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => setShowProlonger(false)}
+                disabled={prolongerLoading}
+                className="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleProlonger}
+                disabled={prolongerLoading || !nouvelleDataFin}
+                className="flex-1 px-4 py-2.5 rounded-lg bg-asm-vert text-white text-sm font-semibold hover:bg-asm-vert/90 transition-colors disabled:opacity-50"
+              >
+                {prolongerLoading ? 'En cours…' : 'Confirmer la prolongation'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -282,6 +282,84 @@ export class ReservationService {
   }
 
   /**
+   * Prolonge une réservation (CONFIRMEE ou EN_COURS uniquement)
+   * Recalcule le prix total sur la nouvelle durée totale
+   */
+  async prolonger(id: string, nouvelleDataFin: string, userId: string) {
+    const reservation = await prisma.reservation.findUnique({
+      where: { id },
+      include: {
+        vehicule: true,
+        client: true,
+      },
+    });
+
+    if (!reservation) throw new Error('Réservation introuvable');
+
+    if (!['CONFIRMEE', 'EN_COURS'].includes(reservation.statut)) {
+      throw new Error('Seules les réservations confirmées ou en cours peuvent être prolongées');
+    }
+
+    const dateFin = new Date(nouvelleDataFin);
+    if (dateFin <= reservation.dateFin) {
+      throw new Error('La nouvelle date de fin doit être postérieure à la date de fin actuelle');
+    }
+
+    // Résoudre le prix journalier (via zone si présente, sinon véhicule)
+    let prixJournalier = Number(reservation.vehicule.prixJournalier);
+    let prixSemaine = Number(reservation.vehicule.prixSemaine);
+
+    if (reservation.zoneId) {
+      const prixCategorie = await prisma.prixCategorie.findUnique({
+        where: {
+          categorie_zoneId: {
+            categorie: reservation.vehicule.categorie,
+            zoneId: reservation.zoneId,
+          },
+        },
+      });
+      if (prixCategorie) {
+        prixJournalier = Number(prixCategorie.prixJournalier);
+        if (prixCategorie.prixSemaine) prixSemaine = Number(prixCategorie.prixSemaine);
+      }
+    }
+
+    // Fidélité client
+    const nombreLocations = await prisma.reservation.count({
+      where: { clientId: reservation.clientId, statut: 'TERMINEE' },
+    });
+
+    const prixCalc = calculerPrix(
+      reservation.typeTrajet,
+      reservation.dateDebut,
+      dateFin,
+      prixJournalier,
+      prixSemaine,
+      nombreLocations
+    );
+
+    const ancienneDataFin = reservation.dateFin;
+    const updated = await prisma.reservation.update({
+      where: { id },
+      data: {
+        dateFin,
+        nombreJours: prixCalc.nombreJours,
+        prixTotal: prixCalc.prixTotal,
+      },
+      include: {
+        client: true,
+        vehicule: true,
+      },
+    });
+
+    logger.info(
+      `Réservation ${reservation.numeroReservation} prolongée: ${ancienneDataFin.toLocaleDateString('fr-FR')} → ${dateFin.toLocaleDateString('fr-FR')} (agent: ${userId})`
+    );
+
+    return { reservation: updated, prixDetail: prixCalc };
+  }
+
+  /**
    * Supprime une réservation (seulement si EN_ATTENTE ou ANNULEE)
    */
   async delete(id: string) {

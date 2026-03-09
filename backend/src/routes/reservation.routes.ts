@@ -49,6 +49,13 @@ router.put(
   reservationController.updateStatut.bind(reservationController)
 );
 
+router.put(
+  '/:id/prolonger',
+  authenticateToken,
+  authorize(Role.ADMIN, Role.AGENT),
+  reservationController.prolonger.bind(reservationController)
+);
+
 router.delete(
   '/:id',
   authenticateToken,
