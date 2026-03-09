@@ -92,6 +92,9 @@ interface SettingsFormData {
   heuresSamedi: string;
   noteTransfert: string;
   bannierePromo: string;
+  promoSousTexte: string;
+  promoReduction: string;
+  promoDateFin: string;
 }
 
 export function ParametresPage() {
@@ -109,6 +112,7 @@ export function ParametresPage() {
     nomEntreprise: '', slogan: '', activite: '', telephone: '', telephone2: '',
     email: '', adresse: '', ville: '', rccm: '', ninea: '',
     heuresLunVen: '', heuresSamedi: '', noteTransfert: '', bannierePromo: '',
+    promoSousTexte: '', promoReduction: '', promoDateFin: '',
   });
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -464,17 +468,56 @@ export function ParametresPage() {
 
             <div>
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Bannière promotionnelle</h3>
-              <p className="text-xs text-gray-400 mb-3">
-                S'affiche sur la vitrine publique en haut de chaque page. Laissez vide pour désactiver.
+              <p className="text-xs text-gray-400 mb-4">
+                Une section promo s'affiche sur la page d'accueil de la vitrine. Laissez le titre vide pour désactiver.
               </p>
-              <textarea
-                aria-label="Bannière promotionnelle"
-                rows={2}
-                placeholder="ex: 🎉 Promotion — 10% de réduction sur toutes les locations ce mois-ci !"
-                value={settingsForm.bannierePromo}
-                onChange={e => setSettingsForm(f => ({ ...f, bannierePromo: e.target.value }))}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert/30 resize-none"
-              />
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Titre principal *</label>
+                  <input
+                    aria-label="Titre de la promotion"
+                    type="text"
+                    placeholder="ex: Promo Ramadan — Louez moins cher !"
+                    value={settingsForm.bannierePromo}
+                    onChange={e => setSettingsForm(f => ({ ...f, bannierePromo: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Sous-texte</label>
+                  <input
+                    aria-label="Sous-texte de la promotion"
+                    type="text"
+                    placeholder="ex: Profitez de notre offre exclusive pour tous vos déplacements à Dakar"
+                    value={settingsForm.promoSousTexte}
+                    onChange={e => setSettingsForm(f => ({ ...f, promoSousTexte: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert/30"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Réduction affichée</label>
+                    <input
+                      aria-label="Pourcentage de réduction"
+                      type="text"
+                      placeholder="ex: -20%"
+                      value={settingsForm.promoReduction}
+                      onChange={e => setSettingsForm(f => ({ ...f, promoReduction: e.target.value }))}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert/30"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Date de fin</label>
+                    <input
+                      aria-label="Date de fin de la promotion"
+                      type="date"
+                      value={settingsForm.promoDateFin}
+                      onChange={e => setSettingsForm(f => ({ ...f, promoDateFin: e.target.value }))}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert/30"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="pt-2">

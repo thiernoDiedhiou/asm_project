@@ -16,6 +16,9 @@ const DEFAULTS = {
   heuresSamedi: '09h00 – 15h00',
   noteTransfert: 'Transfert aéroport disponible 24h/24 sur réservation',
   bannierePromo: '',
+  promoSousTexte: '',
+  promoReduction: '',
+  promoDateFin: '',
 };
 
 export const settingsService = {

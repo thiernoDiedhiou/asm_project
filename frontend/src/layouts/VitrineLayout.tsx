@@ -1,7 +1,7 @@
 // Layout de la vitrine publique — navbar + footer + outlet
 import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { Car, Menu, X, Phone, Mail, MapPin, Clock, Megaphone } from 'lucide-react';
+import { Car, Menu, X, Phone, Mail, MapPin, Clock, ChevronRight } from 'lucide-react';
 import { publicApi } from '../services/api';
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -23,6 +23,8 @@ interface Settings {
   heuresSamedi: string;
   noteTransfert: string;
   bannierePromo?: string;
+  promoReduction?: string;
+  promoDateFin?: string;
 }
 
 const DEFAULTS: Settings = {
@@ -60,10 +62,54 @@ export function VitrineLayout() {
   const telHref = `tel:${settings.telephone.replace(/\s/g, '')}`;
   const whatsappUrl = `https://wa.me/${settings.telephone.replace(/\D/g, '')}`;
 
+  const promoBarActive = Boolean(settings.bannierePromo) &&
+    (!settings.promoDateFin || new Date(settings.promoDateFin) >= new Date());
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
+
+      {/* ===== BARRE PROMO TOP ===== */}
+      {promoBarActive && !bannerDismissed && (
+        <div className="sticky top-0 z-[60] bg-gradient-to-r from-asm-vert via-[#1a6e24] to-asm-vert border-b-2 border-asm-or/60">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-3">
+            {/* Badge réduction */}
+            {settings.promoReduction && (
+              <span className="flex-shrink-0 bg-asm-or text-asm-vert text-xs font-black px-2.5 py-1 rounded-full uppercase tracking-wide">
+                {settings.promoReduction}
+              </span>
+            )}
+            {/* Texte centré */}
+            <p className="flex-1 text-center text-white text-sm font-semibold truncate">
+              {settings.bannierePromo}
+              {settings.promoDateFin && (
+                <span className="text-white/70 font-normal ml-2 hidden sm:inline">
+                  — jusqu'au {new Date(settings.promoDateFin).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+                </span>
+              )}
+            </p>
+            {/* CTA + fermer */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <a
+                href="/reserver"
+                className="hidden sm:inline-flex items-center gap-1 bg-asm-or text-asm-vert text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-yellow-400 transition-colors"
+              >
+                Réserver <ChevronRight className="h-3 w-3" />
+              </a>
+              <button
+                type="button"
+                aria-label="Fermer la bannière"
+                onClick={() => setBannerDismissed(true)}
+                className="p-1 rounded text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ===== NAVBAR ===== */}
-      <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
+      <header className={`sticky z-50 bg-white shadow-sm border-b border-gray-100 ${promoBarActive && !bannerDismissed ? 'top-[41px]' : 'top-0'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -171,26 +217,6 @@ export function VitrineLayout() {
           </div>
         )}
       </header>
-
-      {/* ===== BANNIÈRE PROMOTIONNELLE ===== */}
-      {settings.bannierePromo && !bannerDismissed && (
-        <div className="bg-asm-or text-asm-vert font-medium text-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 flex-1 justify-center">
-              <Megaphone className="h-4 w-4 flex-shrink-0" />
-              <span>{settings.bannierePromo}</span>
-            </div>
-            <button
-              type="button"
-              aria-label="Fermer la bannière"
-              onClick={() => setBannerDismissed(true)}
-              className="flex-shrink-0 p-1 rounded hover:bg-black/10 transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ===== CONTENU PRINCIPAL ===== */}
       <main className="flex-1">
