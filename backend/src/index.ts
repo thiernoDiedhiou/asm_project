@@ -32,6 +32,9 @@ import prisma from './utils/prisma';
 const app = express();
 const httpServer = createServer(app);
 
+// Faire confiance au proxy Nginx (nécessaire pour express-rate-limit en production)
+app.set('trust proxy', 1);
+
 // ---- Configuration Socket.io ----
 const io = new SocketIOServer(httpServer, {
   cors: {
