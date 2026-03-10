@@ -22,4 +22,10 @@ router.post(
   publicController.createDemande.bind(publicController)
 );
 
+// GET /api/public/contrats/verifier/:numero — vérifier l'authenticité d'un contrat
+router.get(
+  '/contrats/verifier/:numero',
+  publicController.verifierContrat.bind(publicController)
+);
+
 export default router;

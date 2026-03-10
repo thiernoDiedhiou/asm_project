@@ -8,6 +8,7 @@ import { VitrineLayout } from './layouts/VitrineLayout';
 import { LandingPage } from './pages/vitrine/LandingPage';
 import { FlottePage } from './pages/vitrine/FlottePage';
 import { DemandeReservationPage } from './pages/vitrine/DemandeReservationPage';
+import { ContratVerificationPage } from './pages/vitrine/ContratVerificationPage';
 
 // Auth
 import { LoginPage } from './pages/auth/LoginPage';
@@ -53,6 +54,7 @@ export function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/flotte" element={<FlottePage />} />
           <Route path="/reserver" element={<DemandeReservationPage />} />
+          <Route path="/contrats/verifier/:numero" element={<ContratVerificationPage />} />
         </Route>
 
         {/* ===== Auth ===== */}
