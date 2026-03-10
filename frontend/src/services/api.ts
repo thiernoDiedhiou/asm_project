@@ -168,6 +168,8 @@ export const reservationsApi = {
   create: (data: Record<string, unknown>) => api.post('/reservations', data),
   updateStatut: (id: string, data: Record<string, unknown>) =>
     api.put(`/reservations/${id}/statut`, data),
+  prolonger: (id: string, dateFin: string) =>
+    api.put(`/reservations/${id}/prolonger`, { dateFin }),
   delete: (id: string) => api.delete(`/reservations/${id}`),
 };
 

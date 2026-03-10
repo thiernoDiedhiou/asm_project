@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import { sendSuccess, sendError } from '../utils/response';
+import { sendNotifNouvelleReservation } from '../utils/mailer';
 
 async function generateNumeroReservation(): Promise<string> {
   const now = new Date();
@@ -213,6 +214,22 @@ export class PublicController {
           dateFin,
         });
       }
+
+      // 7. Envoyer un email de notification (silencieux si SMTP non configuré)
+      sendNotifNouvelleReservation({
+        numeroReservation: reservation.numeroReservation,
+        client: { prenom, nom, telephone, email: email || undefined },
+        vehicule: { marque: vehicule.marque, modele: vehicule.modele },
+        dateDebut,
+        dateFin,
+        nombreJours,
+        prixTotal,
+        lieuPriseEnCharge: lieuPriseEnCharge || 'À préciser',
+        typeTrajet: typeTrajet || 'LOCATION',
+        notes: notes || undefined,
+      }).catch((err) => {
+        console.error('[mailer] Échec envoi email notification:', err.message);
+      });
 
       sendSuccess(
         res,

@@ -97,6 +97,29 @@ export class ReservationController {
     }
   }
 
+  async prolonger(req: Request, res: Response): Promise<void> {
+    try {
+      if (!req.user) { sendError(res, 'Non authentifié', 401); return; }
+      const { dateFin } = req.body;
+      if (!dateFin) { sendError(res, 'La nouvelle date de fin est requise', 400); return; }
+
+      const result = await reservationService.prolonger(req.params.id, dateFin, req.user.userId);
+
+      logAction({
+        userId: req.user.userId,
+        userRole: req.user.role,
+        action: ACTIONS.RESERVATION_STATUT_MODIFIE,
+        entite: ENTITES.RESERVATION,
+        entiteId: req.params.id,
+        details: { action: 'PROLONGATION', nouvelleDateFin: dateFin },
+      }).catch(() => {});
+
+      sendSuccess(res, result, 'Réservation prolongée avec succès');
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
+    }
+  }
+
   async delete(req: Request, res: Response): Promise<void> {
     try {
       await reservationService.delete(req.params.id);
