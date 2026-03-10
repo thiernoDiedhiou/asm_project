@@ -126,23 +126,25 @@ export function LoginPage() {
             </button>
           </form>
 
-          {/* Comptes de demo */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">
-              Comptes de démonstration
-            </p>
-            <div className="space-y-1 text-xs text-gray-600">
-              <p>
-                <span className="font-medium">Admin:</span> admin@asm.sn / Admin123!
+          {/* Comptes de demo — masqués en production */}
+          {!import.meta.env.PROD && (
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">
+                Comptes de démonstration
               </p>
-              <p>
-                <span className="font-medium">Agent:</span> agent1@asm.sn / Agent123!
-              </p>
-              <p>
-                <span className="font-medium">Comptable:</span> comptable@asm.sn / Compta123!
-              </p>
+              <div className="space-y-1 text-xs text-gray-600">
+                <p>
+                  <span className="font-medium">Admin:</span> admin@asm.sn / Admin123!
+                </p>
+                <p>
+                  <span className="font-medium">Agent:</span> agent1@asm.sn / Agent123!
+                </p>
+                <p>
+                  <span className="font-medium">Comptable:</span> comptable@asm.sn / Compta123!
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Pied de page */}

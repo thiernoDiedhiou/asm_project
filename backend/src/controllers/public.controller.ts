@@ -246,6 +246,50 @@ export class PublicController {
       sendError(res, error instanceof Error ? error.message : 'Erreur lors de la création', 500);
     }
   }
+
+  /**
+   * GET /api/public/contrats/verifier/:numero
+   * Vérifie l'authenticité d'un contrat à partir de son numéro.
+   * Retourne uniquement les informations non-sensibles (pas de montants).
+   */
+  async verifierContrat(req: Request, res: Response): Promise<void> {
+    try {
+      const { numero } = req.params;
+      const contrat = await prisma.contrat.findUnique({
+        where: { numeroContrat: numero },
+        select: {
+          id: true,
+          numeroContrat: true,
+          statut: true,
+          dateSignature: true,
+          createdAt: true,
+          reservation: {
+            select: {
+              dateDebut: true,
+              dateFin: true,
+              nombreJours: true,
+              lieuPriseEnCharge: true,
+              client: {
+                select: { prenom: true, nom: true },
+              },
+              vehicule: {
+                select: { marque: true, modele: true, immatriculation: true, categorie: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (!contrat) {
+        sendError(res, 'Contrat introuvable ou numéro invalide', 404);
+        return;
+      }
+
+      sendSuccess(res, contrat);
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
+    }
+  }
 }
 
 export const publicController = new PublicController();

@@ -241,6 +241,7 @@ export const publicApi = {
   createDemande: (data: Record<string, unknown>) =>
     api.post('/public/reservation', data),
   getSettings: () => api.get('/settings'),
+  verifierContrat: (numero: string) => api.get(`/public/contrats/verifier/${numero}`),
 };
 
 // Zones tarifaires
