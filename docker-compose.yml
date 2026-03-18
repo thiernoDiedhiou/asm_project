@@ -8,13 +8,13 @@ services:
     environment:
       POSTGRES_USER: asm_user
       POSTGRES_PASSWORD: asm_password
-      POSTGRES_DB: asm_location
+      POSTGRES_DB: location
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U asm_user -d asm_location"]
+      test: ["CMD-SHELL", "pg_isready -U asm_user -d location"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -44,7 +44,7 @@ services:
       dockerfile: Dockerfile
     container_name: asm-backend
     environment:
-      DATABASE_URL: postgresql://asm_user:asm_password@postgres:5432/asm_location
+      DATABASE_URL: postgresql://asm_user:asm_password@postgres:5432/location
       JWT_SECRET: dev_jwt_secret_change_in_production_very_long_string
       JWT_REFRESH_SECRET: dev_refresh_secret_change_in_production_different
       JWT_EXPIRY: 15m

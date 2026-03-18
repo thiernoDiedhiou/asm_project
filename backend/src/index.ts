@@ -43,7 +43,7 @@ function isAllowedOrigin(origin: string | undefined): boolean {
   if (!origin) return true; // same-origin ou Postman
   if (origin.includes('localhost') || origin.includes('127.0.0.1')) return true;
   // Autorise exactement *.{platformDomain} (ex: boucotteauto.innosft.com)
-  const pattern = new RegExp(`^https?://[a-z0-9-]+\\.${platformDomain.replace('.', '\\.')}(:\\d+)?$`);
+  const pattern = new RegExp(`^https?://[a-z0-9-]+\\.${platformDomain.replace(/\./g, '\\.')}(:\\d+)?$`);
   return pattern.test(origin);
 }
 

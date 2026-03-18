@@ -1,0 +1,15 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+# En prod, VITE_API_URL est vide : nginx proxifie /api → backend:5000
+RUN VITE_API_URL="" VITE_API_FILE_BASE="" npm run build
+
+# Image finale légère — juste le build statique
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
