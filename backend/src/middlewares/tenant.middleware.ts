@@ -42,6 +42,13 @@ export async function resolveTenant(req: Request, res: Response, next: NextFunct
     }
 
     if (!tenant) {
+      // Les routes d'auth (login, refresh, reset password) doivent fonctionner même sans tenant actif
+      // pour permettre la connexion SUPER_ADMIN quand tous les tenants sont désactivés
+      const isAuthRoute = req.originalUrl.startsWith('/api/auth/');
+      if (isAuthRoute) {
+        next();
+        return;
+      }
       res.status(404).json({ success: false, message: 'Tenant introuvable' });
       return;
     }
