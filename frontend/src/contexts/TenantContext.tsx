@@ -52,9 +52,13 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   const userRole = useAuthStore(state => state.user?.role);
 
   function fetchTenant(auth: boolean, role: string | undefined) {
-    const fetchFn = (auth && role !== 'SUPER_ADMIN')
-      ? settingsApi.get()
-      : publicApi.getTenantInfo();
+    // Super Admin : pas de tenant — titre fixe SenLocaDesk
+    if (auth && role === 'SUPER_ADMIN') {
+      document.title = 'SenLocaDesk — Gestion de la Plateforme';
+      return;
+    }
+
+    const fetchFn = auth ? settingsApi.get() : publicApi.getTenantInfo();
 
     fetchFn
       .then(res => {
