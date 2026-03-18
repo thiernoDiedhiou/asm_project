@@ -1,5 +1,4 @@
 // Utilitaire de journalisation des actions utilisateurs (audit log)
-import { Prisma } from '@prisma/client';
 import prisma from './prisma';
 
 export interface LogActionParams {
@@ -39,7 +38,7 @@ export async function logAction(params: LogActionParams): Promise<void> {
         action: params.action,
         entite: params.entite,
         entiteId: params.entiteId ?? null,
-        details: (params.details ?? {}) as unknown as Prisma.InputJsonValue,
+        details: (params.details ?? {}) as object,
       },
     });
   } catch {
