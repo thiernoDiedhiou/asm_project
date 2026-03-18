@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: Number(process.env.SMTP_PORT) || 587,
-  secure: false, // STARTTLS
+  secure: process.env.SMTP_SECURE === 'true', // true = SSL/TLS (port 465), false = STARTTLS (port 587)
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -13,7 +13,9 @@ const transporter = nodemailer.createTransport({
 
 interface DemandeReservationMailData {
   numeroReservation: string;
-  nomEntreprise: string;  // Nom du tenant (ex: "ASM Multi-Services")
+  nomEntreprise: string;
+  couleurPrimaire: string;   // Couleur principale du tenant (ex: "#1B5E20")
+  couleurSecondaire: string; // Couleur secondaire du tenant (ex: "#F9A825")
   client: { prenom: string; nom: string; telephone: string; email?: string };
   vehicule: { marque: string; modele: string };
   dateDebut: string;
@@ -23,6 +25,7 @@ interface DemandeReservationMailData {
   lieuPriseEnCharge: string;
   typeTrajet: string;
   notes?: string;
+  backofficeUrl?: string;
 }
 
 function formatDate(dateStr: string): string {
@@ -46,6 +49,8 @@ export async function sendNotifNouvelleReservation(
   const {
     numeroReservation,
     nomEntreprise,
+    couleurPrimaire,
+    couleurSecondaire,
     client,
     vehicule,
     dateDebut,
@@ -55,7 +60,12 @@ export async function sendNotifNouvelleReservation(
     lieuPriseEnCharge,
     typeTrajet,
     notes,
+    backofficeUrl,
   } = data;
+
+  const ctaUrl = backofficeUrl || `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reservations`;
+  const cp = couleurPrimaire || '#1B5E20';
+  const cs = couleurSecondaire || '#F9A825';
 
   const subject = `[${nomEntreprise}] Nouvelle demande — ${numeroReservation} — ${client.prenom} ${client.nom}`;
 
@@ -70,16 +80,16 @@ export async function sendNotifNouvelleReservation(
 
         <!-- Header -->
         <tr>
-          <td style="background:#1B5E20;padding:24px 32px;">
-            <p style="margin:0;color:#F9A825;font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:bold;">${nomEntreprise}</p>
+          <td style="background:${cp};padding:24px 32px;">
+            <p style="margin:0;color:${cs};font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:bold;">${nomEntreprise}</p>
             <h1 style="margin:8px 0 0;color:#ffffff;font-size:22px;">Nouvelle demande de réservation</h1>
           </td>
         </tr>
 
         <!-- Référence -->
         <tr>
-          <td style="background:#F9A825;padding:12px 32px;">
-            <p style="margin:0;color:#1B5E20;font-size:15px;font-weight:bold;">Référence : ${numeroReservation}</p>
+          <td style="background:${cs};padding:12px 32px;">
+            <p style="margin:0;color:${cp};font-size:15px;font-weight:bold;">Référence : ${numeroReservation}</p>
           </td>
         </tr>
 
@@ -88,15 +98,15 @@ export async function sendNotifNouvelleReservation(
           <td style="padding:28px 32px;">
 
             <!-- Client -->
-            <h2 style="margin:0 0 12px;color:#1B5E20;font-size:16px;border-bottom:2px solid #F9A825;padding-bottom:6px;">Client</h2>
+            <h2 style="margin:0 0 12px;color:${cp};font-size:16px;border-bottom:2px solid ${cs};padding-bottom:6px;">Client</h2>
             <table width="100%" cellpadding="4" cellspacing="0" style="font-size:14px;color:#333;">
               <tr><td style="color:#666;width:40%;">Nom</td><td><strong>${client.prenom} ${client.nom}</strong></td></tr>
-              <tr><td style="color:#666;">Téléphone</td><td><a href="tel:${client.telephone}" style="color:#1B5E20;">${client.telephone}</a></td></tr>
-              ${client.email ? `<tr><td style="color:#666;">Email</td><td><a href="mailto:${client.email}" style="color:#1B5E20;">${client.email}</a></td></tr>` : ''}
+              <tr><td style="color:#666;">Téléphone</td><td><a href="tel:${client.telephone}" style="color:${cp};">${client.telephone}</a></td></tr>
+              ${client.email ? `<tr><td style="color:#666;">Email</td><td><a href="mailto:${client.email}" style="color:${cp};">${client.email}</a></td></tr>` : ''}
             </table>
 
             <!-- Véhicule & dates -->
-            <h2 style="margin:24px 0 12px;color:#1B5E20;font-size:16px;border-bottom:2px solid #F9A825;padding-bottom:6px;">Location</h2>
+            <h2 style="margin:24px 0 12px;color:${cp};font-size:16px;border-bottom:2px solid ${cs};padding-bottom:6px;">Location</h2>
             <table width="100%" cellpadding="4" cellspacing="0" style="font-size:14px;color:#333;">
               <tr><td style="color:#666;width:40%;">Véhicule</td><td><strong>${vehicule.marque} ${vehicule.modele}</strong></td></tr>
               <tr><td style="color:#666;">Début</td><td>${formatDate(dateDebut)}</td></tr>
@@ -111,13 +121,13 @@ export async function sendNotifNouvelleReservation(
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px;background:#f9f9f9;border:1px solid #e0e0e0;border-radius:6px;padding:16px;">
               <tr>
                 <td style="font-size:14px;color:#666;">Prix total estimé</td>
-                <td align="right" style="font-size:22px;font-weight:bold;color:#1B5E20;">${prixTotal.toLocaleString('fr-FR')} FCFA</td>
+                <td align="right" style="font-size:22px;font-weight:bold;color:${cp};">${prixTotal.toLocaleString('fr-FR')} FCFA</td>
               </tr>
             </table>
 
             <!-- CTA -->
             <div style="margin-top:28px;text-align:center;">
-              <a href="http://localhost:3000/reservations" style="display:inline-block;background:#1B5E20;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:15px;font-weight:bold;">
+              <a href="${ctaUrl}" style="display:inline-block;background:${cp};color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:15px;font-weight:bold;">
                 Voir dans le back-office →
               </a>
             </div>
@@ -129,7 +139,7 @@ export async function sendNotifNouvelleReservation(
         <tr>
           <td style="background:#f4f4f4;padding:16px 32px;text-align:center;">
             <p style="margin:0;font-size:12px;color:#999;">${nomEntreprise}</p>
-            <p style="margin:4px 0 0;font-size:12px;color:#bbb;">Cet email a été généré automatiquement par le système de réservation en ligne.<br/>Propulsé par <strong>ASM Platform</strong> — Innosoft Creation</p>
+            <p style="margin:4px 0 0;font-size:12px;color:#bbb;">Cet email a été généré automatiquement par le système de réservation en ligne.<br/>Propulsé par <strong>SenLocaDesk</strong> — Innosoft Creation</p>
           </td>
         </tr>
 

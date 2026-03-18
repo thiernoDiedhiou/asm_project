@@ -142,7 +142,7 @@ export class PublicController {
         }),
         prisma.tenant.findUnique({
           where: { id: tenantId },
-          select: { nomEntreprise: true },
+          select: { nomEntreprise: true, slug: true, couleurPrimaire: true, couleurSecondaire: true },
         }),
       ]);
 
@@ -243,10 +243,20 @@ export class PublicController {
 
       // 7. Envoyer un email de notification à l'admin du tenant (silencieux si SMTP non configuré)
       //    L'email va à agentSysteme.email (l'ADMIN du tenant), pas à une valeur .env
+      // Construire l'URL back-office du tenant pour le bouton CTA de l'email
+      // Prod: https://{slug}.innosft.com/reservations | Dev: http://localhost:3000/reservations
+      const platformDomain = process.env.PLATFORM_DOMAIN || 'innosft.com';
+      const isDevMode = process.env.NODE_ENV !== 'production';
+      const backofficeUrl = isDevMode
+        ? `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reservations`
+        : `https://${tenant?.slug}.${platformDomain}/reservations`;
+
       sendNotifNouvelleReservation(
         {
           numeroReservation: reservation.numeroReservation,
-          nomEntreprise: tenant?.nomEntreprise || 'ASM Platform',
+          nomEntreprise: tenant?.nomEntreprise || 'SenLocaDesk',
+          couleurPrimaire: tenant?.couleurPrimaire || '#1B5E20',
+          couleurSecondaire: tenant?.couleurSecondaire || '#F9A825',
           client: { prenom, nom, telephone, email: email || undefined },
           vehicule: { marque: vehicule.marque, modele: vehicule.modele },
           dateDebut,
@@ -256,6 +266,7 @@ export class PublicController {
           lieuPriseEnCharge: lieuPriseEnCharge || 'À préciser',
           typeTrajet: typeTrajet || 'LOCATION',
           notes: notes || undefined,
+          backofficeUrl,
         },
         agentSysteme.email  // Destinataire dynamique = admin du tenant
       ).catch((err) => {
