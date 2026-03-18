@@ -39,6 +39,7 @@ export const tarificationService = {
       create: {
         categorie: categorie as any,
         zoneId,
+        tenantId,
         prixJournalier: new Decimal(prixJournalier),
         prixSemaine: prixSemaine != null ? new Decimal(prixSemaine) : null,
       },

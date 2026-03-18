@@ -146,7 +146,7 @@ export class AuthService {
    * Révoque le token (logout)
    */
   async logout(accessToken: string, refreshToken?: string) {
-    const tokensToRevoke = [];
+    const tokensToRevoke: { token: string; expiresAt: Date }[] = [];
 
     if (accessToken) {
       try {
