@@ -104,6 +104,9 @@ export function LandingPage() {
   const navigate = useNavigate();
   const [vehicules, setVehicules] = useState<VehiculePublic[]>([]);
   const [promo, setPromo] = useState<PromoSettings>({});
+  const [nomEntreprise, setNomEntreprise] = useState('');
+  const [ville, setVille] = useState('');
+  const [activite, setActivite] = useState('');
 
   useEffect(() => {
     publicApi.getVehicules().then((res) => {
@@ -112,7 +115,13 @@ export function LandingPage() {
     }).catch(() => {});
 
     publicApi.getSettings().then((res) => {
-      if (res.data?.data) setPromo(res.data.data);
+      if (res.data?.data) {
+        const d = res.data.data;
+        setPromo(d);
+        if (d.nomEntreprise) setNomEntreprise(d.nomEntreprise);
+        if (d.ville) setVille(d.ville);
+        if (d.activite) setActivite(d.activite);
+      }
     }).catch(() => {});
   }, []);
 
@@ -122,18 +131,18 @@ export function LandingPage() {
   const services = [
     {
       icon: Car,
-      title: 'Location classique',
+      title: 'Location courte durée',
       description: 'Louez un véhicule à la journée ou à la semaine pour tous vos déplacements professionnels ou personnels.',
     },
     {
       icon: Plane,
-      title: 'Transfert AIBD',
-      description: 'Service de navette depuis et vers l\'Aéroport International Blaise Diagne. Ponctualité garantie.',
+      title: 'Transfert aéroport',
+      description: 'Service de navette depuis et vers les aéroports et gares de la région. Ponctualité et confort garantis.',
     },
     {
       icon: Calendar,
-      title: 'Longue durée',
-      description: 'Des tarifs préférentiels pour les locations de plusieurs semaines ou mois. Idéal pour les expatriés.',
+      title: 'Location longue durée',
+      description: 'Des tarifs préférentiels pour les locations de plusieurs semaines ou mois. Idéal pour les séjours prolongés.',
     },
   ];
 
@@ -158,15 +167,15 @@ export function LandingPage() {
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 bg-white/15 text-white text-sm font-medium px-4 py-2 rounded-full mb-6">
               <Star className="h-4 w-4 text-asm-or fill-asm-or" />
-              Dakar's premier car rental service
+              {activite || 'Location de véhicules'}
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
               Louez un véhicule
               <span className="text-asm-or block">en toute confiance</span>
             </h1>
             <p className="text-white/80 text-lg mb-8 leading-relaxed">
-              ASM Multi-Services vous offre une flotte de véhicules modernes pour tous vos
-              besoins à Dakar et ses environs. Tarifs clairs, service fiable, zéro surprise.
+              {nomEntreprise || 'Votre agence'} vous offre une flotte de véhicules modernes pour tous vos
+              besoins{ville ? ` à ${ville} et ses environs` : ''}. Tarifs clairs, service fiable, zéro surprise.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button
@@ -333,7 +342,7 @@ export function LandingPage() {
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Pourquoi choisir ASM ?</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Pourquoi choisir {nomEntreprise || 'nous'} ?</h2>
             <p className="text-gray-500 text-lg">La qualité de service qui fait la différence</p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">

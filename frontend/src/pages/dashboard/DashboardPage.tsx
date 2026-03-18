@@ -7,6 +7,7 @@ import {
 import { useQuery } from '../../components/hooks/useQuery';
 import { dashboardApi } from '../../services/api';
 import { formatFCFA, formatDate, getStatutReservationColor, STATUT_LABELS, METHODE_LABELS } from '../../utils/format';
+import { useTenant } from '../../contexts/TenantContext';
 
 // Composant KPI Card
 function KpiCard({
@@ -63,10 +64,8 @@ function KpiCard({
   );
 }
 
-// Couleurs pour le camembert
-const PIE_COLORS = ['#1B5E20', '#F9A825', '#2196F3', '#9C27B0', '#FF5722', '#607D8B'];
-
 export function DashboardPage() {
+  const { nomEntreprise, couleurPrimaire, couleurSecondaire } = useTenant();
 
   const { data: statsData, isLoading: statsLoading } = useQuery(
     ['dashboard-stats'],
@@ -119,8 +118,8 @@ export function DashboardPage() {
   }));
 
   const vehiculesStatut = [
-    { name: 'Disponibles', value: stats?.vehiculesDisponibles || 0, color: '#1B5E20' },
-    { name: 'Loués', value: stats?.vehiculesLoues || 0, color: '#F9A825' },
+    { name: 'Disponibles', value: stats?.vehiculesDisponibles || 0, color: couleurPrimaire },
+    { name: 'Loués', value: stats?.vehiculesLoues || 0, color: couleurSecondaire },
     { name: 'Maintenance', value: stats?.vehiculesMaintenance || 0, color: '#FF5722' },
   ].filter(v => v.value > 0);
 
@@ -130,7 +129,7 @@ export function DashboardPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
         <p className="text-gray-500 text-sm mt-1">
-          Vue d'ensemble de l'activité ASM Multi-Services
+          Vue d'ensemble de l'activité {nomEntreprise}
         </p>
       </div>
 
@@ -179,8 +178,8 @@ export function DashboardPage() {
               <AreaChart data={revenusFormatted}>
                 <defs>
                   <linearGradient id="colorMontant" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#1B5E20" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#1B5E20" stopOpacity={0} />
+                    <stop offset="5%" stopColor={couleurPrimaire} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={couleurPrimaire} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -199,7 +198,7 @@ export function DashboardPage() {
                 <Area
                   type="monotone"
                   dataKey="montant"
-                  stroke="#1B5E20"
+                  stroke={couleurPrimaire}
                   strokeWidth={2}
                   fill="url(#colorMontant)"
                 />
@@ -283,7 +282,7 @@ export function DashboardPage() {
                   formatter={(value: number) => [formatFCFA(value), 'Total']}
                   labelFormatter={(label) => METHODE_LABELS[label] || label}
                 />
-                <Bar dataKey="total" fill="#F9A825" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="total" fill={couleurSecondaire} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (

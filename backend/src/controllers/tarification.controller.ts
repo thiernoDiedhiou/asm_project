@@ -6,7 +6,7 @@ import { sendSuccess, sendError } from '../utils/response';
 export class TarificationController {
   async getMatrix(req: Request, res: Response): Promise<void> {
     try {
-      const matrix = await tarificationService.getMatrix();
+      const matrix = await tarificationService.getMatrix(req.tenantId!);
       sendSuccess(res, matrix);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
@@ -25,6 +25,19 @@ export class TarificationController {
         prixSemaine: prixSemaine ?? null,
       });
       sendSuccess(res, updated, 'Prix mis à jour');
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
+    }
+  }
+  async upsertCell(req: Request, res: Response): Promise<void> {
+    try {
+      const { categorie, zoneId, prixJournalier, prixSemaine } = req.body;
+      if (!categorie || !zoneId || typeof prixJournalier !== 'number' || prixJournalier <= 0) {
+        sendError(res, 'categorie, zoneId et prixJournalier (positif) sont obligatoires', 400);
+        return;
+      }
+      const result = await tarificationService.upsertCell(req.tenantId!, categorie, zoneId, prixJournalier, prixSemaine);
+      sendSuccess(res, result, 'Prix enregistré');
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
     }

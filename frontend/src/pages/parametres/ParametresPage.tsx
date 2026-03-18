@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
-import { Plus, CheckCircle, X, Shield, Building2, Save, MapPin, Pencil, Trash2, DollarSign } from 'lucide-react';
+import { useState, useMemo, useRef } from 'react';
+import { Plus, CheckCircle, X, Shield, Building2, Save, MapPin, Pencil, Trash2, DollarSign, Upload, ImageIcon } from 'lucide-react';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { useQuery } from '../../components/hooks/useQuery';
-import { usersApi, settingsApi, tarifZonesApi, tarificationApi } from '../../services/api';
+import { usersApi, settingsApi, tarifZonesApi, tarificationApi, API_FILE_BASE } from '../../services/api';
 import { useAuthStore, useIsAdmin } from '../../store/authStore';
 import { formatDate, formatFCFA } from '../../utils/format';
 import api from '../../services/api';
@@ -119,6 +119,12 @@ export function ParametresPage() {
   const [settingsError, setSettingsError] = useState('');
   const [settingsSuccess, setSettingsSuccess] = useState('');
 
+  // Logo
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoSuccess, setLogoSuccess] = useState('');
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
   // Zones
   const [showZoneModal, setShowZoneModal] = useState(false);
   const [editingZone, setEditingZone] = useState<TarifZone | null>(null);
@@ -130,6 +136,7 @@ export function ParametresPage() {
   // Édition cellule matrice
   const [deleteZoneId, setDeleteZoneId] = useState<string | null>(null);
   const [editingCell, setEditingCell] = useState<{ id: string; value: string } | null>(null);
+  const [newCell, setNewCell] = useState<{ categorie: string; zoneId: string; value: string } | null>(null);
   const [savingCell, setSavingCell] = useState(false);
   const [matrixSuccess, setMatrixSuccess] = useState('');
 
@@ -292,6 +299,39 @@ export function ParametresPage() {
     }
   }
 
+  async function handleSaveNewPrix() {
+    if (!newCell) return;
+    const valeur = parseFloat(newCell.value);
+    if (isNaN(valeur) || valeur <= 0) { setNewCell(null); return; }
+    setSavingCell(true);
+    try {
+      await tarificationApi.upsertCell({ categorie: newCell.categorie, zoneId: newCell.zoneId, prixJournalier: valeur });
+      setMatrixSuccess('Prix enregistré');
+      refetchMatrix();
+      setTimeout(() => setMatrixSuccess(''), 2000);
+    } catch { /* revert */ }
+    finally {
+      setSavingCell(false);
+      setNewCell(null);
+    }
+  }
+
+  async function handleLogoUpload(file: File) {
+    setLogoUploading(true); setLogoSuccess('');
+    // Aperçu local immédiat
+    const reader = new FileReader();
+    reader.onload = e => setLogoPreview(e.target?.result as string);
+    reader.readAsDataURL(file);
+    try {
+      await settingsApi.uploadLogo(file);
+      setLogoSuccess('Logo mis à jour avec succès');
+      // Rafraîchir le branding dans toute l'app (navbar, sidebar...)
+      window.dispatchEvent(new Event('tenant:updated'));
+      setTimeout(() => setLogoSuccess(''), 3000);
+    } catch { /* silencieux */ }
+    finally { setLogoUploading(false); }
+  }
+
   async function handleSaveSettings(e: React.FormEvent) {
     e.preventDefault();
     setSavingSettings(true);
@@ -352,6 +392,48 @@ export function ParametresPage() {
                 <CheckCircle className="h-4 w-4" /> {settingsSuccess}
               </div>
             )}
+
+            {/* Section Logo */}
+            <div>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Logo</h3>
+              <div className="flex items-center gap-5">
+                {/* Aperçu */}
+                <div className="h-20 w-40 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
+                  {logoPreview || settingsData?.data?.logo ? (
+                    <img
+                      src={logoPreview || `${API_FILE_BASE}${settingsData?.data?.logo}`}
+                      alt="Logo"
+                      className="h-full w-full object-contain p-2"
+                    />
+                  ) : (
+                    <ImageIcon className="h-8 w-8 text-gray-300" />
+                  )}
+                </div>
+                {/* Actions */}
+                <div className="space-y-2">
+                  <input
+                    ref={logoInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/svg+xml,image/webp"
+                    className="hidden"
+                    onChange={e => { const f = e.target.files?.[0]; if (f) handleLogoUpload(f); }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => logoInputRef.current?.click()}
+                    disabled={logoUploading}
+                    className="flex items-center gap-2 px-4 py-2 border border-asm-vert text-asm-vert text-sm font-medium rounded-lg hover:bg-asm-vert/5 transition-colors disabled:opacity-50"
+                  >
+                    <Upload className="h-4 w-4" />
+                    {logoUploading ? 'Upload en cours…' : 'Choisir un logo'}
+                  </button>
+                  <p className="text-xs text-gray-400">PNG, JPG, SVG ou WEBP — max 2 Mo</p>
+                  {logoSuccess && (
+                    <p className="text-xs text-green-600 flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" />{logoSuccess}</p>
+                  )}
+                </div>
+              </div>
+            </div>
 
             <div>
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Identité</h3>
@@ -592,9 +674,38 @@ export function ParametresPage() {
                         </td>
                         {zones.map(zone => {
                           const pc = prixLookup[cat]?.[zone.id];
-                          if (!pc) return (
-                            <td key={zone.id} className="px-4 py-3 text-center text-gray-300 text-xs">—</td>
-                          );
+                          if (!pc) {
+                            const isNewEditing = newCell?.categorie === cat && newCell?.zoneId === zone.id;
+                            return (
+                              <td key={zone.id} className="px-4 py-3 text-center">
+                                {isNewEditing ? (
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    placeholder="0"
+                                    className="w-28 border-2 border-asm-vert rounded-lg px-2 py-1 text-sm text-center font-semibold focus:outline-none focus:ring-2 focus:ring-asm-vert/30"
+                                    value={newCell!.value}
+                                    onChange={e => setNewCell(prev => prev ? { ...prev, value: e.target.value } : null)}
+                                    onKeyDown={e => {
+                                      if (e.key === 'Enter') { e.preventDefault(); handleSaveNewPrix(); }
+                                      if (e.key === 'Escape') setNewCell(null);
+                                    }}
+                                    onBlur={handleSaveNewPrix}
+                                    autoFocus
+                                  />
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => setNewCell({ categorie: cat, zoneId: zone.id, value: '' })}
+                                    title="Cliquer pour définir le prix"
+                                    className="w-full text-gray-300 hover:text-asm-vert hover:bg-asm-vert/5 text-xs px-2 py-1.5 rounded-lg transition-colors"
+                                  >
+                                    — Définir
+                                  </button>
+                                )}
+                              </td>
+                            );
+                          }
                           const isEditing = editingCell?.id === pc.id;
                           return (
                             <td key={zone.id} className="px-4 py-3 text-center">

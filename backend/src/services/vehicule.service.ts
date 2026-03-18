@@ -1,6 +1,7 @@
 // Service de gestion des véhicules
 import { StatutVehicule } from '@prisma/client';
 import prisma from '../utils/prisma';
+import { checkPlanLimit } from '../utils/planLimits';
 import {
   CreateVehiculeDto,
   UpdateVehiculeDto,
@@ -12,7 +13,8 @@ export class VehiculeService {
   /**
    * Récupère la liste des véhicules avec filtres et pagination
    */
-  async getAll(filters: VehiculeFilters) {
+  async getAll(filters: VehiculeFilters, tenantId: string) {
+    if (!tenantId) throw new Error('TenantId requis');
     const { statut, categorie, search, dateDebut, dateFin, page, limit } = filters;
     const skip = (page - 1) * limit;
 
@@ -20,7 +22,9 @@ export class VehiculeService {
     let vehiculesOccupesIds: string[] = [];
     if (dateDebut && dateFin) {
       const reservationsOccupees = await prisma.reservation.findMany({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         where: {
+          tenantId,
           statut: { in: ['CONFIRMEE', 'EN_COURS'] },
           OR: [
             {
@@ -35,6 +39,7 @@ export class VehiculeService {
     }
 
     const where = {
+      tenantId,
       ...(statut && { statut }),
       ...(categorie && { categorie }),
       ...(vehiculesOccupesIds.length > 0 && {
@@ -66,9 +71,9 @@ export class VehiculeService {
   /**
    * Récupère un véhicule par son ID
    */
-  async getById(id: string) {
-    const vehicule = await prisma.vehicule.findUnique({
-      where: { id },
+  async getById(id: string, tenantId: string) {
+    const vehicule = await prisma.vehicule.findFirst({
+      where: { id, tenantId },
       include: {
         reservations: {
           take: 5,
@@ -94,10 +99,13 @@ export class VehiculeService {
   /**
    * Crée un nouveau véhicule
    */
-  async create(dto: CreateVehiculeDto) {
-    // Vérifier l'unicité de l'immatriculation
-    const existant = await prisma.vehicule.findUnique({
-      where: { immatriculation: dto.immatriculation },
+  async create(dto: CreateVehiculeDto, tenantId: string) {
+    // Vérifier les limites du plan avant création
+    await checkPlanLimit(tenantId, 'vehicules');
+
+    // Vérifier l'unicité de l'immatriculation au sein du tenant
+    const existant = await prisma.vehicule.findFirst({
+      where: { immatriculation: dto.immatriculation, tenantId },
     });
 
     if (existant) {
@@ -109,6 +117,7 @@ export class VehiculeService {
     const vehicule = await prisma.vehicule.create({
       data: {
         ...dto,
+        tenantId,
         prixJournalier: dto.prixJournalier,
         prixSemaine: dto.prixSemaine,
       },
@@ -121,8 +130,8 @@ export class VehiculeService {
   /**
    * Met à jour un véhicule
    */
-  async update(id: string, dto: UpdateVehiculeDto) {
-    const vehicule = await prisma.vehicule.findUnique({ where: { id } });
+  async update(id: string, dto: UpdateVehiculeDto, tenantId: string) {
+    const vehicule = await prisma.vehicule.findFirst({ where: { id, tenantId } });
 
     if (!vehicule) {
       throw new Error('Véhicule introuvable');
@@ -130,8 +139,8 @@ export class VehiculeService {
 
     // Vérifier l'unicité de l'immatriculation si elle change
     if (dto.immatriculation && dto.immatriculation !== vehicule.immatriculation) {
-      const existant = await prisma.vehicule.findUnique({
-        where: { immatriculation: dto.immatriculation },
+      const existant = await prisma.vehicule.findFirst({
+        where: { immatriculation: dto.immatriculation, tenantId },
       });
 
       if (existant) {
@@ -152,11 +161,15 @@ export class VehiculeService {
    * Bloqué si des réservations EN_ATTENTE, CONFIRMEE, EN_COURS ou TERMINEE existent.
    * Les réservations ANNULEE et les maintenances sont supprimées en cascade.
    */
-  async delete(id: string) {
+  async delete(id: string, tenantId: string) {
+    const vehicule = await prisma.vehicule.findFirst({ where: { id, tenantId } });
+    if (!vehicule) throw new Error('Véhicule introuvable');
+
     const [reservationsBloquantes, totalMaintenances] = await Promise.all([
       prisma.reservation.count({
         where: {
           vehiculeId: id,
+          tenantId,
           statut: { in: ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS', 'TERMINEE'] },
         },
       }),
@@ -177,7 +190,7 @@ export class VehiculeService {
 
     // Supprimer les réservations ANNULEE (aucun impact financier) avant de supprimer le véhicule
     await prisma.reservation.deleteMany({
-      where: { vehiculeId: id, statut: 'ANNULEE' },
+      where: { vehiculeId: id, tenantId, statut: 'ANNULEE' },
     });
 
     return prisma.vehicule.delete({ where: { id } });
@@ -186,10 +199,9 @@ export class VehiculeService {
   /**
    * Vérifie la disponibilité d'un véhicule pour une période donnée
    */
-  async checkDisponibilite(vehiculeId: string, dateDebut: Date, dateFin: Date) {
-    const vehicule = await prisma.vehicule.findUnique({
-      where: { id: vehiculeId },
-    });
+  async checkDisponibilite(vehiculeId: string, dateDebut: Date, dateFin: Date, tenantId?: string) {
+    const where = tenantId ? { id: vehiculeId, tenantId } : { id: vehiculeId };
+    const vehicule = await prisma.vehicule.findFirst({ where });
 
     if (!vehicule) {
       throw new Error('Véhicule introuvable');
@@ -238,8 +250,8 @@ export class VehiculeService {
   /**
    * Ajoute des photos à un véhicule
    */
-  async addPhotos(id: string, photoPaths: string[]) {
-    const vehicule = await prisma.vehicule.findUnique({ where: { id } });
+  async addPhotos(id: string, photoPaths: string[], tenantId: string) {
+    const vehicule = await prisma.vehicule.findFirst({ where: { id, tenantId } });
 
     if (!vehicule) {
       throw new Error('Véhicule introuvable');
@@ -256,13 +268,14 @@ export class VehiculeService {
   /**
    * Récupère le calendrier de disponibilité (pour un mois donné)
    */
-  async getCalendrierDisponibilite(vehiculeId: string, mois: number, annee: number) {
+  async getCalendrierDisponibilite(vehiculeId: string, mois: number, annee: number, tenantId: string) {
     const debutMois = new Date(annee, mois - 1, 1);
     const finMois = new Date(annee, mois, 0);
 
     const reservations = await prisma.reservation.findMany({
       where: {
         vehiculeId,
+        tenantId,
         statut: { in: ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'] },
         dateDebut: { lte: finMois },
         dateFin: { gte: debutMois },

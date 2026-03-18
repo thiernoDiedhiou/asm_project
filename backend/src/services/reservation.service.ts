@@ -11,26 +11,32 @@ import { calculerPrix, calculerNombreJours } from '../utils/pricing';
 import logger from '../utils/logger';
 
 /**
- * Génère un numéro de réservation lisible : RES-YYMM-NNNN
- * Exemple : RES-2603-0001
+ * Génère le prochain numéro candidat RES-YYMM-NNNN à partir du dernier existant.
+ * Appelé dans une boucle retry côté service pour gérer les collisions.
  */
-async function generateNumeroReservation(): Promise<string> {
+async function generateNumeroReservation(offset = 0): Promise<string> {
   const now = new Date();
   const yymm = `${String(now.getFullYear()).slice(2)}${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const debutMois = new Date(now.getFullYear(), now.getMonth(), 1);
-  const count = await prisma.reservation.count({ where: { createdAt: { gte: debutMois } } });
-  return `RES-${yymm}-${String(count + 1).padStart(4, '0')}`;
+  const prefix = `RES-${yymm}-`;
+
+  const last = await prisma.reservation.findFirst({
+    where: { numeroReservation: { startsWith: prefix } },
+    orderBy: { numeroReservation: 'desc' },
+    select: { numeroReservation: true },
+  });
+
+  const lastSeq = last ? parseInt(last.numeroReservation.slice(prefix.length), 10) : 0;
+  return `${prefix}${String(lastSeq + 1 + offset).padStart(4, '0')}`;
 }
 
 export class ReservationService {
-  /**
-   * Récupère la liste des réservations avec filtres
-   */
-  async getAll(filters: ReservationFilters) {
+  async getAll(filters: ReservationFilters, tenantId: string) {
+    if (!tenantId) throw new Error('TenantId requis');
     const { statut, agentId, dateDebut, dateFin, search, page, limit } = filters;
     const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {
+      tenantId,
       ...(statut && { statut }),
       ...(agentId && { agentId }),
       ...(dateDebut && dateFin && {
@@ -98,12 +104,9 @@ export class ReservationService {
     return { reservations, total };
   }
 
-  /**
-   * Récupère une réservation par son ID
-   */
-  async getById(id: string) {
-    return prisma.reservation.findUnique({
-      where: { id },
+  async getById(id: string, tenantId: string) {
+    return prisma.reservation.findFirst({
+      where: { id, tenantId },
       include: {
         client: true,
         vehicule: true,
@@ -121,42 +124,36 @@ export class ReservationService {
     });
   }
 
-  /**
-   * Crée une nouvelle réservation
-   */
-  async create(dto: CreateReservationDto, agentId: string) {
+  async create(dto: CreateReservationDto, agentId: string, tenantId: string) {
     const dateDebut = new Date(dto.dateDebut);
     const dateFin = new Date(dto.dateFin);
 
-    // Vérifier la disponibilité du véhicule
     const dispo = await vehiculeService.checkDisponibilite(
       dto.vehiculeId,
       dateDebut,
-      dateFin
+      dateFin,
+      tenantId
     );
 
     if (!dispo.disponible) {
       throw new Error(dispo.raison || 'Véhicule non disponible');
     }
 
-    // Récupérer le véhicule pour les prix
-    const vehicule = await prisma.vehicule.findUnique({
-      where: { id: dto.vehiculeId },
+    const vehicule = await prisma.vehicule.findFirst({
+      where: { id: dto.vehiculeId, tenantId },
     });
 
     if (!vehicule) {
       throw new Error('Véhicule introuvable');
     }
 
-    // Récupérer la zone tarifaire si fournie (prix depuis la matrice catégorie × zone)
     let prixJournalier = Number(vehicule.prixJournalier);
     let prixSemaine = Number(vehicule.prixSemaine);
 
     if (dto.zoneId) {
-      const zone = await prisma.tarifZone.findUnique({ where: { id: dto.zoneId } });
+      const zone = await prisma.tarifZone.findFirst({ where: { id: dto.zoneId, tenantId } });
       if (!zone) throw new Error('Zone tarifaire introuvable');
       if (!zone.actif) throw new Error('Cette zone tarifaire est désactivée');
-      // Chercher le prix dans la matrice pour la catégorie du véhicule
       const prixCategorie = await prisma.prixCategorie.findUnique({
         where: { categorie_zoneId: { categorie: vehicule.categorie, zoneId: dto.zoneId } },
       });
@@ -166,12 +163,10 @@ export class ReservationService {
       }
     }
 
-    // Récupérer le nombre de locations précédentes du client (fidélité)
     const nombreLocations = await prisma.reservation.count({
-      where: { clientId: dto.clientId, statut: 'TERMINEE' },
+      where: { clientId: dto.clientId, tenantId, statut: 'TERMINEE' },
     });
 
-    // Calculer le prix (tarif zone si sélectionnée, sinon tarif véhicule)
     const prixCalc = calculerPrix(
       dto.typeTrajet || 'LOCATION',
       dateDebut,
@@ -183,48 +178,55 @@ export class ReservationService {
 
     const nombreJours = calculerNombreJours(dateDebut, dateFin);
 
-    const numeroReservation = await generateNumeroReservation();
+    // Retry jusqu'à 5 fois en cas de collision sur numeroReservation (P2002)
+    let reservation;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const numeroReservation = await generateNumeroReservation(attempt);
+      try {
+        reservation = await prisma.reservation.create({
+          data: {
+            tenantId,
+            numeroReservation,
+            clientId: dto.clientId,
+            vehiculeId: dto.vehiculeId,
+            dateDebut,
+            dateFin,
+            lieuPriseEnCharge: dto.lieuPriseEnCharge,
+            lieuRetour: dto.lieuRetour,
+            nombreJours,
+            prixTotal: prixCalc.prixTotal,
+            avance: dto.avance || 0,
+            typeTrajet: dto.typeTrajet || 'LOCATION',
+            notes: dto.notes,
+            agentId,
+            ...(dto.zoneId && { zoneId: dto.zoneId }),
+          },
+          include: {
+            client: true,
+            vehicule: true,
+            agent: { select: { id: true, nom: true, prenom: true } },
+          },
+        });
+        break; // succès
+      } catch (err: unknown) {
+        const isPrismaUnique = (err as { code?: string })?.code === 'P2002';
+        if (isPrismaUnique && attempt < 4) continue;
+        throw err;
+      }
+    }
 
-    const reservation = await prisma.reservation.create({
-      data: {
-        numeroReservation,
-        clientId: dto.clientId,
-        vehiculeId: dto.vehiculeId,
-        dateDebut,
-        dateFin,
-        lieuPriseEnCharge: dto.lieuPriseEnCharge,
-        lieuRetour: dto.lieuRetour,
-        nombreJours,
-        prixTotal: prixCalc.prixTotal,
-        avance: dto.avance || 0,
-        typeTrajet: dto.typeTrajet || 'LOCATION',
-        notes: dto.notes,
-        agentId,
-        ...(dto.zoneId && { zoneId: dto.zoneId }),
-      },
-      include: {
-        client: true,
-        vehicule: true,
-        agent: {
-          select: { id: true, nom: true, prenom: true },
-        },
-      },
-    });
-
-    logger.info(`Réservation créée: ${reservation.numeroReservation}`);
+    logger.info(`Réservation créée: ${(reservation as { numeroReservation: string }).numeroReservation}`);
     return { reservation, prixDetail: prixCalc };
   }
 
-  /**
-   * Met à jour le statut d'une réservation
-   */
   async updateStatut(
     id: string,
     dto: UpdateStatutReservationDto,
-    userId: string
+    userId: string,
+    tenantId: string
   ) {
-    const reservation = await prisma.reservation.findUnique({
-      where: { id },
+    const reservation = await prisma.reservation.findFirst({
+      where: { id, tenantId },
       include: { vehicule: true },
     });
 
@@ -232,7 +234,6 @@ export class ReservationService {
       throw new Error('Réservation introuvable');
     }
 
-    // Transitions autorisées
     const transitionsValides: Record<string, StatutReservation[]> = {
       EN_ATTENTE: ['CONFIRMEE', 'ANNULEE'],
       CONFIRMEE: ['EN_COURS', 'ANNULEE'],
@@ -247,7 +248,6 @@ export class ReservationService {
       );
     }
 
-    // Mettre à jour le statut du véhicule en conséquence
     let statutVehicule = reservation.vehicule.statut;
 
     if (dto.statut === 'EN_COURS') {
@@ -281,13 +281,9 @@ export class ReservationService {
     return updatedReservation;
   }
 
-  /**
-   * Prolonge une réservation (CONFIRMEE ou EN_COURS uniquement)
-   * Recalcule le prix total sur la nouvelle durée totale
-   */
-  async prolonger(id: string, nouvelleDataFin: string, userId: string) {
-    const reservation = await prisma.reservation.findUnique({
-      where: { id },
+  async prolonger(id: string, nouvelleDataFin: string, userId: string, tenantId: string) {
+    const reservation = await prisma.reservation.findFirst({
+      where: { id, tenantId },
       include: {
         vehicule: true,
         client: true,
@@ -305,7 +301,6 @@ export class ReservationService {
       throw new Error('La nouvelle date de fin doit être postérieure à la date de fin actuelle');
     }
 
-    // Résoudre le prix journalier (via zone si présente, sinon véhicule)
     let prixJournalier = Number(reservation.vehicule.prixJournalier);
     let prixSemaine = Number(reservation.vehicule.prixSemaine);
 
@@ -324,9 +319,8 @@ export class ReservationService {
       }
     }
 
-    // Fidélité client
     const nombreLocations = await prisma.reservation.count({
-      where: { clientId: reservation.clientId, statut: 'TERMINEE' },
+      where: { clientId: reservation.clientId, tenantId, statut: 'TERMINEE' },
     });
 
     const prixCalc = calculerPrix(
@@ -359,11 +353,8 @@ export class ReservationService {
     return { reservation: updated, prixDetail: prixCalc };
   }
 
-  /**
-   * Supprime une réservation (seulement si EN_ATTENTE ou ANNULEE)
-   */
-  async delete(id: string) {
-    const reservation = await prisma.reservation.findUnique({ where: { id } });
+  async delete(id: string, tenantId: string) {
+    const reservation = await prisma.reservation.findFirst({ where: { id, tenantId } });
 
     if (!reservation) {
       throw new Error('Réservation introuvable');
@@ -378,15 +369,13 @@ export class ReservationService {
     return prisma.reservation.delete({ where: { id } });
   }
 
-  /**
-   * Récupère le calendrier des réservations pour un mois donné
-   */
-  async getCalendrier(mois: number, annee: number) {
+  async getCalendrier(mois: number, annee: number, tenantId: string) {
     const debutMois = new Date(annee, mois - 1, 1);
     const finMois = new Date(annee, mois, 0, 23, 59, 59);
 
     return prisma.reservation.findMany({
       where: {
+        tenantId,
         statut: { not: 'ANNULEE' },
         OR: [
           {

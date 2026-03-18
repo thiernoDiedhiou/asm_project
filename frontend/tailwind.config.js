@@ -18,14 +18,14 @@ module.exports = {
     },
     extend: {
       colors: {
-        // Couleurs ASM Multi-Services
+        // Couleurs dynamiques tenant (overridées via CSS vars par TenantContext)
         asm: {
-          vert: '#1B5E20',
-          'vert-clair': '#2E7D32',
-          'vert-pale': '#E8F5E9',
-          or: '#F9A825',
-          'or-fonce': '#F57F17',
-          'or-pale': '#FFF8E1',
+          vert: 'var(--color-primary)',
+          'vert-clair': 'var(--color-primary-light, #2E7D32)',
+          'vert-pale': 'var(--color-primary-pale, #E8F5E9)',
+          or: 'var(--color-secondary)',
+          'or-fonce': 'var(--color-secondary-dark, #F57F17)',
+          'or-pale': 'var(--color-secondary-pale, #FFF8E1)',
         },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

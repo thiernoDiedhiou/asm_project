@@ -4,12 +4,18 @@ import prisma from '../utils/prisma';
 import { sendSuccess, sendError } from '../utils/response';
 import { sendNotifNouvelleReservation } from '../utils/mailer';
 
-async function generateNumeroReservation(): Promise<string> {
+// Génère le prochain numéro RES-YYMM-NNNN (même logique que reservation.service.ts)
+async function generateNumeroReservation(tenantId: string, offset = 0): Promise<string> {
   const now = new Date();
   const yymm = `${String(now.getFullYear()).slice(2)}${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const debutMois = new Date(now.getFullYear(), now.getMonth(), 1);
-  const count = await prisma.reservation.count({ where: { createdAt: { gte: debutMois } } });
-  return `RES-${yymm}-${String(count + 1).padStart(4, '0')}`;
+  const prefix = `RES-${yymm}-`;
+  const last = await prisma.reservation.findFirst({
+    where: { tenantId, numeroReservation: { startsWith: prefix } },
+    orderBy: { numeroReservation: 'desc' },
+    select: { numeroReservation: true },
+  });
+  const lastSeq = last ? parseInt(last.numeroReservation.slice(prefix.length), 10) : 0;
+  return `${prefix}${String(lastSeq + 1 + offset).padStart(4, '0')}`;
 }
 
 export class PublicController {
@@ -20,7 +26,7 @@ export class PublicController {
   async getZones(req: Request, res: Response): Promise<void> {
     try {
       const zones = await prisma.tarifZone.findMany({
-        where: { actif: true },
+        where: { tenantId: req.tenantId!, actif: true },
         select: {
           id: true,
           nom: true,
@@ -47,7 +53,7 @@ export class PublicController {
   async getVehicules(req: Request, res: Response): Promise<void> {
     try {
       const vehicules = await prisma.vehicule.findMany({
-        where: { statut: 'DISPONIBLE' },
+        where: { tenantId: req.tenantId!, statut: 'DISPONIBLE' },
         select: {
           id: true,
           marque: true,
@@ -107,14 +113,17 @@ export class PublicController {
         notes,
       } = req.body;
 
+      const tenantId = req.tenantId!;
+
       // 1. Trouver ou créer le client par téléphone
       let client = await prisma.client.findFirst({
-        where: { telephone },
+        where: { tenantId, telephone },
       });
 
       if (!client) {
         client = await prisma.client.create({
           data: {
+            tenantId,
             prenom,
             nom,
             telephone,
@@ -125,10 +134,17 @@ export class PublicController {
       }
 
       // 2. Récupérer le premier admin comme agent système pour les demandes publiques
-      const agentSysteme = await prisma.user.findFirst({
-        where: { role: 'ADMIN', actif: true },
-        orderBy: { createdAt: 'asc' },
-      });
+      //    Son email servira de destinataire pour la notification de la nouvelle demande
+      const [agentSysteme, tenant] = await Promise.all([
+        prisma.user.findFirst({
+          where: { tenantId, role: 'ADMIN', actif: true },
+          orderBy: { createdAt: 'asc' },
+        }),
+        prisma.tenant.findUnique({
+          where: { id: tenantId },
+          select: { nomEntreprise: true },
+        }),
+      ]);
 
       if (!agentSysteme) {
         sendError(res, 'Service temporairement indisponible', 503);
@@ -136,8 +152,8 @@ export class PublicController {
       }
 
       // 3. Récupérer le véhicule pour le calcul du prix
-      const vehicule = await prisma.vehicule.findUnique({
-        where: { id: vehiculeId },
+      const vehicule = await prisma.vehicule.findFirst({
+        where: { id: vehiculeId, tenantId },
         select: {
           id: true,
           marque: true,
@@ -176,30 +192,40 @@ export class PublicController {
         prixTotal = nombreJours * prixJournalier;
       }
 
-      // 5. Créer la réservation EN_ATTENTE
-      const numeroReservation = await generateNumeroReservation();
-      const reservation = await prisma.reservation.create({
-        data: {
-          numeroReservation,
-          clientId: client.id,
-          vehiculeId,
-          dateDebut: debut,
-          dateFin: fin,
-          lieuPriseEnCharge: lieuPriseEnCharge || 'À préciser',
-          lieuRetour: lieuRetour || lieuPriseEnCharge || 'À préciser',
-          nombreJours,
-          prixTotal,
-          avance: 0,
-          statut: 'EN_ATTENTE',
-          typeTrajet: typeTrajet || 'LOCATION',
-          notes: notes || `Demande en ligne — ${prenom} ${nom}`,
-          agentId: agentSysteme.id,
-        },
-        include: {
-          vehicule: { select: { marque: true, modele: true } },
-          client: { select: { prenom: true, nom: true, telephone: true } },
-        },
-      });
+      // 5. Créer la réservation EN_ATTENTE (retry sur P2002 en cas de collision numero unique)
+      let reservation!: Awaited<ReturnType<typeof prisma.reservation.create>>;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const numeroReservation = await generateNumeroReservation(tenantId, attempt);
+        try {
+          reservation = await prisma.reservation.create({
+            data: {
+              tenantId,
+              numeroReservation,
+              clientId: client.id,
+              vehiculeId,
+              dateDebut: debut,
+              dateFin: fin,
+              lieuPriseEnCharge: lieuPriseEnCharge || 'À préciser',
+              lieuRetour: lieuRetour || lieuPriseEnCharge || 'À préciser',
+              nombreJours,
+              prixTotal,
+              avance: 0,
+              statut: 'EN_ATTENTE',
+              typeTrajet: typeTrajet || 'LOCATION',
+              notes: notes || `Demande en ligne — ${prenom} ${nom}`,
+              agentId: agentSysteme.id,
+            },
+            include: {
+              vehicule: { select: { marque: true, modele: true } },
+              client: { select: { prenom: true, nom: true, telephone: true } },
+            },
+          });
+          break;
+        } catch (err: unknown) {
+          if ((err as { code?: string })?.code === 'P2002' && attempt < 4) continue;
+          throw err;
+        }
+      }
 
       // 6. Émettre une notification socket à tous les agents/admins connectés
       const io = req.app.get('io');
@@ -215,19 +241,24 @@ export class PublicController {
         });
       }
 
-      // 7. Envoyer un email de notification (silencieux si SMTP non configuré)
-      sendNotifNouvelleReservation({
-        numeroReservation: reservation.numeroReservation,
-        client: { prenom, nom, telephone, email: email || undefined },
-        vehicule: { marque: vehicule.marque, modele: vehicule.modele },
-        dateDebut,
-        dateFin,
-        nombreJours,
-        prixTotal,
-        lieuPriseEnCharge: lieuPriseEnCharge || 'À préciser',
-        typeTrajet: typeTrajet || 'LOCATION',
-        notes: notes || undefined,
-      }).catch((err) => {
+      // 7. Envoyer un email de notification à l'admin du tenant (silencieux si SMTP non configuré)
+      //    L'email va à agentSysteme.email (l'ADMIN du tenant), pas à une valeur .env
+      sendNotifNouvelleReservation(
+        {
+          numeroReservation: reservation.numeroReservation,
+          nomEntreprise: tenant?.nomEntreprise || 'ASM Platform',
+          client: { prenom, nom, telephone, email: email || undefined },
+          vehicule: { marque: vehicule.marque, modele: vehicule.modele },
+          dateDebut,
+          dateFin,
+          nombreJours,
+          prixTotal,
+          lieuPriseEnCharge: lieuPriseEnCharge || 'À préciser',
+          typeTrajet: typeTrajet || 'LOCATION',
+          notes: notes || undefined,
+        },
+        agentSysteme.email  // Destinataire dynamique = admin du tenant
+      ).catch((err) => {
         console.error('[mailer] Échec envoi email notification:', err.message);
       });
 
@@ -286,6 +317,30 @@ export class PublicController {
       }
 
       sendSuccess(res, contrat);
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
+    }
+  }
+
+  /**
+   * GET /api/public/tenant
+   * Retourne les informations publiques de branding du tenant courant.
+   */
+  async getTenantPublicInfo(req: Request, res: Response): Promise<void> {
+    try {
+      const tenant = await prisma.tenant.findUnique({
+        where: { id: req.tenantId },
+        select: {
+          slug: true,
+          nomEntreprise: true,
+          slogan: true,
+          couleurPrimaire: true,
+          couleurSecondaire: true,
+          logo: true,
+        },
+      });
+      if (!tenant) { sendError(res, 'Tenant introuvable', 404); return; }
+      sendSuccess(res, tenant);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
     }

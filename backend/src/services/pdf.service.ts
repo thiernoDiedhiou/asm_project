@@ -16,6 +16,9 @@ interface EntrepriseInfo {
   email: string;
   rccm: string;
   ninea: string;
+  couleurPrimaire: string;
+  couleurSecondaire: string;
+  logo: string | null;
 }
 
 interface ContratData {
@@ -69,6 +72,22 @@ interface ContratData {
 
 export class PdfService {
   /**
+   * Convertit un chemin logo (relatif à uploads/) en data URL base64 pour Puppeteer
+   */
+  private logoToBase64(logoPath: string): string | null {
+    try {
+      const fullPath = path.join(process.cwd(), logoPath);
+      if (!fs.existsSync(fullPath)) return null;
+      const ext = path.extname(logoPath).toLowerCase().replace('.', '');
+      const mime = ext === 'svg' ? 'image/svg+xml' : `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+      const b64 = fs.readFileSync(fullPath).toString('base64');
+      return `data:${mime};base64,${b64}`;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * Génère le HTML du contrat
    */
   private async generateContratHtml(data: ContratData, entreprise: EntrepriseInfo): Promise<string> {
@@ -121,7 +140,7 @@ export class PdfService {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 3px solid #1B5E20;
+      border-bottom: 3px solid ${entreprise.couleurPrimaire};
       padding-bottom: 15px;
       margin-bottom: 20px;
     }
@@ -131,12 +150,12 @@ export class PdfService {
     .company-name {
       font-size: 22px;
       font-weight: bold;
-      color: #1B5E20;
+      color: ${entreprise.couleurPrimaire};
       text-transform: uppercase;
     }
     .company-tagline {
       font-size: 12px;
-      color: #F9A825;
+      color: ${entreprise.couleurSecondaire};
       font-weight: bold;
       margin-top: 2px;
     }
@@ -164,8 +183,8 @@ export class PdfService {
     .contract-number {
       font-size: 16px;
       font-weight: bold;
-      color: #1B5E20;
-      border: 2px solid #1B5E20;
+      color: ${entreprise.couleurPrimaire};
+      border: 2px solid ${entreprise.couleurPrimaire};
       padding: 8px 15px;
       border-radius: 5px;
       display: inline-block;
@@ -182,11 +201,11 @@ export class PdfService {
       text-align: center;
       font-size: 16px;
       font-weight: bold;
-      color: #1B5E20;
+      color: ${entreprise.couleurPrimaire};
       margin: 20px 0;
       text-transform: uppercase;
       letter-spacing: 2px;
-      border: 1px solid #1B5E20;
+      border: 1px solid ${entreprise.couleurPrimaire};
       padding: 8px;
       background-color: #f0f7f0;
     }
@@ -194,7 +213,7 @@ export class PdfService {
       margin-bottom: 15px;
     }
     .section-title {
-      background-color: #1B5E20;
+      background-color: ${entreprise.couleurPrimaire};
       color: white;
       padding: 5px 10px;
       font-weight: bold;
@@ -252,7 +271,7 @@ export class PdfService {
       font-size: 9px;
       font-weight: bold;
     }
-    .badge-green { background-color: #e8f5e9; color: #1B5E20; }
+    .badge-green { background-color: #e8f5e9; color: ${entreprise.couleurPrimaire}; }
     .badge-orange { background-color: #fff3e0; color: #e65100; }
     .badge-blue { background-color: #e3f2fd; color: #1565c0; }
     .page-break {
@@ -263,14 +282,14 @@ export class PdfService {
     }
     .cg-header {
       text-align: center;
-      border-bottom: 3px solid #1B5E20;
+      border-bottom: 3px solid ${entreprise.couleurPrimaire};
       padding-bottom: 12px;
       margin-bottom: 18px;
     }
     .cg-title {
       font-size: 15px;
       font-weight: bold;
-      color: #1B5E20;
+      color: ${entreprise.couleurPrimaire};
       text-transform: uppercase;
       letter-spacing: 1px;
     }
@@ -285,10 +304,10 @@ export class PdfService {
     .article-title {
       font-size: 11px;
       font-weight: bold;
-      color: #1B5E20;
+      color: ${entreprise.couleurPrimaire};
       text-transform: uppercase;
       margin-bottom: 5px;
-      border-left: 3px solid #F9A825;
+      border-left: 3px solid ${entreprise.couleurSecondaire};
       padding-left: 8px;
     }
     .article p {
@@ -337,13 +356,13 @@ export class PdfService {
       padding-top: 10px;
     }
     .highlight {
-      color: #F9A825;
+      color: ${entreprise.couleurSecondaire};
       font-weight: bold;
     }
     .due-amount {
       font-size: 14px;
       font-weight: bold;
-      color: ${resteADu > 0 ? '#c62828' : '#1B5E20'};
+      color: ${resteADu > 0 ? '#c62828' : entreprise.couleurPrimaire};
     }
   </style>
 </head>
@@ -351,7 +370,7 @@ export class PdfService {
   <!-- En-tête -->
   <div class="header">
     <div class="logo-section">
-      <div class="company-name">${entreprise.nom}</div>
+      ${entreprise.logo ? `<img src="${entreprise.logo}" alt="${entreprise.nom}" style="max-height:56px; max-width:160px; object-fit:contain; margin-bottom:6px; display:block;" />` : `<div class="company-name">${entreprise.nom}</div>`}
       <div class="company-tagline">${entreprise.slogan}</div>
       <div class="company-activity">${entreprise.activite}</div>
       <div class="company-info">
@@ -497,7 +516,7 @@ export class PdfService {
         ${data.paiements.map(p => `
         <tr>
           <td>Paiement ${p.methode.replace('_', ' ')} du ${formatDate(p.datePaiement)}${p.reference ? ` (Réf: ${p.reference})` : ''}</td>
-          <td class="amount" style="color: #1B5E20;">- ${formatMontant(Number(p.montant))}</td>
+          <td class="amount" style="color: ${entreprise.couleurPrimaire};">- ${formatMontant(Number(p.montant))}</td>
         </tr>
         `).join('')}
         <tr class="total-row">
@@ -506,7 +525,7 @@ export class PdfService {
         </tr>
       </tbody>
     </table>
-    ${resteADu === 0 ? '<div style="text-align:center; color:#1B5E20; font-weight:bold; margin-top:8px;">✅ CONTRAT ENTIÈREMENT RÉGLÉ</div>' : ''}
+    ${resteADu === 0 ? `<div style="text-align:center; color:${entreprise.couleurPrimaire}; font-weight:bold; margin-top:8px;">✅ CONTRAT ENTIÈREMENT RÉGLÉ</div>` : ''}
   </div>
 
   <!-- Zone de signature -->
@@ -537,7 +556,7 @@ export class PdfService {
   <div class="footer">
     <p>${entreprise.nom} - ${entreprise.adresse} - Tél: ${entreprise.telephone}</p>
     <p>Document généré le ${formatDate(new Date())} | Contrat N° ${data.numeroContrat}</p>
-    <p style="color: #1B5E20;">Ce document est un contrat légalement contraignant - Conservez-le précieusement</p>
+    <p style="color: ${entreprise.couleurPrimaire};">Ce document est un contrat légalement contraignant - Conservez-le précieusement</p>
   </div>
 
   <!-- ============================================================ -->
@@ -627,15 +646,15 @@ export class PdfService {
   <title>Reçu de Paiement</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:11px;color:#333;background:#fff;padding:30px}
-    .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1B5E20;padding-bottom:15px;margin-bottom:20px}
-    .company-name{font-size:20px;font-weight:bold;color:#1B5E20;text-transform:uppercase}
-    .company-tagline{font-size:11px;color:#F9A825;font-weight:bold;margin-top:2px}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid ${entreprise.couleurPrimaire};padding-bottom:15px;margin-bottom:20px}
+    .company-name{font-size:20px;font-weight:bold;color:${entreprise.couleurPrimaire};text-transform:uppercase}
+    .company-tagline{font-size:11px;color:${entreprise.couleurSecondaire};font-weight:bold;margin-top:2px}
     .company-activity{font-size:9px;color:#888;font-style:italic;margin-top:1px}
     .company-info{font-size:10px;color:#666;margin-top:6px;line-height:1.6}
     .company-legal{font-size:9px;color:#999;margin-top:3px;line-height:1.4}
-    .doc-title{text-align:right}.doc-title h2{font-size:18px;color:#1B5E20;text-transform:uppercase;letter-spacing:1px}
+    .doc-title{text-align:right}.doc-title h2{font-size:18px;color:${entreprise.couleurPrimaire};text-transform:uppercase;letter-spacing:1px}
     .doc-title .ref{font-size:10px;color:#888;margin-top:4px}
-    .amount-badge{background:#1B5E20;color:#fff;font-size:22px;font-weight:bold;padding:12px 24px;border-radius:8px;text-align:center;margin:18px 0}
+    .amount-badge{background:${entreprise.couleurPrimaire};color:#fff;font-size:22px;font-weight:bold;padding:12px 24px;border-radius:8px;text-align:center;margin:18px 0}
     .amount-badge .label{font-size:10px;font-weight:normal;opacity:.8}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
     .card{border:1px solid #e5e7eb;border-radius:6px;padding:10px 14px}
@@ -649,17 +668,17 @@ export class PdfService {
     .summary-table th{background:#f9fafb;padding:7px 10px;text-align:left;font-size:9px;color:#6b7280;text-transform:uppercase;border-bottom:1px solid #e5e7eb}
     .summary-table td{padding:7px 10px;border-bottom:1px solid #f3f4f6}
     .summary-table .amount{text-align:right;font-weight:bold}
-    .summary-table .total-row td{background:#f0fdf4;font-weight:bold;font-size:11px;border-top:2px solid #1B5E20}
+    .summary-table .total-row td{background:#f0fdf4;font-weight:bold;font-size:11px;border-top:2px solid ${entreprise.couleurPrimaire}}
     .paid-row td{color:#15803d}
     .seal{text-align:center;margin:16px 0}
-    .seal-box{display:inline-block;border:2px dashed #1B5E20;padding:10px 24px;border-radius:8px;color:#1B5E20;font-size:10px;font-weight:bold}
+    .seal-box{display:inline-block;border:2px dashed ${entreprise.couleurPrimaire};padding:10px 24px;border-radius:8px;color:${entreprise.couleurPrimaire};font-size:10px;font-weight:bold}
     .footer{margin-top:20px;border-top:1px solid #e5e7eb;padding-top:10px;text-align:center;font-size:9px;color:#9ca3af;line-height:1.6}
   </style>
 </head>
 <body>
   <div class="header">
     <div>
-      <div class="company-name">${entreprise.nom}</div>
+      ${entreprise.logo ? `<img src="${entreprise.logo}" alt="${entreprise.nom}" style="max-height:48px;max-width:140px;object-fit:contain;margin-bottom:6px;display:block;" />` : `<div class="company-name">${entreprise.nom}</div>`}
       <div class="company-tagline">${entreprise.slogan}</div>
       <div class="company-activity">${entreprise.activite}</div>
       <div class="company-info">
@@ -740,8 +759,8 @@ export class PdfService {
   /**
    * Génère le PDF reçu de paiement en mémoire (Buffer)
    */
-  async generateRecuPaiementPdf(data: Parameters<PdfService['generateRecuHtml']>[0]): Promise<Buffer> {
-    const s = await settingsService.get();
+  async generateRecuPaiementPdf(data: Parameters<PdfService['generateRecuHtml']>[0], tenantId: string): Promise<Buffer> {
+    const s = await settingsService.get(tenantId);
     const entreprise: EntrepriseInfo = {
       nom: s.nomEntreprise,
       slogan: s.slogan,
@@ -752,6 +771,9 @@ export class PdfService {
       email: s.email,
       rccm: s.rccm,
       ninea: s.ninea,
+      couleurPrimaire: s.couleurPrimaire ?? '#1B5E20',
+      couleurSecondaire: s.couleurSecondaire ?? '#F9A825',
+      logo: s.logo ? this.logoToBase64(s.logo) : null,
     };
     let browser;
     try {
@@ -775,7 +797,7 @@ export class PdfService {
   /**
    * Génère le PDF du contrat et le sauvegarde
    */
-  async generateContratPdf(data: ContratData): Promise<string> {
+  async generateContratPdf(data: ContratData, tenantId: string): Promise<string> {
     const uploadDir = process.env.UPLOAD_DIR || './uploads';
     const pdfDir = path.join(uploadDir, 'contrats');
 
@@ -799,7 +821,7 @@ export class PdfService {
         ],
       });
 
-      const s = await settingsService.get();
+      const s = await settingsService.get(tenantId);
       const entreprise: EntrepriseInfo = {
         nom: s.nomEntreprise,
         slogan: s.slogan,
@@ -810,6 +832,9 @@ export class PdfService {
         email: s.email,
         rccm: s.rccm,
         ninea: s.ninea,
+        couleurPrimaire: s.couleurPrimaire ?? '#1B5E20',
+        couleurSecondaire: s.couleurSecondaire ?? '#F9A825',
+        logo: s.logo ? this.logoToBase64(s.logo) : null,
       };
       const page = await browser.newPage();
       const html = await this.generateContratHtml(data, entreprise);

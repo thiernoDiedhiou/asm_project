@@ -14,7 +14,7 @@ export class ClientController {
   async getAll(req: Request, res: Response): Promise<void> {
     try {
       const filters = req.query as unknown as ClientFilters;
-      const { clients, total } = await clientService.getAll(filters);
+      const { clients, total } = await clientService.getAll(filters, req.tenantId!);
       sendPaginatedSuccess(res, clients, {
         page: filters.page || 1,
         limit: filters.limit || 20,
@@ -27,7 +27,7 @@ export class ClientController {
 
   async getById(req: Request, res: Response): Promise<void> {
     try {
-      const client = await clientService.getById(req.params.id);
+      const client = await clientService.getById(req.params.id, req.tenantId!);
       if (!client) { sendNotFound(res, 'Client introuvable'); return; }
       sendSuccess(res, client);
     } catch (error) {
@@ -37,7 +37,7 @@ export class ClientController {
 
   async getHistorique(req: Request, res: Response): Promise<void> {
     try {
-      const result = await clientService.getHistorique(req.params.id);
+      const result = await clientService.getHistorique(req.params.id, req.tenantId!);
       sendSuccess(res, result);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
@@ -46,11 +46,12 @@ export class ClientController {
 
   async create(req: Request, res: Response): Promise<void> {
     try {
-      const client = await clientService.create(req.body);
+      const client = await clientService.create(req.body, req.tenantId!);
 
       if (req.user) {
         logAction({
           userId: req.user.userId,
+          tenantId: req.tenantId!,
           userRole: req.user.role,
           action: ACTIONS.CLIENT_CREE,
           entite: ENTITES.CLIENT,
@@ -67,7 +68,20 @@ export class ClientController {
 
   async update(req: Request, res: Response): Promise<void> {
     try {
-      const client = await clientService.update(req.params.id, req.body);
+      const client = await clientService.update(req.params.id, req.body, req.tenantId!);
+
+      if (req.user) {
+        logAction({
+          userId: req.user.userId,
+          tenantId: req.tenantId!,
+          userRole: req.user.role,
+          action: ACTIONS.CLIENT_MODIFIE,
+          entite: ENTITES.CLIENT,
+          entiteId: req.params.id,
+          details: { champsModifies: Object.keys(req.body) },
+        }).catch(() => {});
+      }
+
       sendSuccess(res, client, 'Client mis à jour');
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);

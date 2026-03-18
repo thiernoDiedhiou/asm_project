@@ -50,6 +50,7 @@ export function Header({ onMenuClick }: HeaderProps) {
     numeroReservation: string;
     client: { prenom: string; nom: string; telephone: string };
   } | null>(null);
+  const [saNotif, setSaNotif] = useState<{ type: 'expire' | 'paiement'; message: string } | null>(null);
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -194,13 +195,23 @@ export function Header({ onMenuClick }: HeaderProps) {
     return acc;
   }, {});
 
-  // Écoute socket — nouvelles demandes vitrine (toutes pages)
+  // Écoute socket — nouvelles demandes vitrine + événements Super Admin
   useEffect(() => {
     if (!user) return;
     const socket = socketIO(window.location.origin, { path: '/socket.io' });
     socket.on('notification:nouvelle_demande', (data) => {
       setNouvelleDemande(data);
     });
+    if (user.role === 'SUPER_ADMIN') {
+      socket.on('superadmin:tenant_expire', (data: { nomEntreprise: string }) => {
+        setSaNotif({ type: 'expire', message: `🔴 Tenant expiré : ${data.nomEntreprise}` });
+        setTimeout(() => setSaNotif(null), 8000);
+      });
+      socket.on('superadmin:paiement_recu', (data: { nomEntreprise: string; montant: number; periode: string }) => {
+        setSaNotif({ type: 'paiement', message: `✅ Paiement reçu de ${data.nomEntreprise} — ${Number(data.montant).toLocaleString('fr-SN')} FCFA (${data.periode})` });
+        setTimeout(() => setSaNotif(null), 8000);
+      });
+    }
     return () => { socket.disconnect(); };
   }, [user]);
 
@@ -208,7 +219,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { data: alertesData } = useQuery(
     ['alertes'],
     () => dashboardApi.getAlertes(),
-    { refetchInterval: 60000, enabled: !!user }
+    { refetchInterval: 60000, enabled: !!user && user.role !== 'SUPER_ADMIN' }
   );
 
   const alertes = alertesData?.data || [];
@@ -589,6 +600,21 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
       )}
     </header>
+
+    {/* Toast — événements Super Admin (expiration / paiement) */}
+    {saNotif && (
+      <div className={`fixed bottom-6 right-6 z-50 max-w-sm w-full rounded-xl shadow-2xl border p-4 flex items-start gap-3 animate-fade-in ${saNotif.type === 'expire' ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+        <div className="flex-1 min-w-0">
+          <p className={`text-sm font-semibold ${saNotif.type === 'expire' ? 'text-red-800' : 'text-green-800'}`}>
+            {saNotif.type === 'expire' ? '⚠️ Tenant expiré' : '💳 Paiement reçu'}
+          </p>
+          <p className={`text-xs mt-0.5 ${saNotif.type === 'expire' ? 'text-red-600' : 'text-green-600'}`}>{saNotif.message.replace(/^[^:]+:\s*/, '')}</p>
+        </div>
+        <button type="button" aria-label="Fermer" onClick={() => setSaNotif(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0">
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+    )}
 
     {/* Toast — nouvelle demande vitrine (visible sur toutes les pages) */}
     {nouvelleDemande && (

@@ -44,7 +44,7 @@ interface ZonePublic {
 
 const TYPE_TRAJET_OPTIONS = [
   { value: 'LOCATION', label: 'Location classique', icon: '🚗' },
-  { value: 'TRANSFERT_AEROPORT', label: 'Transfert aéroport (AIBD)', icon: '✈️' },
+  { value: 'TRANSFERT_AEROPORT', label: 'Transfert aéroport', icon: '✈️' },
   { value: 'LONGUE_DUREE', label: 'Longue durée (7j+)', icon: '📅' },
 ];
 

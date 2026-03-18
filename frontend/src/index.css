@@ -14,6 +14,9 @@
     --primary-foreground: 210 40% 98%;
     --secondary: 45 95% 57%;   /* Or ASM #F9A825 */
     --secondary-foreground: 138 67% 22%;
+    /* Couleurs dynamiques tenant — overridées par TenantContext */
+    --color-primary: #1B5E20;
+    --color-secondary: #F9A825;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
     --accent: 210 40% 96.1%;

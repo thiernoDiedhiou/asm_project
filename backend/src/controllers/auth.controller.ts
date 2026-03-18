@@ -16,17 +16,20 @@ export class AuthController {
    */
   async login(req: Request, res: Response): Promise<void> {
     try {
-      const result = await authService.login(req.body);
+      const result = await authService.login(req.body, req.tenantId);
 
-      // Journal : connexion réussie
-      logAction({
-        userId: result.user.id,
-        userNom: `${result.user.prenom} ${result.user.nom}`,
-        userRole: result.user.role,
-        action: ACTIONS.LOGIN,
-        entite: ENTITES.AUTH,
-        details: { email: req.body.email },
-      }).catch(() => {});
+      // Journal : connexion réussie (tenantId peut être undefined pour SUPER_ADMIN hors tenant)
+      if (req.tenantId) {
+        logAction({
+          userId: result.user.id,
+          tenantId: req.tenantId,
+          userNom: `${result.user.prenom} ${result.user.nom}`,
+          userRole: result.user.role,
+          action: ACTIONS.LOGIN,
+          entite: ENTITES.AUTH,
+          details: { email: req.body.email },
+        }).catch(() => {});
+      }
 
       sendSuccess(res, result, 'Connexion réussie');
     } catch (error) {
@@ -38,7 +41,6 @@ export class AuthController {
 
   /**
    * POST /api/auth/refresh
-   * Rafraîchir le token d'accès
    */
   async refresh(req: Request, res: Response): Promise<void> {
     try {
@@ -60,7 +62,6 @@ export class AuthController {
 
   /**
    * POST /api/auth/logout
-   * Déconnexion et révocation du token
    */
   async logout(req: Request, res: Response): Promise<void> {
     try {
@@ -71,10 +72,10 @@ export class AuthController {
 
       const { refreshToken } = req.body;
 
-      // Journal : déconnexion (avant blacklist du token)
-      if (req.user) {
+      if (req.user && req.tenantId) {
         logAction({
           userId: req.user.userId,
+          tenantId: req.tenantId,
           userRole: req.user.role,
           action: ACTIONS.LOGOUT,
           entite: ENTITES.AUTH,
@@ -91,7 +92,6 @@ export class AuthController {
 
   /**
    * GET /api/auth/me
-   * Récupère le profil de l'utilisateur connecté
    */
   async me(req: Request, res: Response): Promise<void> {
     try {
@@ -108,9 +108,41 @@ export class AuthController {
       sendError(res, message, 500);
     }
   }
+
+  /**
+   * POST /api/auth/forgot-password
+   */
+  async forgotPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+      if (!email) { sendError(res, 'Email requis', 400); return; }
+      const origin = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:3000';
+      await authService.forgotPassword(email, req.tenantId, origin as string);
+      // Toujours retourner succès (anti-énumération)
+      sendSuccess(res, null, 'Si cet email existe, un lien de réinitialisation a été envoyé');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erreur serveur';
+      sendError(res, message, 500);
+    }
+  }
+
+  /**
+   * POST /api/auth/reset-password
+   */
+  async resetPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { token, nouveauMotDePasse } = req.body;
+      if (!token || !nouveauMotDePasse) { sendError(res, 'Token et nouveau mot de passe requis', 400); return; }
+      await authService.resetPassword(token, nouveauMotDePasse);
+      sendSuccess(res, null, 'Mot de passe réinitialisé avec succès');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erreur serveur';
+      sendError(res, message, 400);
+    }
+  }
+
   /**
    * PUT /api/auth/password
-   * Changer le mot de passe de l'utilisateur connecté
    */
   async changePassword(req: Request, res: Response): Promise<void> {
     try {

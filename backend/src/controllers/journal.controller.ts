@@ -4,11 +4,6 @@ import prisma from '../utils/prisma';
 import { sendSuccess, sendError, sendPaginatedSuccess } from '../utils/response';
 
 export class JournalController {
-  /**
-   * GET /api/journal
-   * Retourne le journal paginé avec filtres
-   * Filtres: userId, action, entite, dateDebut, dateFin, page, limit
-   */
   async getAll(req: Request, res: Response): Promise<void> {
     try {
       const {
@@ -25,8 +20,7 @@ export class JournalController {
       const limit = Math.min(100, parseInt(limitStr) || 50);
       const skip = (page - 1) * limit;
 
-      // Construction du filtre Prisma
-      const where: Record<string, unknown> = {};
+      const where: Record<string, unknown> = { tenantId: req.tenantId! };
 
       if (userId) where.userId = userId;
       if (action) where.action = action;
@@ -55,14 +49,10 @@ export class JournalController {
     }
   }
 
-  /**
-   * GET /api/journal/users
-   * Retourne la liste des utilisateurs ayant des entrées dans le journal
-   * (pour le filtre par agent dans le frontend)
-   */
   async getUsers(req: Request, res: Response): Promise<void> {
     try {
       const users = await prisma.journalActivite.findMany({
+        where: { tenantId: req.tenantId! },
         distinct: ['userId'],
         select: {
           userId: true,
@@ -77,15 +67,11 @@ export class JournalController {
     }
   }
 
-  /**
-   * GET /api/journal/stats
-   * Résumé par utilisateur (nombre d'actions par agent)
-   */
   async getStats(req: Request, res: Response): Promise<void> {
     try {
       const { dateDebut, dateFin } = req.query as Record<string, string>;
 
-      const where: Record<string, unknown> = {};
+      const where: Record<string, unknown> = { tenantId: req.tenantId! };
       if (dateDebut || dateFin) {
         where.createdAt = {
           ...(dateDebut ? { gte: new Date(dateDebut) } : {}),

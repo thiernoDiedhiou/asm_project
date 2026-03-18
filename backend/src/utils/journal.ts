@@ -4,6 +4,7 @@ import prisma from './prisma';
 
 export interface LogActionParams {
   userId: string;
+  tenantId: string;
   userNom?: string;  // Optionnel : si fourni, évite la requête DB
   userRole: string;
   action: string;
@@ -32,6 +33,7 @@ export async function logAction(params: LogActionParams): Promise<void> {
     await prisma.journalActivite.create({
       data: {
         userId: params.userId,
+        tenantId: params.tenantId,
         userNom,
         userRole: params.userRole,
         action: params.action,

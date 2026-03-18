@@ -3,13 +3,9 @@ import prisma from '../utils/prisma';
 import { Decimal } from '@prisma/client/runtime/library';
 
 export const tarificationService = {
-  /**
-   * Retourne la matrice complète :
-   * zones[] avec pour chacune ses prixCategories[]
-   */
-  async getMatrix() {
+  async getMatrix(tenantId: string) {
     const zones = await prisma.tarifZone.findMany({
-      where: { actif: true },
+      where: { tenantId, actif: true },
       orderBy: { nom: 'asc' },
       include: {
         prixCategories: {
@@ -20,11 +16,6 @@ export const tarificationService = {
     return zones;
   },
 
-  /**
-   * Met à jour un prix dans la matrice.
-   * @param id  ID du PrixCategorie à modifier
-   * @param data  { prixJournalier, prixSemaine? }
-   */
   async updateCell(id: string, data: { prixJournalier: number; prixSemaine?: number | null }) {
     const updated = await prisma.prixCategorie.update({
       where: { id },
@@ -38,11 +29,26 @@ export const tarificationService = {
     return updated;
   },
 
-  /**
-   * Résout le prix journalier pour une catégorie de véhicule et une zone.
-   * Utilisé lors de la création d'une réservation.
-   * Retourne null si la combinaison n'existe pas.
-   */
+  async upsertCell(tenantId: string, categorie: string, zoneId: string, prixJournalier: number, prixSemaine?: number | null) {
+    // Vérifie que la zone appartient bien au tenant
+    const zone = await prisma.tarifZone.findFirst({ where: { id: zoneId, tenantId } });
+    if (!zone) throw new Error('Zone introuvable ou accès refusé');
+
+    return prisma.prixCategorie.upsert({
+      where: { categorie_zoneId: { categorie: categorie as any, zoneId } },
+      create: {
+        categorie: categorie as any,
+        zoneId,
+        prixJournalier: new Decimal(prixJournalier),
+        prixSemaine: prixSemaine != null ? new Decimal(prixSemaine) : null,
+      },
+      update: {
+        prixJournalier: new Decimal(prixJournalier),
+        ...(prixSemaine !== undefined && { prixSemaine: prixSemaine != null ? new Decimal(prixSemaine) : null }),
+      },
+    });
+  },
+
   async getPrix(categorie: string, zoneId: string) {
     const prix = await prisma.prixCategorie.findUnique({
       where: { categorie_zoneId: { categorie: categorie as any, zoneId } },

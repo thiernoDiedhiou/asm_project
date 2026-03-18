@@ -1,6 +1,7 @@
 // Routes publiques (vitrine) - aucune authentification requise
 import { Router } from 'express';
 import { publicController } from '../controllers/public.controller';
+import { planController } from '../controllers/plan.controller';
 
 const router = Router();
 
@@ -26,6 +27,18 @@ router.post(
 router.get(
   '/contrats/verifier/:numero',
   publicController.verifierContrat.bind(publicController)
+);
+
+// GET /api/public/tenant — infos publiques de branding du tenant courant
+router.get(
+  '/tenant',
+  publicController.getTenantPublicInfo.bind(publicController)
+);
+
+// GET /api/public/plans — plans d'abonnement avec tarifs (pour page /pricing)
+router.get(
+  '/plans',
+  planController.getAll.bind(planController)
 );
 
 export default router;

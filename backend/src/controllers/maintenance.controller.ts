@@ -8,7 +8,7 @@ export class MaintenanceController {
   async getAll(req: Request, res: Response): Promise<void> {
     try {
       const filters = req.query as unknown as MaintenanceFiltres;
-      const { maintenances, total } = await maintenanceService.getAll(filters);
+      const { maintenances, total } = await maintenanceService.getAll(filters, req.tenantId!);
       sendPaginatedSuccess(res, maintenances, { page: filters.page || 1, limit: filters.limit || 20, total });
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
@@ -17,7 +17,7 @@ export class MaintenanceController {
 
   async getById(req: Request, res: Response): Promise<void> {
     try {
-      const maintenance = await maintenanceService.getById(req.params.id);
+      const maintenance = await maintenanceService.getById(req.params.id, req.tenantId!);
       if (!maintenance) { sendNotFound(res, 'Maintenance introuvable'); return; }
       sendSuccess(res, maintenance);
     } catch (error) {
@@ -27,11 +27,12 @@ export class MaintenanceController {
 
   async create(req: Request, res: Response): Promise<void> {
     try {
-      const maintenance = await maintenanceService.create(req.body);
+      const maintenance = await maintenanceService.create(req.body, req.tenantId!);
 
       if (req.user) {
         logAction({
           userId: req.user.userId,
+          tenantId: req.tenantId!,
           userRole: req.user.role,
           action: ACTIONS.MAINTENANCE_CREEE,
           entite: ENTITES.MAINTENANCE,
@@ -48,11 +49,12 @@ export class MaintenanceController {
 
   async update(req: Request, res: Response): Promise<void> {
     try {
-      const maintenance = await maintenanceService.update(req.params.id, req.body);
+      const maintenance = await maintenanceService.update(req.params.id, req.body, req.tenantId!);
 
       if (req.user) {
         logAction({
           userId: req.user.userId,
+          tenantId: req.tenantId!,
           userRole: req.user.role,
           action: ACTIONS.MAINTENANCE_MODIFIEE,
           entite: ENTITES.MAINTENANCE,
@@ -69,7 +71,7 @@ export class MaintenanceController {
 
   async delete(req: Request, res: Response): Promise<void> {
     try {
-      await maintenanceService.delete(req.params.id);
+      await maintenanceService.delete(req.params.id, req.tenantId!);
       sendSuccess(res, null, 'Maintenance supprimée');
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
@@ -78,7 +80,7 @@ export class MaintenanceController {
 
   async getStats(req: Request, res: Response): Promise<void> {
     try {
-      const stats = await maintenanceService.getStats();
+      const stats = await maintenanceService.getStats(req.tenantId!);
       sendSuccess(res, stats);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);

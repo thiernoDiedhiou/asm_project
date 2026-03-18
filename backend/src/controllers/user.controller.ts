@@ -6,7 +6,7 @@ import { Role } from '@prisma/client';
 export class UserController {
   async getAll(req: Request, res: Response): Promise<void> {
     try {
-      const users = await userService.getAll();
+      const users = await userService.getAll(req.tenantId!);
       sendSuccess(res, users);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
@@ -24,9 +24,9 @@ export class UserController {
         sendError(res, 'Le mot de passe doit faire au moins 8 caractères', 400);
         return;
       }
-      const validRoles = Object.values(Role);
+      const validRoles = Object.values(Role).filter(r => r !== 'SUPER_ADMIN');
       const userRole = validRoles.includes(role) ? role : Role.AGENT;
-      const user = await userService.create({ nom, prenom, email, telephone, role: userRole, motDePasse });
+      const user = await userService.create({ nom, prenom, email, telephone, role: userRole, motDePasse }, req.tenantId!);
       sendSuccess(res, user, 'Utilisateur créé avec succès', 201);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erreur serveur';
@@ -38,12 +38,11 @@ export class UserController {
     try {
       const { id } = req.params;
       const { actif, nom, prenom, telephone, role } = req.body;
-      // Empêcher la désactivation de son propre compte
       if (req.user?.userId === id && actif === false) {
         sendError(res, 'Vous ne pouvez pas désactiver votre propre compte', 400);
         return;
       }
-      const user = await userService.update(id, { actif, nom, prenom, telephone, role });
+      const user = await userService.update(id, { actif, nom, prenom, telephone, role }, req.tenantId!);
       sendSuccess(res, user, 'Utilisateur mis à jour');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erreur serveur';

@@ -6,6 +6,7 @@ export interface JwtPayload {
   userId: string;
   email: string;
   role: Role;
+  tenantId?: string; // présent pour tous sauf SUPER_ADMIN
   type: 'access' | 'refresh';
 }
 

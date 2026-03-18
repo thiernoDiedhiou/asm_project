@@ -13,9 +13,12 @@ import {
   X,
   Wrench,
   Activity,
+  Building2,
 } from 'lucide-react';
 import { useAuthStore, useIsAdmin, useIsComptable } from '../../store/authStore';
+import { useTenant } from '../../contexts/TenantContext';
 import { cn } from '../../utils/cn';
+import { API_FILE_BASE } from '../../services/api';
 
 interface SidebarProps {
   open: boolean;
@@ -92,17 +95,21 @@ const navItems: NavItem[] = [
 ];
 
 export function Sidebar({ open, onClose }: SidebarProps) {
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const isAdmin = useIsAdmin();
   const isComptable = useIsComptable();
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+  const tenant = useTenant();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const filteredNavItems = navItems.filter((item) => {
-    if (item.adminOnly && !isAdmin) return false;
-    if (item.comptableAccess && !isComptable && !isAdmin) return false;
-    return true;
-  });
+  const filteredNavItems = isSuperAdmin
+    ? [{ label: 'Tenants', href: '/tenants', icon: Building2 }]
+    : navItems.filter((item) => {
+        if (item.adminOnly && !isAdmin) return false;
+        if (item.comptableAccess && !isComptable && !isAdmin) return false;
+        return true;
+      });
 
   const handleLogout = async () => {
     await logout();
@@ -130,16 +137,26 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         <div className="flex items-center justify-between p-4 border-b border-white/20">
           <button
             type="button"
-            onClick={() => { navigate('/dashboard'); onClose(); }}
-            className="text-left hover:opacity-80 transition-opacity"
-            aria-label="Aller au tableau de bord"
+            onClick={() => { navigate(isSuperAdmin ? '/tenants' : '/dashboard'); onClose(); }}
+            className="text-left hover:opacity-80 transition-opacity flex items-center gap-2.5"
+            aria-label={isSuperAdmin ? 'Aller aux tenants' : 'Aller au tableau de bord'}
           >
-            <h1 className="text-white font-bold text-lg leading-tight">
-              ASM Multi-Services
-            </h1>
-            <p className="text-asm-or text-xs font-medium">
-              Location de Véhicules
-            </p>
+            {!isSuperAdmin && tenant.logo ? (
+              <img
+                src={`${API_FILE_BASE}${tenant.logo}`}
+                alt={tenant.nomEntreprise}
+                className="h-9 w-auto max-w-[120px] object-contain rounded"
+              />
+            ) : (
+              <div>
+                <h1 className="text-white font-bold text-lg leading-tight">
+                  {isSuperAdmin ? 'Super Admin' : tenant.nomEntreprise}
+                </h1>
+                <p className="text-asm-or text-xs font-medium">
+                  {isSuperAdmin ? 'Gestion des Tenants' : tenant.slogan}
+                </p>
+              </div>
+            )}
           </button>
           <button
             aria-label="Fermer le menu"

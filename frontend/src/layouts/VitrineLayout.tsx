@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { Car, Menu, X, Phone, Mail, MapPin, Clock, ChevronRight } from 'lucide-react';
-import { publicApi } from '../services/api';
+import { publicApi, API_FILE_BASE } from '../services/api';
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -25,6 +25,7 @@ interface Settings {
   bannierePromo?: string;
   promoReduction?: string;
   promoDateFin?: string;
+  logo?: string | null;
 }
 
 const DEFAULTS: Settings = {
@@ -114,13 +115,23 @@ export function VitrineLayout() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2.5">
-              <div className="h-9 w-9 rounded-xl bg-asm-vert flex items-center justify-center">
-                <Car className="h-5 w-5 text-asm-or" />
-              </div>
-              <div className="leading-tight">
-                <span className="font-bold text-asm-vert text-base block">{settings.nomEntreprise}</span>
-                <span className="text-xs text-gray-500 block -mt-0.5">{settings.slogan}</span>
-              </div>
+              {settings.logo ? (
+                <img
+                  src={`${API_FILE_BASE}${settings.logo}`}
+                  alt={settings.nomEntreprise}
+                  className="h-10 w-auto max-w-[140px] object-contain"
+                />
+              ) : (
+                <>
+                  <div className="h-9 w-9 rounded-xl bg-asm-vert flex items-center justify-center shrink-0">
+                    <Car className="h-5 w-5 text-asm-or" />
+                  </div>
+                  <div className="leading-tight">
+                    <span className="font-bold text-asm-vert text-base block">{settings.nomEntreprise}</span>
+                    <span className="text-xs text-gray-500 block -mt-0.5">{settings.slogan}</span>
+                  </div>
+                </>
+              )}
             </Link>
 
             {/* Navigation desktop */}
@@ -236,7 +247,7 @@ export function VitrineLayout() {
                 <span className="font-bold text-lg">{settings.nomEntreprise}</span>
               </div>
               <p className="text-white/70 text-sm leading-relaxed">
-                Votre partenaire de confiance pour la location de véhicules à Dakar.
+                Votre partenaire de confiance pour la location de véhicules{settings.ville ? ` à ${settings.ville}` : ''}.
                 Flotte récente, tarifs transparents, service disponible 24h/24.
               </p>
             </div>

@@ -11,25 +11,31 @@ import { pdfService } from './pdf.service';
 import logger from '../utils/logger';
 
 /**
- * Génère un numéro de contrat lisible : CTR-YYMM-NNNN
- * Exemple : CTR-2603-0001
+ * Génère le prochain numéro candidat CTR-YYMM-NNNN à partir du dernier existant.
+ * Appelé dans une boucle retry côté service pour gérer les collisions.
  */
-async function generateNumeroContrat(): Promise<string> {
+async function generateNumeroContrat(offset = 0): Promise<string> {
   const now = new Date();
   const yymm = `${String(now.getFullYear()).slice(2)}${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const debutMois = new Date(now.getFullYear(), now.getMonth(), 1);
-  const count = await prisma.contrat.count({ where: { createdAt: { gte: debutMois } } });
-  return `CTR-${yymm}-${String(count + 1).padStart(4, '0')}`;
+  const prefix = `CTR-${yymm}-`;
+
+  const last = await prisma.contrat.findFirst({
+    where: { numeroContrat: { startsWith: prefix } },
+    orderBy: { numeroContrat: 'desc' },
+    select: { numeroContrat: true },
+  });
+
+  const lastSeq = last ? parseInt(last.numeroContrat.slice(prefix.length), 10) : 0;
+  return `${prefix}${String(lastSeq + 1 + offset).padStart(4, '0')}`;
 }
 
 export class ContratService {
-  /**
-   * Récupère tous les contrats avec pagination et filtres
-   */
-  async getAll(page = 1, limit = 20, statut?: string, search?: string) {
+  async getAll(page = 1, limit = 20, statut: string | undefined, search: string | undefined, tenantId: string) {
+    if (!tenantId) throw new Error('TenantId requis');
     const skip = (page - 1) * limit;
 
     const where = {
+      tenantId,
       ...(statut ? { statut: statut as 'ACTIF' | 'TERMINE' | 'LITIGE' } : {}),
       ...(search ? {
         OR: [
@@ -75,7 +81,6 @@ export class ContratService {
       prisma.contrat.count({ where }),
     ]);
 
-    // Calculer le montant payé et le reste dû pour chaque contrat
     const contratsAvecSolde = contrats.map((c) => {
       const totalPaye = c.paiements.reduce(
         (sum, p) => sum + Number(p.montant),
@@ -92,12 +97,9 @@ export class ContratService {
     return { contrats: contratsAvecSolde, total };
   }
 
-  /**
-   * Récupère un contrat par son ID avec tous les détails
-   */
-  async getById(id: string) {
-    return prisma.contrat.findUnique({
-      where: { id },
+  async getById(id: string, tenantId: string) {
+    return prisma.contrat.findFirst({
+      where: { id, tenantId },
       include: {
         client: true,
         reservation: {
@@ -116,13 +118,9 @@ export class ContratService {
     });
   }
 
-  /**
-   * Crée un contrat depuis une réservation confirmée
-   */
-  async create(dto: CreateContratDto, agentId: string) {
-    // Vérifier que la réservation existe et est confirmée
-    const reservation = await prisma.reservation.findUnique({
-      where: { id: dto.reservationId },
+  async create(dto: CreateContratDto, agentId: string, tenantId: string) {
+    const reservation = await prisma.reservation.findFirst({
+      where: { id: dto.reservationId, tenantId },
       include: {
         client: true,
         vehicule: true,
@@ -139,7 +137,6 @@ export class ContratService {
       );
     }
 
-    // Vérifier qu'il n'y a pas déjà un contrat pour cette réservation
     const contratExistant = await prisma.contrat.findUnique({
       where: { reservationId: dto.reservationId },
     });
@@ -148,59 +145,54 @@ export class ContratService {
       throw new Error('Un contrat existe déjà pour cette réservation');
     }
 
-    const numeroContrat = await generateNumeroContrat();
+    // Retry jusqu'à 5 fois en cas de collision sur numeroContrat (P2002)
+    let contrat;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const numeroContrat = await generateNumeroContrat(attempt);
+      try {
+        contrat = await prisma.$transaction(async (tx) => {
+          const newContrat = await tx.contrat.create({
+            data: {
+              tenantId,
+              numeroContrat,
+              reservationId: dto.reservationId,
+              clientId: reservation.clientId,
+              agentId,
+              kilometrageDepart: dto.kilometrageDepart,
+              etatDepart: dto.etatDepart,
+              caution: dto.caution ?? 0,
+              notes: dto.notes,
+            },
+            include: {
+              client: true,
+              reservation: { include: { vehicule: true } },
+              agent: { select: { nom: true, prenom: true } },
+            },
+          });
+          await tx.reservation.update({
+            where: { id: dto.reservationId },
+            data: { statut: 'EN_COURS' },
+          });
+          await tx.vehicule.update({
+            where: { id: reservation.vehiculeId },
+            data: { statut: 'LOUE', kilometrage: dto.kilometrageDepart },
+          });
+          return newContrat;
+        });
+        break; // succès — sortir de la boucle
+      } catch (err: unknown) {
+        const isPrismaUnique = (err as { code?: string })?.code === 'P2002';
+        if (isPrismaUnique && attempt < 4) continue; // réessayer avec offset+1
+        throw err; // autre erreur ou épuisement des tentatives
+      }
+    }
 
-    const contrat = await prisma.$transaction(async (tx) => {
-      // Créer le contrat
-      const newContrat = await tx.contrat.create({
-        data: {
-          numeroContrat,
-          reservationId: dto.reservationId,
-          clientId: reservation.clientId,
-          agentId,
-          kilometrageDepart: dto.kilometrageDepart,
-          etatDepart: dto.etatDepart,
-          caution: dto.caution ?? 0,
-          notes: dto.notes,
-        },
-        include: {
-          client: true,
-          reservation: {
-            include: { vehicule: true },
-          },
-          agent: {
-            select: { nom: true, prenom: true },
-          },
-        },
-      });
-
-      // Mettre à jour le statut de la réservation en EN_COURS
-      await tx.reservation.update({
-        where: { id: dto.reservationId },
-        data: { statut: 'EN_COURS' },
-      });
-
-      // Mettre à jour le statut du véhicule
-      await tx.vehicule.update({
-        where: { id: reservation.vehiculeId },
-        data: {
-          statut: 'LOUE',
-          kilometrage: dto.kilometrageDepart,
-        },
-      });
-
-      return newContrat;
-    });
-
-    logger.info(`Contrat créé: ${contrat.numeroContrat}`);
+    logger.info(`Contrat créé: ${(contrat as { numeroContrat: string }).numeroContrat}`);
     return contrat;
   }
 
-  /**
-   * Met à jour un contrat
-   */
-  async update(id: string, dto: UpdateContratDto) {
-    const contrat = await prisma.contrat.findUnique({ where: { id } });
+  async update(id: string, dto: UpdateContratDto, tenantId: string) {
+    const contrat = await prisma.contrat.findFirst({ where: { id, tenantId } });
 
     if (!contrat) {
       throw new Error('Contrat introuvable');
@@ -216,12 +208,9 @@ export class ContratService {
     });
   }
 
-  /**
-   * Clôture un contrat (fin de location)
-   */
-  async cloture(id: string, dto: ClotureContratDto) {
-    const contrat = await prisma.contrat.findUnique({
-      where: { id },
+  async cloture(id: string, dto: ClotureContratDto, tenantId: string) {
+    const contrat = await prisma.contrat.findFirst({
+      where: { id, tenantId },
       include: {
         reservation: {
           include: { vehicule: true },
@@ -244,7 +233,6 @@ export class ContratService {
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      // Clôturer le contrat
       const updatedContrat = await tx.contrat.update({
         where: { id },
         data: {
@@ -255,13 +243,11 @@ export class ContratService {
         },
       });
 
-      // Mettre à jour la réservation
       await tx.reservation.update({
         where: { id: contrat.reservationId },
         data: { statut: 'TERMINEE' },
       });
 
-      // Remettre le véhicule disponible et mettre à jour le kilométrage
       await tx.vehicule.update({
         where: { id: contrat.reservation.vehiculeId },
         data: {
@@ -277,12 +263,9 @@ export class ContratService {
     return result;
   }
 
-  /**
-   * Génère le PDF d'un contrat
-   */
-  async generatePdf(id: string): Promise<string> {
-    const contrat = await prisma.contrat.findUnique({
-      where: { id },
+  async generatePdf(id: string, tenantId: string): Promise<string> {
+    const contrat = await prisma.contrat.findFirst({
+      where: { id, tenantId },
       include: {
         client: true,
         reservation: {
@@ -329,9 +312,8 @@ export class ContratService {
         datePaiement: p.datePaiement,
         reference: p.reference,
       })),
-    });
+    }, tenantId);
 
-    // Sauvegarder l'URL du PDF dans le contrat
     await prisma.contrat.update({
       where: { id },
       data: { pdfUrl },
@@ -346,14 +328,12 @@ export const contratService = new ContratService();
 // ---- Service Paiements ----
 
 export class PaiementService {
-  /**
-   * Récupère tous les paiements avec filtres
-   */
-  async getAll(filters: PaiementFilters) {
+  async getAll(filters: PaiementFilters, tenantId: string) {
     const { methode, dateDebut, dateFin, valide, contratId, search, page, limit } = filters;
     const skip = (page - 1) * limit;
 
     const where = {
+      tenantId,
       ...(methode && { methode }),
       ...(typeof valide === 'boolean' && { valide }),
       ...(contratId && { contratId }),
@@ -400,12 +380,9 @@ export class PaiementService {
     return { paiements, total };
   }
 
-  /**
-   * Récupère les paiements d'un contrat
-   */
-  async getByContrat(contratId: string) {
-    const contrat = await prisma.contrat.findUnique({
-      where: { id: contratId },
+  async getByContrat(contratId: string, tenantId: string) {
+    const contrat = await prisma.contrat.findFirst({
+      where: { id: contratId, tenantId },
       include: {
         reservation: { select: { prixTotal: true } },
         paiements: {
@@ -432,12 +409,9 @@ export class PaiementService {
     };
   }
 
-  /**
-   * Enregistre un nouveau paiement
-   */
-  async create(dto: CreatePaiementDto) {
-    const contrat = await prisma.contrat.findUnique({
-      where: { id: dto.contratId },
+  async create(dto: CreatePaiementDto, tenantId: string) {
+    const contrat = await prisma.contrat.findFirst({
+      where: { id: dto.contratId, tenantId },
       include: {
         reservation: { select: { prixTotal: true } },
         paiements: {
@@ -455,7 +429,6 @@ export class PaiementService {
       throw new Error('Impossible d\'ajouter un paiement à un contrat terminé');
     }
 
-    // Vérifier que le montant ne dépasse pas le reste dû
     const totalPaye = contrat.paiements.reduce(
       (sum, p) => sum + Number(p.montant),
       0
@@ -471,6 +444,7 @@ export class PaiementService {
 
     const paiement = await prisma.paiement.create({
       data: {
+        tenantId,
         contratId: dto.contratId,
         montant: dto.montant,
         methode: dto.methode,
@@ -489,9 +463,6 @@ export class PaiementService {
     return paiement;
   }
 
-  /**
-   * Valide ou invalide un paiement (Comptable/Admin)
-   */
   async valider(id: string, valide: boolean) {
     const paiement = await prisma.paiement.findUnique({ where: { id } });
 
@@ -505,12 +476,9 @@ export class PaiementService {
     });
   }
 
-  /**
-   * Génère le reçu PDF d'un paiement
-   */
-  async generateRecu(id: string): Promise<Buffer> {
-    const paiement = await prisma.paiement.findUnique({
-      where: { id },
+  async generateRecu(id: string, tenantId: string): Promise<Buffer> {
+    const paiement = await prisma.paiement.findFirst({
+      where: { id, tenantId },
       include: {
         contrat: {
           include: {
@@ -556,14 +524,12 @@ export class PaiementService {
         nombreJours: c.reservation.nombreJours,
       },
       resteADu: Math.max(0, prixTotal - totalPaye),
-    });
+    }, tenantId);
   }
 
-  /**
-   * Statistiques des paiements par méthode
-   */
-  async getStatsByMethode(dateDebut?: Date, dateFin?: Date) {
+  async getStatsByMethode(tenantId: string, dateDebut?: Date, dateFin?: Date) {
     const where = {
+      tenantId,
       valide: true,
       ...(dateDebut && dateFin && {
         datePaiement: { gte: dateDebut, lte: dateFin },

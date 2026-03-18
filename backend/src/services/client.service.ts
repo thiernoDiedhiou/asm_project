@@ -11,12 +11,14 @@ export class ClientService {
   /**
    * Récupère la liste des clients avec recherche et pagination
    */
-  async getAll(filters: ClientFilters) {
+  async getAll(filters: ClientFilters, tenantId: string) {
+    if (!tenantId) throw new Error('TenantId requis');
     const { search, typeClient, page, limit } = filters;
     const skip = (page - 1) * limit;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {
+      tenantId,
       ...(typeClient && { typeClient }),
       ...(search && {
         OR: [
@@ -50,18 +52,18 @@ export class ClientService {
   /**
    * Récupère un client par son ID
    */
-  async getById(id: string) {
-    return prisma.client.findUnique({
-      where: { id },
+  async getById(id: string, tenantId: string) {
+    return prisma.client.findFirst({
+      where: { id, tenantId },
     });
   }
 
   /**
    * Récupère le profil complet d'un client avec son historique
    */
-  async getHistorique(clientId: string) {
-    const client = await prisma.client.findUnique({
-      where: { id: clientId },
+  async getHistorique(clientId: string, tenantId: string) {
+    const client = await prisma.client.findFirst({
+      where: { id: clientId, tenantId },
     });
 
     if (!client) {
@@ -69,7 +71,7 @@ export class ClientService {
     }
 
     const reservations = await prisma.reservation.findMany({
-      where: { clientId },
+      where: { clientId, tenantId },
       orderBy: { createdAt: 'desc' },
       include: {
         vehicule: {
@@ -122,9 +124,9 @@ export class ClientService {
   /**
    * Crée un nouveau client
    */
-  async create(dto: CreateClientDto) {
+  async create(dto: CreateClientDto, tenantId: string) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const client = await prisma.client.create({ data: { ...dto, email: dto.email || null } as any });
+    const client = await prisma.client.create({ data: { ...dto, tenantId, email: dto.email || null } as any });
 
     logger.info(`Client créé: ${client.prenom} ${client.nom} (${client.telephone})`);
     return client;
@@ -133,8 +135,8 @@ export class ClientService {
   /**
    * Met à jour un client
    */
-  async update(id: string, dto: UpdateClientDto) {
-    const client = await prisma.client.findUnique({ where: { id } });
+  async update(id: string, dto: UpdateClientDto, tenantId: string) {
+    const client = await prisma.client.findFirst({ where: { id, tenantId } });
 
     if (!client) {
       throw new Error('Client introuvable');
@@ -147,10 +149,11 @@ export class ClientService {
   /**
    * Recherche un client par téléphone (pour autocomplétion)
    */
-  async searchByPhone(telephone: string) {
+  async searchByPhone(telephone: string, tenantId: string) {
     return prisma.client.findMany({
       where: {
         telephone: { contains: telephone },
+        tenantId,
       },
       take: 5,
     });

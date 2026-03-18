@@ -7,7 +7,7 @@ export class TarifZoneController {
   async getAll(req: Request, res: Response): Promise<void> {
     try {
       const actifSeulement = req.query.actif === 'true';
-      const zones = await tarifZoneService.getAll(actifSeulement);
+      const zones = await tarifZoneService.getAll(actifSeulement, req.tenantId!);
       sendSuccess(res, zones);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
@@ -16,7 +16,7 @@ export class TarifZoneController {
 
   async create(req: Request, res: Response): Promise<void> {
     try {
-      const zone = await tarifZoneService.create(req.body);
+      const zone = await tarifZoneService.create(req.body, req.tenantId!);
       sendSuccess(res, zone, 'Zone créée avec succès', 201);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
@@ -25,7 +25,7 @@ export class TarifZoneController {
 
   async update(req: Request, res: Response): Promise<void> {
     try {
-      const zone = await tarifZoneService.update(req.params.id, req.body);
+      const zone = await tarifZoneService.update(req.params.id, req.body, req.tenantId!);
       sendSuccess(res, zone, 'Zone mise à jour');
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
@@ -34,7 +34,7 @@ export class TarifZoneController {
 
   async delete(req: Request, res: Response): Promise<void> {
     try {
-      await tarifZoneService.delete(req.params.id);
+      await tarifZoneService.delete(req.params.id, req.tenantId!);
       sendSuccess(res, null, 'Zone supprimée');
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);

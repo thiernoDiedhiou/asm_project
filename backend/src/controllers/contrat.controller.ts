@@ -19,7 +19,7 @@ export class ContratController {
       const limit = parseInt(req.query.limit as string) || 20;
       const statut = req.query.statut as string | undefined;
       const search = (req.query.search as string) || undefined;
-      const { contrats, total } = await contratService.getAll(page, limit, statut, search);
+      const { contrats, total } = await contratService.getAll(page, limit, statut, search, req.tenantId!);
       sendPaginatedSuccess(res, contrats, { page, limit, total });
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
@@ -28,7 +28,7 @@ export class ContratController {
 
   async getById(req: Request, res: Response): Promise<void> {
     try {
-      const contrat = await contratService.getById(req.params.id);
+      const contrat = await contratService.getById(req.params.id, req.tenantId!);
       if (!contrat) { sendNotFound(res, 'Contrat introuvable'); return; }
       sendSuccess(res, contrat);
     } catch (error) {
@@ -39,10 +39,11 @@ export class ContratController {
   async create(req: Request, res: Response): Promise<void> {
     try {
       if (!req.user) { sendError(res, 'Non authentifié', 401); return; }
-      const contrat = await contratService.create(req.body, req.user.userId);
+      const contrat = await contratService.create(req.body, req.user.userId, req.tenantId!);
 
       logAction({
         userId: req.user.userId,
+        tenantId: req.tenantId!,
         userRole: req.user.role,
         action: ACTIONS.CONTRAT_CREE,
         entite: ENTITES.CONTRAT,
@@ -58,7 +59,7 @@ export class ContratController {
 
   async update(req: Request, res: Response): Promise<void> {
     try {
-      const contrat = await contratService.update(req.params.id, req.body);
+      const contrat = await contratService.update(req.params.id, req.body, req.tenantId!);
       sendSuccess(res, contrat, 'Contrat mis à jour');
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
@@ -67,11 +68,12 @@ export class ContratController {
 
   async cloture(req: Request, res: Response): Promise<void> {
     try {
-      const contrat = await contratService.cloture(req.params.id, req.body);
+      const contrat = await contratService.cloture(req.params.id, req.body, req.tenantId!);
 
       if (req.user) {
         logAction({
           userId: req.user.userId,
+          tenantId: req.tenantId!,
           userRole: req.user.role,
           action: ACTIONS.CONTRAT_CLOTURE,
           entite: ENTITES.CONTRAT,
@@ -88,7 +90,7 @@ export class ContratController {
 
   async generatePdf(req: Request, res: Response): Promise<void> {
     try {
-      const pdfUrl = await contratService.generatePdf(req.params.id);
+      const pdfUrl = await contratService.generatePdf(req.params.id, req.tenantId!);
       const filePath = path.join(process.cwd(), pdfUrl);
 
       if (fs.existsSync(filePath)) {
@@ -111,7 +113,7 @@ export class PaiementController {
   async getAll(req: Request, res: Response): Promise<void> {
     try {
       const filters = req.query as unknown as PaiementFilters;
-      const { paiements, total } = await paiementService.getAll(filters);
+      const { paiements, total } = await paiementService.getAll(filters, req.tenantId!);
       sendPaginatedSuccess(res, paiements, {
         page: filters.page || 1,
         limit: filters.limit || 20,
@@ -124,7 +126,7 @@ export class PaiementController {
 
   async getByContrat(req: Request, res: Response): Promise<void> {
     try {
-      const result = await paiementService.getByContrat(req.params.contratId);
+      const result = await paiementService.getByContrat(req.params.contratId, req.tenantId!);
       sendSuccess(res, result);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
@@ -133,11 +135,12 @@ export class PaiementController {
 
   async create(req: Request, res: Response): Promise<void> {
     try {
-      const paiement = await paiementService.create(req.body);
+      const paiement = await paiementService.create(req.body, req.tenantId!);
 
       if (req.user) {
         logAction({
           userId: req.user.userId,
+          tenantId: req.tenantId!,
           userRole: req.user.role,
           action: ACTIONS.PAIEMENT_ENREGISTRE,
           entite: ENTITES.PAIEMENT,
@@ -160,6 +163,7 @@ export class PaiementController {
       if (req.user) {
         logAction({
           userId: req.user.userId,
+          tenantId: req.tenantId!,
           userRole: req.user.role,
           action: valide ? ACTIONS.PAIEMENT_VALIDE : ACTIONS.PAIEMENT_INVALIDE,
           entite: ENTITES.PAIEMENT,
@@ -180,6 +184,7 @@ export class PaiementController {
         dateFin?: string;
       };
       const stats = await paiementService.getStatsByMethode(
+        req.tenantId!,
         dateDebut ? new Date(dateDebut) : undefined,
         dateFin ? new Date(dateFin) : undefined
       );
@@ -191,7 +196,7 @@ export class PaiementController {
 
   async generateRecu(req: Request, res: Response): Promise<void> {
     try {
-      const buffer = await paiementService.generateRecu(req.params.id);
+      const buffer = await paiementService.generateRecu(req.params.id, req.tenantId!);
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader(
         'Content-Disposition',

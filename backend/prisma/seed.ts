@@ -11,18 +11,73 @@ async function main() {
   console.log('🌱 Démarrage du seed...');
 
   // Nettoyer la base de données dans le bon ordre
+  await prisma.journalActivite.deleteMany();
   await prisma.paiement.deleteMany();
   await prisma.contrat.deleteMany();
   await prisma.reservation.deleteMany();
   await prisma.maintenance.deleteMany();
+  await prisma.prixCategorie.deleteMany();
+  await prisma.tarifZone.deleteMany();
   await prisma.vehicule.deleteMany();
   await prisma.client.deleteMany();
   await prisma.user.deleteMany();
   await prisma.tokenBlacklist.deleteMany();
-  await prisma.prixCategorie.deleteMany();
-  await prisma.tarifZone.deleteMany();
+  await prisma.parametre.deleteMany();
+  await prisma.tenant.deleteMany();
 
   console.log('🗑️  Base de données nettoyée');
+
+  // ---- 0. Tenant ASM ----
+  const tenant = await prisma.tenant.create({
+    data: {
+      id: 'tenant-asm-001',
+      slug: 'asm',
+      nomEntreprise: 'ASM Multi-Services',
+      slogan: 'Location de Véhicules',
+      activite: 'Vente et location de voitures — Import/Export',
+      domaine: 'asm-location.innosft.com',
+      couleurPrimaire: '#1B5E20',
+      couleurSecondaire: '#F9A825',
+      actif: true,
+    },
+  });
+
+  // Paramètres du tenant
+  await prisma.parametre.create({
+    data: {
+      tenantId: tenant.id,
+      nomEntreprise: 'ASM Multi-Services',
+      slogan: 'Location de Véhicules',
+      activite: 'Vente et location de voitures — Import/Export',
+      telephone: '+221 77 418 05 32',
+      telephone2: '+221 76 474 90 92',
+      email: 'contact@asm-location.sn',
+      adresse: 'Grand Yoff — Zone de Captage',
+      ville: 'Dakar, Sénégal',
+      rccm: 'SN.DKR.2024.A.53708',
+      ninea: '011803633',
+      heuresLunVen: '08h00 – 18h00',
+      heuresSamedi: '09h00 – 16h00',
+      noteTransfert: 'Transfert aéroport disponible 24h/24 sur réservation',
+    },
+  });
+
+  // Super Admin plateforme (cross-tenant, pas de tenantId)
+  const motDePasseSuperAdmin = await bcrypt.hash('SuperAdmin123!', 12);
+  await prisma.user.create({
+    data: {
+      nom: 'Platform',
+      prenom: 'Super Admin',
+      email: 'superadmin@asm-platform.sn',
+      motDePasse: motDePasseSuperAdmin,
+      role: Role.SUPER_ADMIN,
+      tenantId: undefined,
+    },
+  });
+
+  console.log('🏢 Tenant ASM + Super Admin créés');
+
+  const TENANT_ID = tenant.id;
 
   // ---- 1. Utilisateurs ----
   const motDePasseHash = await bcrypt.hash('Admin123!', 12);
@@ -38,6 +93,7 @@ async function main() {
         motDePasse: motDePasseHash,
         telephone: '+221 77 100 00 01',
         role: Role.ADMIN,
+        tenantId: TENANT_ID,
       },
     }),
     prisma.user.create({
@@ -48,6 +104,7 @@ async function main() {
         motDePasse: motDePasseAgent,
         telephone: '+221 77 200 00 01',
         role: Role.AGENT,
+        tenantId: TENANT_ID,
       },
     }),
     prisma.user.create({
@@ -58,6 +115,7 @@ async function main() {
         motDePasse: motDePasseAgent,
         telephone: '+221 77 200 00 02',
         role: Role.AGENT,
+        tenantId: TENANT_ID,
       },
     }),
     prisma.user.create({
@@ -68,6 +126,7 @@ async function main() {
         motDePasse: motDePasseComptable,
         telephone: '+221 77 300 00 01',
         role: Role.COMPTABLE,
+        tenantId: TENANT_ID,
       },
     }),
   ]);
@@ -76,9 +135,9 @@ async function main() {
 
   // ---- 2. Véhicules (flotte réelle ASM) ----
   const vehicules = await Promise.all([
-    // Mitsubishi Outlander - SUV premium
     prisma.vehicule.create({
       data: {
+        tenantId: TENANT_ID,
         marque: 'Mitsubishi',
         modele: 'Outlander',
         annee: 2022,
@@ -93,9 +152,9 @@ async function main() {
         photos: [],
       },
     }),
-    // Peugeot 308 - Berline standard
     prisma.vehicule.create({
       data: {
+        tenantId: TENANT_ID,
         marque: 'Peugeot',
         modele: '308',
         annee: 2021,
@@ -110,9 +169,9 @@ async function main() {
         photos: [],
       },
     }),
-    // Mazda CX-5 - SUV intermédiaire
     prisma.vehicule.create({
       data: {
+        tenantId: TENANT_ID,
         marque: 'Mazda',
         modele: 'CX-5',
         annee: 2023,
@@ -127,9 +186,9 @@ async function main() {
         photos: [],
       },
     }),
-    // Toyota Corolla - Économique
     prisma.vehicule.create({
       data: {
+        tenantId: TENANT_ID,
         marque: 'Toyota',
         modele: 'Corolla',
         annee: 2020,
@@ -144,9 +203,9 @@ async function main() {
         photos: [],
       },
     }),
-    // Mercedes Vito - Utilitaire
     prisma.vehicule.create({
       data: {
+        tenantId: TENANT_ID,
         marque: 'Mercedes',
         modele: 'Vito',
         annee: 2021,
@@ -161,9 +220,9 @@ async function main() {
         photos: [],
       },
     }),
-    // BMW Série 3 - Luxe
     prisma.vehicule.create({
       data: {
+        tenantId: TENANT_ID,
         marque: 'BMW',
         modele: 'Série 3',
         annee: 2022,
@@ -178,9 +237,9 @@ async function main() {
         photos: [],
       },
     }),
-    // Renault Kangoo - Utilitaire compact
     prisma.vehicule.create({
       data: {
+        tenantId: TENANT_ID,
         marque: 'Renault',
         modele: 'Kangoo',
         annee: 2020,
@@ -203,6 +262,7 @@ async function main() {
   const clients = await Promise.all([
     prisma.client.create({
       data: {
+        tenantId: TENANT_ID,
         nom: 'Ba',
         prenom: 'Ibrahima',
         email: 'ibrahima.ba@gmail.com',
@@ -215,6 +275,7 @@ async function main() {
     }),
     prisma.client.create({
       data: {
+        tenantId: TENANT_ID,
         nom: 'Sarr',
         prenom: 'Mariama',
         email: 'mariama.sarr@yahoo.fr',
@@ -227,6 +288,7 @@ async function main() {
     }),
     prisma.client.create({
       data: {
+        tenantId: TENANT_ID,
         nom: 'Mbaye',
         prenom: 'Cheikh',
         email: 'cheikh.mbaye@hotmail.com',
@@ -239,6 +301,7 @@ async function main() {
     }),
     prisma.client.create({
       data: {
+        tenantId: TENANT_ID,
         nom: 'Diop',
         prenom: 'Aissatou',
         telephone: '+221 77 000 11 22',
@@ -249,6 +312,7 @@ async function main() {
     }),
     prisma.client.create({
       data: {
+        tenantId: TENANT_ID,
         nom: 'Sentravel',
         prenom: 'SARL',
         email: 'contact@sentravel.sn',
@@ -259,6 +323,7 @@ async function main() {
     }),
     prisma.client.create({
       data: {
+        tenantId: TENANT_ID,
         nom: 'Touré',
         prenom: 'Moussa',
         email: 'moussa.toure@orange.sn',
@@ -271,6 +336,7 @@ async function main() {
     }),
     prisma.client.create({
       data: {
+        tenantId: TENANT_ID,
         nom: 'Cissé',
         prenom: 'Rokhaya',
         telephone: '+221 77 666 77 88',
@@ -281,6 +347,7 @@ async function main() {
     }),
     prisma.client.create({
       data: {
+        tenantId: TENANT_ID,
         nom: 'Thiam',
         prenom: 'Abdoulaye',
         email: 'abdoulaye.thiam@gmail.com',
@@ -293,6 +360,7 @@ async function main() {
     }),
     prisma.client.create({
       data: {
+        tenantId: TENANT_ID,
         nom: 'Orange Business',
         prenom: 'Sénégal',
         email: 'fleet@orange.sn',
@@ -303,6 +371,7 @@ async function main() {
     }),
     prisma.client.create({
       data: {
+        tenantId: TENANT_ID,
         nom: 'Diouf',
         prenom: 'Babacar',
         email: 'babacar.diouf@gmail.com',
@@ -318,7 +387,7 @@ async function main() {
 
   console.log('👤 10 clients créés');
 
-  // ---- 4. Réservations (mix sur 3 mois) ----
+  // ---- 4. Réservations ----
   const maintenant = new Date();
   const il_y_a_2_mois = new Date(maintenant);
   il_y_a_2_mois.setMonth(maintenant.getMonth() - 2);
@@ -333,9 +402,9 @@ async function main() {
   dans_2_semaines.setDate(maintenant.getDate() + 14);
 
   const reservations = await Promise.all([
-    // Réservation terminée il y a 2 mois
     prisma.reservation.create({
       data: {
+        tenantId: TENANT_ID,
         numeroReservation: 'RES-SEED-0001',
         clientId: clients[0].id,
         vehiculeId: vehicules[0].id,
@@ -351,9 +420,9 @@ async function main() {
         typeTrajet: TypeTrajet.LOCATION,
       },
     }),
-    // Réservation terminée il y a 1 mois
     prisma.reservation.create({
       data: {
+        tenantId: TENANT_ID,
         numeroReservation: 'RES-SEED-0002',
         clientId: clients[1].id,
         vehiculeId: vehicules[1].id,
@@ -369,9 +438,9 @@ async function main() {
         typeTrajet: TypeTrajet.LOCATION,
       },
     }),
-    // Transfert aéroport terminé
     prisma.reservation.create({
       data: {
+        tenantId: TENANT_ID,
         numeroReservation: 'RES-SEED-0003',
         clientId: clients[2].id,
         vehiculeId: vehicules[4].id,
@@ -387,9 +456,9 @@ async function main() {
         typeTrajet: TypeTrajet.TRANSFERT_AEROPORT,
       },
     }),
-    // Réservation en cours actuellement
     prisma.reservation.create({
       data: {
+        tenantId: TENANT_ID,
         numeroReservation: 'RES-SEED-0004',
         clientId: clients[3].id,
         vehiculeId: vehicules[2].id,
@@ -405,9 +474,9 @@ async function main() {
         typeTrajet: TypeTrajet.LOCATION,
       },
     }),
-    // Réservation confirmée pour la semaine prochaine
     prisma.reservation.create({
       data: {
+        tenantId: TENANT_ID,
         numeroReservation: 'RES-SEED-0005',
         clientId: clients[4].id,
         vehiculeId: vehicules[0].id,
@@ -424,9 +493,9 @@ async function main() {
         notes: 'Client VIP - Accueil prioritaire',
       },
     }),
-    // Réservation en attente
     prisma.reservation.create({
       data: {
+        tenantId: TENANT_ID,
         numeroReservation: 'RES-SEED-0006',
         clientId: clients[5].id,
         vehiculeId: vehicules[3].id,
@@ -442,9 +511,9 @@ async function main() {
         typeTrajet: TypeTrajet.LOCATION,
       },
     }),
-    // Longue durée (mois précédent - terminée)
     prisma.reservation.create({
       data: {
+        tenantId: TENANT_ID,
         numeroReservation: 'RES-SEED-0007',
         clientId: clients[8].id,
         vehiculeId: vehicules[1].id,
@@ -461,9 +530,9 @@ async function main() {
         notes: 'Contrat mensuel entreprise',
       },
     }),
-    // Réservation annulée
     prisma.reservation.create({
       data: {
+        tenantId: TENANT_ID,
         numeroReservation: 'RES-SEED-0008',
         clientId: clients[6].id,
         vehiculeId: vehicules[0].id,
@@ -480,9 +549,9 @@ async function main() {
         notes: 'Annulée par le client',
       },
     }),
-    // Réservation du mois précédent - terminée avec Mazda
     prisma.reservation.create({
       data: {
+        tenantId: TENANT_ID,
         numeroReservation: 'RES-SEED-0009',
         clientId: clients[7].id,
         vehiculeId: vehicules[2].id,
@@ -502,9 +571,10 @@ async function main() {
 
   console.log('📅 9 réservations créées');
 
-  // ---- 5. Contrats pour les réservations terminées/en cours ----
+  // ---- 5. Contrats ----
   const contratRes1 = await prisma.contrat.create({
     data: {
+      tenantId: TENANT_ID,
       numeroContrat: 'CTR-SEED-0001',
       reservationId: reservations[0].id,
       clientId: clients[0].id,
@@ -521,6 +591,7 @@ async function main() {
 
   const contratRes2 = await prisma.contrat.create({
     data: {
+      tenantId: TENANT_ID,
       numeroContrat: 'CTR-SEED-0002',
       reservationId: reservations[1].id,
       clientId: clients[1].id,
@@ -537,6 +608,7 @@ async function main() {
 
   const contratRes3 = await prisma.contrat.create({
     data: {
+      tenantId: TENANT_ID,
       numeroContrat: 'CTR-SEED-0003',
       reservationId: reservations[2].id,
       clientId: clients[2].id,
@@ -551,9 +623,9 @@ async function main() {
     },
   });
 
-  // Contrat actif (en cours)
   const contratRes4 = await prisma.contrat.create({
     data: {
+      tenantId: TENANT_ID,
       numeroContrat: 'CTR-SEED-0004',
       reservationId: reservations[3].id,
       clientId: clients[3].id,
@@ -568,6 +640,7 @@ async function main() {
 
   const contratRes7 = await prisma.contrat.create({
     data: {
+      tenantId: TENANT_ID,
       numeroContrat: 'CTR-SEED-0005',
       reservationId: reservations[6].id,
       clientId: clients[8].id,
@@ -584,6 +657,7 @@ async function main() {
 
   const contratRes9 = await prisma.contrat.create({
     data: {
+      tenantId: TENANT_ID,
       numeroContrat: 'CTR-SEED-0006',
       reservationId: reservations[8].id,
       clientId: clients[7].id,
@@ -593,7 +667,7 @@ async function main() {
       etatDepart: 'Excellent',
       etatRetour: 'Bon état',
       caution: 150000,
-      cautionRendue: false,  // Caution non encore rendue
+      cautionRendue: false,
       statut: StatutContrat.TERMINE,
     },
   });
@@ -602,9 +676,9 @@ async function main() {
 
   // ---- 6. Paiements ----
   await Promise.all([
-    // Paiements contrat 1 (terminé)
     prisma.paiement.create({
       data: {
+        tenantId: TENANT_ID,
         contratId: contratRes1.id,
         montant: 30000,
         methode: MethodePaiement.WAVE,
@@ -615,6 +689,7 @@ async function main() {
     }),
     prisma.paiement.create({
       data: {
+        tenantId: TENANT_ID,
         contratId: contratRes1.id,
         montant: 50000,
         methode: MethodePaiement.ESPECES,
@@ -622,10 +697,9 @@ async function main() {
         notes: 'Solde au retour',
       },
     }),
-
-    // Paiements contrat 2 (terminé)
     prisma.paiement.create({
       data: {
+        tenantId: TENANT_ID,
         contratId: contratRes2.id,
         montant: 55000,
         methode: MethodePaiement.ORANGE_MONEY,
@@ -633,10 +707,9 @@ async function main() {
         datePaiement: new Date(il_y_a_1_mois.getFullYear(), il_y_a_1_mois.getMonth(), 10),
       },
     }),
-
-    // Paiements contrat 3 (transfert)
     prisma.paiement.create({
       data: {
+        tenantId: TENANT_ID,
         contratId: contratRes3.id,
         montant: 25000,
         methode: MethodePaiement.WAVE,
@@ -644,10 +717,9 @@ async function main() {
         datePaiement: new Date(il_y_a_1_mois.getFullYear(), il_y_a_1_mois.getMonth(), 20),
       },
     }),
-
-    // Paiement partiel contrat 4 (en cours)
     prisma.paiement.create({
       data: {
+        tenantId: TENANT_ID,
         contratId: contratRes4.id,
         montant: 47500,
         methode: MethodePaiement.VIREMENT,
@@ -656,10 +728,9 @@ async function main() {
         notes: 'Avance 50%',
       },
     }),
-
-    // Paiements contrat longue durée entreprise
     prisma.paiement.create({
       data: {
+        tenantId: TENANT_ID,
         contratId: contratRes7.id,
         montant: 100000,
         methode: MethodePaiement.VIREMENT,
@@ -670,6 +741,7 @@ async function main() {
     }),
     prisma.paiement.create({
       data: {
+        tenantId: TENANT_ID,
         contratId: contratRes7.id,
         montant: 100000,
         methode: MethodePaiement.VIREMENT,
@@ -678,10 +750,9 @@ async function main() {
         notes: 'Deuxième versement',
       },
     }),
-
-    // Paiements contrat 9
     prisma.paiement.create({
       data: {
+        tenantId: TENANT_ID,
         contratId: contratRes9.id,
         montant: 85000,
         methode: MethodePaiement.WAVE,
@@ -692,6 +763,7 @@ async function main() {
     }),
     prisma.paiement.create({
       data: {
+        tenantId: TENANT_ID,
         contratId: contratRes9.id,
         montant: 85000,
         methode: MethodePaiement.ORANGE_MONEY,
@@ -706,9 +778,9 @@ async function main() {
 
   // ---- 7. Maintenances ----
   await Promise.all([
-    // Terminée - Toyota Corolla vidange
     prisma.maintenance.create({
       data: {
+        tenantId: TENANT_ID,
         vehiculeId: vehicules[3].id,
         type: 'Vidange complète',
         description: 'Vidange huile moteur + filtre à huile + filtre à air + contrôle niveaux',
@@ -718,9 +790,9 @@ async function main() {
         statut: 'TERMINEE',
       },
     }),
-    // Terminée - Peugeot 308 freins
     prisma.maintenance.create({
       data: {
+        tenantId: TENANT_ID,
         vehiculeId: vehicules[1].id,
         type: 'Remplacement plaquettes de frein',
         description: 'Remplacement plaquettes avant et arrière, disques contrôlés',
@@ -730,9 +802,9 @@ async function main() {
         statut: 'TERMINEE',
       },
     }),
-    // En cours - Mitsubishi Outlander révision générale
     prisma.maintenance.create({
       data: {
+        tenantId: TENANT_ID,
         vehiculeId: vehicules[0].id,
         type: 'Révision générale 50 000 km',
         description: 'Révision complète: vidange, filtres, bougies, courroie de distribution, contrôle géométrie',
@@ -741,9 +813,9 @@ async function main() {
         statut: 'EN_COURS',
       },
     }),
-    // Planifiée - Mercedes Vito pneumatiques
     prisma.maintenance.create({
       data: {
+        tenantId: TENANT_ID,
         vehiculeId: vehicules[4].id,
         type: 'Remplacement pneus',
         description: 'Remplacement des 4 pneus + rééquilibrage + parallélisme',
@@ -752,9 +824,9 @@ async function main() {
         statut: 'PLANIFIEE',
       },
     }),
-    // Terminée - Mazda CX-5 climatisation
     prisma.maintenance.create({
       data: {
+        tenantId: TENANT_ID,
         vehiculeId: vehicules[2].id,
         type: 'Recharge climatisation',
         description: 'Recharge gaz climatisation + contrôle compresseur + remplacement filtre habitacle',
@@ -764,9 +836,9 @@ async function main() {
         statut: 'TERMINEE',
       },
     }),
-    // Planifiée - Toyota Corolla contrôle technique
     prisma.maintenance.create({
       data: {
+        tenantId: TENANT_ID,
         vehiculeId: vehicules[3].id,
         type: 'Contrôle technique annuel',
         description: 'Passage contrôle technique obligatoire + mise en conformité si nécessaire',
@@ -780,47 +852,37 @@ async function main() {
 
   // ---- 8. Zones tarifaires ----
   const [zoneDakar, zoneThies, zoneAutres] = await Promise.all([
-    prisma.tarifZone.create({ data: { nom: 'Dakar', actif: true } }),
-    prisma.tarifZone.create({ data: { nom: 'Thiès / Région', actif: true } }),
-    prisma.tarifZone.create({ data: { nom: 'Autres régions', actif: true } }),
+    prisma.tarifZone.create({ data: { tenantId: TENANT_ID, nom: 'Dakar', actif: true } }),
+    prisma.tarifZone.create({ data: { tenantId: TENANT_ID, nom: 'Thiès / Région', actif: true } }),
+    prisma.tarifZone.create({ data: { tenantId: TENANT_ID, nom: 'Autres régions', actif: true } }),
   ]);
 
   console.log('🗺️  3 zones tarifaires créées');
 
   // ---- 9. Matrice tarifaire (catégorie × zone) ----
-  //
-  //  Catégorie    | Dakar  | Thiès  | Autres
-  //  -------------|--------|--------|--------
-  //  Économique   | 25 000 | 30 000 | 35 000
-  //  Standard     | 30 000 | 35 000 | 40 000
-  //  SUV          | 40 000 | 45 000 | 50 000
-  //  Luxe         | 60 000 | 65 000 | 70 000
-  //  Utilitaire   | 35 000 | 40 000 | 45 000
-  //
   await Promise.all([
     // --- Dakar ---
-    prisma.prixCategorie.create({ data: { zoneId: zoneDakar.id, categorie: Categorie.ECONOMIQUE,  prixJournalier: 25000, prixSemaine: 150000 } }),
-    prisma.prixCategorie.create({ data: { zoneId: zoneDakar.id, categorie: Categorie.STANDARD,    prixJournalier: 30000, prixSemaine: 180000 } }),
-    prisma.prixCategorie.create({ data: { zoneId: zoneDakar.id, categorie: Categorie.SUV,         prixJournalier: 40000, prixSemaine: 240000 } }),
-    prisma.prixCategorie.create({ data: { zoneId: zoneDakar.id, categorie: Categorie.LUXE,        prixJournalier: 60000, prixSemaine: 360000 } }),
-    prisma.prixCategorie.create({ data: { zoneId: zoneDakar.id, categorie: Categorie.UTILITAIRE,  prixJournalier: 35000, prixSemaine: 210000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneDakar.id, categorie: Categorie.ECONOMIQUE,  prixJournalier: 25000, prixSemaine: 150000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneDakar.id, categorie: Categorie.STANDARD,    prixJournalier: 30000, prixSemaine: 180000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneDakar.id, categorie: Categorie.SUV,         prixJournalier: 40000, prixSemaine: 240000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneDakar.id, categorie: Categorie.LUXE,        prixJournalier: 60000, prixSemaine: 360000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneDakar.id, categorie: Categorie.UTILITAIRE,  prixJournalier: 35000, prixSemaine: 210000 } }),
     // --- Thiès / Région ---
-    prisma.prixCategorie.create({ data: { zoneId: zoneThies.id, categorie: Categorie.ECONOMIQUE,  prixJournalier: 30000, prixSemaine: 180000 } }),
-    prisma.prixCategorie.create({ data: { zoneId: zoneThies.id, categorie: Categorie.STANDARD,    prixJournalier: 35000, prixSemaine: 210000 } }),
-    prisma.prixCategorie.create({ data: { zoneId: zoneThies.id, categorie: Categorie.SUV,         prixJournalier: 45000, prixSemaine: 270000 } }),
-    prisma.prixCategorie.create({ data: { zoneId: zoneThies.id, categorie: Categorie.LUXE,        prixJournalier: 65000, prixSemaine: 390000 } }),
-    prisma.prixCategorie.create({ data: { zoneId: zoneThies.id, categorie: Categorie.UTILITAIRE,  prixJournalier: 40000, prixSemaine: 240000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneThies.id, categorie: Categorie.ECONOMIQUE,  prixJournalier: 30000, prixSemaine: 180000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneThies.id, categorie: Categorie.STANDARD,    prixJournalier: 35000, prixSemaine: 210000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneThies.id, categorie: Categorie.SUV,         prixJournalier: 45000, prixSemaine: 270000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneThies.id, categorie: Categorie.LUXE,        prixJournalier: 65000, prixSemaine: 390000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneThies.id, categorie: Categorie.UTILITAIRE,  prixJournalier: 40000, prixSemaine: 240000 } }),
     // --- Autres régions ---
-    prisma.prixCategorie.create({ data: { zoneId: zoneAutres.id, categorie: Categorie.ECONOMIQUE, prixJournalier: 35000, prixSemaine: 210000 } }),
-    prisma.prixCategorie.create({ data: { zoneId: zoneAutres.id, categorie: Categorie.STANDARD,   prixJournalier: 40000, prixSemaine: 240000 } }),
-    prisma.prixCategorie.create({ data: { zoneId: zoneAutres.id, categorie: Categorie.SUV,        prixJournalier: 50000, prixSemaine: 300000 } }),
-    prisma.prixCategorie.create({ data: { zoneId: zoneAutres.id, categorie: Categorie.LUXE,       prixJournalier: 70000, prixSemaine: 420000 } }),
-    prisma.prixCategorie.create({ data: { zoneId: zoneAutres.id, categorie: Categorie.UTILITAIRE, prixJournalier: 45000, prixSemaine: 270000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneAutres.id, categorie: Categorie.ECONOMIQUE, prixJournalier: 35000, prixSemaine: 210000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneAutres.id, categorie: Categorie.STANDARD,   prixJournalier: 40000, prixSemaine: 240000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneAutres.id, categorie: Categorie.SUV,        prixJournalier: 50000, prixSemaine: 300000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneAutres.id, categorie: Categorie.LUXE,       prixJournalier: 70000, prixSemaine: 420000 } }),
+    prisma.prixCategorie.create({ data: { tenantId: TENANT_ID, zoneId: zoneAutres.id, categorie: Categorie.UTILITAIRE, prixJournalier: 45000, prixSemaine: 270000 } }),
   ]);
 
   console.log('💲 15 prix catégorie × zone créés');
 
-  // ---- Résumé ----
   console.log('\n✅ Seed terminé avec succès!');
   console.log('\n🔐 Comptes de connexion:');
   console.log('   Admin:     admin@asm.sn       / Admin123!');

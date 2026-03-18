@@ -9,12 +9,20 @@ const router = Router();
 // Lecture — tous les utilisateurs authentifiés
 router.get('/', authenticateToken, tarificationController.getMatrix.bind(tarificationController));
 
-// Mise à jour d'une cellule — admin seulement
+// Mise à jour d'une cellule existante — admin seulement
 router.put(
   '/:id',
   authenticateToken,
   authorize(Role.ADMIN),
   tarificationController.updateCell.bind(tarificationController)
+);
+
+// Upsert (créer ou mettre à jour) par categorie + zoneId — admin seulement
+router.post(
+  '/',
+  authenticateToken,
+  authorize(Role.ADMIN),
+  tarificationController.upsertCell.bind(tarificationController)
 );
 
 export default router;

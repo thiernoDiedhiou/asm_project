@@ -13,6 +13,7 @@ const transporter = nodemailer.createTransport({
 
 interface DemandeReservationMailData {
   numeroReservation: string;
+  nomEntreprise: string;  // Nom du tenant (ex: "ASM Multi-Services")
   client: { prenom: string; nom: string; telephone: string; email?: string };
   vehicule: { marque: string; modele: string };
   dateDebut: string;
@@ -33,15 +34,18 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export async function sendNotifNouvelleReservation(data: DemandeReservationMailData): Promise<void> {
-  const to = process.env.NOTIF_EMAIL_TO;
+export async function sendNotifNouvelleReservation(
+  data: DemandeReservationMailData,
+  to: string  // Email de l'admin du tenant — passé dynamiquement depuis le controller
+): Promise<void> {
   if (!to || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    // SMTP non configuré — notification ignorée silencieusement
+    // SMTP non configuré ou pas d'admin — notification ignorée silencieusement
     return;
   }
 
   const {
     numeroReservation,
+    nomEntreprise,
     client,
     vehicule,
     dateDebut,
@@ -53,7 +57,7 @@ export async function sendNotifNouvelleReservation(data: DemandeReservationMailD
     notes,
   } = data;
 
-  const subject = `[ASM] Nouvelle demande — ${numeroReservation} — ${client.prenom} ${client.nom}`;
+  const subject = `[${nomEntreprise}] Nouvelle demande — ${numeroReservation} — ${client.prenom} ${client.nom}`;
 
   const html = `
 <!DOCTYPE html>
@@ -67,7 +71,7 @@ export async function sendNotifNouvelleReservation(data: DemandeReservationMailD
         <!-- Header -->
         <tr>
           <td style="background:#1B5E20;padding:24px 32px;">
-            <p style="margin:0;color:#F9A825;font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:bold;">ASM Multi-Services</p>
+            <p style="margin:0;color:#F9A825;font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:bold;">${nomEntreprise}</p>
             <h1 style="margin:8px 0 0;color:#ffffff;font-size:22px;">Nouvelle demande de réservation</h1>
           </td>
         </tr>
@@ -124,8 +128,8 @@ export async function sendNotifNouvelleReservation(data: DemandeReservationMailD
         <!-- Footer -->
         <tr>
           <td style="background:#f4f4f4;padding:16px 32px;text-align:center;">
-            <p style="margin:0;font-size:12px;color:#999;">ASM Multi-Services — Grand Yoff, Zone de Captage, Dakar, Sénégal</p>
-            <p style="margin:4px 0 0;font-size:12px;color:#bbb;">Cet email a été généré automatiquement par le système de réservation en ligne.</p>
+            <p style="margin:0;font-size:12px;color:#999;">${nomEntreprise}</p>
+            <p style="margin:4px 0 0;font-size:12px;color:#bbb;">Cet email a été généré automatiquement par le système de réservation en ligne.<br/>Propulsé par <strong>ASM Platform</strong> — Innosoft Creation</p>
           </td>
         </tr>
 
@@ -144,7 +148,7 @@ Prix estimé : ${prixTotal.toLocaleString('fr-FR')} FCFA
 ${notes ? `Notes : ${notes}` : ''}`;
 
   await transporter.sendMail({
-    from: `"ASM Multi-Services" <${process.env.SMTP_USER}>`,
+    from: process.env.SMTP_FROM || `"${nomEntreprise}" <${process.env.SMTP_USER}>`,
     to,
     subject,
     text,

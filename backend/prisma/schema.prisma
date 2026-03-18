@@ -1,6 +1,6 @@
 // ============================================================
-// SCHÉMA PRISMA - ASM Multi-Services Location de Véhicules
-// Base de données: PostgreSQL
+// SCHÉMA PRISMA - Plateforme SaaS Multi-Tenant
+// Location de Véhicules — Architecture multi-entreprises
 // ============================================================
 
 generator client {
@@ -15,7 +15,8 @@ datasource db {
 // ---- Enums ----
 
 enum Role {
-  ADMIN
+  SUPER_ADMIN  // Administrateur de la plateforme (vous)
+  ADMIN        // Administrateur d'un tenant
   AGENT
   COMPTABLE
 }
@@ -76,31 +77,77 @@ enum StatutMaintenance {
   TERMINEE
 }
 
-// ---- Modèles ----
+// ---- Tenant (entreprise cliente de la plateforme) ----
+
+model Tenant {
+  id                String    @id @default(uuid())
+  slug              String    @unique   // "asm", "autocity" — identifie le sous-domaine
+  domaine           String?   @unique   // Domaine custom: "asm-location.sn"
+  nomEntreprise     String
+  slogan            String    @default("Location de Véhicules")
+  activite          String    @default("Location de véhicules")
+  couleurPrimaire   String    @default("#1B5E20")
+  couleurSecondaire String    @default("#F9A825")
+  logo              String?
+  actif             Boolean   @default(true)
+  // Abonnement
+  planType          String    @default("STARTER")  // STARTER, PRO, ENTERPRISE
+  montantMensuel    Decimal?  @db.Decimal(10, 2)
+  dateExpiration    DateTime?
+  statutAbonnement  String    @default("ACTIF")    // ACTIF, EXPIRE, SUSPENDU
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  users               User[]
+  vehicules           Vehicule[]
+  clients             Client[]
+  reservations        Reservation[]
+  contrats            Contrat[]
+  paiements           Paiement[]
+  maintenances        Maintenance[]
+  journal             JournalActivite[]
+  tarifZones          TarifZone[]
+  prixCategories      PrixCategorie[]
+  parametre           Parametre?
+  paiementsAbonnement PaiementAbonnement[]
+
+  @@map("tenants")
+}
+
+// ---- Utilisateurs ----
 
 model User {
   id           String        @id @default(uuid())
   nom          String
   prenom       String
-  email        String        @unique
+  email        String
   motDePasse   String
   telephone    String?
   role         Role          @default(AGENT)
-  actif        Boolean       @default(true)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  actif             Boolean       @default(true)
+  resetToken        String?       @unique
+  resetTokenExpiry  DateTime?
+  tenantId          String?       // NULL pour SUPER_ADMIN (cross-tenant)
+  tenant            Tenant?       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
   reservations Reservation[]
   contrats     Contrat[]
 
+  @@unique([email, tenantId])  // Un email peut exister dans deux tenants différents
+  @@index([tenantId])
   @@map("users")
 }
+
+// ---- Véhicules ----
 
 model Vehicule {
   id              String         @id @default(uuid())
   marque          String
   modele          String
   annee           Int
-  immatriculation String         @unique
+  immatriculation String
   couleur         String
   categorie       Categorie
   kilometrage     Int            @default(0)
@@ -109,13 +156,19 @@ model Vehicule {
   statut          StatutVehicule @default(DISPONIBLE)
   photos          String[]
   description     String?
+  tenantId        String
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   reservations    Reservation[]
   maintenances    Maintenance[]
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
+  @@unique([immatriculation, tenantId])  // Immatriculation unique par tenant
+  @@index([tenantId])
   @@map("vehicules")
 }
+
+// ---- Clients ----
 
 model Client {
   id              String        @id @default(uuid())
@@ -130,13 +183,18 @@ model Client {
   numeroPasseport String?
   permisConduire  String?
   notes           String?
+  tenantId        String
+  tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   reservations    Reservation[]
   contrats        Contrat[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
+  @@index([tenantId])
   @@map("clients")
 }
+
+// ---- Réservations ----
 
 model Reservation {
   id                 String            @id @default(uuid())
@@ -160,11 +218,16 @@ model Reservation {
   zoneId             String?
   zone               TarifZone?        @relation(fields: [zoneId], references: [id])
   contrat            Contrat?
+  tenantId           String
+  tenant             Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
 
+  @@index([tenantId])
   @@map("reservations")
 }
+
+// ---- Contrats ----
 
 model Contrat {
   id                String        @id @default(uuid())
@@ -186,11 +249,16 @@ model Contrat {
   paiements         Paiement[]
   statut            StatutContrat @default(ACTIF)
   pdfUrl            String?
+  tenantId          String
+  tenant            Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
+  @@index([tenantId])
   @@map("contrats")
 }
+
+// ---- Paiements ----
 
 model Paiement {
   id           String          @id @default(uuid())
@@ -202,11 +270,16 @@ model Paiement {
   datePaiement DateTime        @default(now())
   notes        String?
   valide       Boolean         @default(true)
+  tenantId     String
+  tenant       Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
 
+  @@index([tenantId])
   @@map("paiements")
 }
+
+// ---- Maintenances ----
 
 model Maintenance {
   id          String            @id @default(uuid())
@@ -218,44 +291,57 @@ model Maintenance {
   dateDebut   DateTime
   dateFin     DateTime?
   statut      StatutMaintenance @default(EN_COURS)
+  tenantId    String
+  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
+  @@index([tenantId])
   @@map("maintenances")
 }
 
-// Journal d'activité — traçabilité des actions utilisateurs
+// ---- Journal d'activité ----
+
 model JournalActivite {
   id        String   @id @default(uuid())
   userId    String
-  userNom   String   // Snapshot du nom (conservé même si l'utilisateur est supprimé)
-  userRole  String   // Snapshot du rôle
-  action    String   // Ex: RESERVATION_CREEE, LOGIN, PAIEMENT_ENREGISTRE
-  entite    String   // Ex: RESERVATION, CONTRAT, VEHICULE, AUTH
-  entiteId  String?  // ID de l'entité concernée
-  details   Json?    // Informations supplémentaires (JSON libre)
+  userNom   String
+  userRole  String
+  action    String
+  entite    String
+  entiteId  String?
+  details   Json?
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
+  @@index([tenantId])
   @@index([userId])
   @@index([createdAt])
   @@index([action])
   @@map("journal_activite")
 }
 
-// Zones tarifaires — zones géographiques de déplacement
+// ---- Zones tarifaires ----
+
 model TarifZone {
   id             String          @id @default(uuid())
-  nom            String          @unique
+  nom            String
   actif          Boolean         @default(true)
+  tenantId       String
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   reservations   Reservation[]
   prixCategories PrixCategorie[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
+  @@unique([nom, tenantId])  // Nom unique par tenant
+  @@index([tenantId])
   @@map("tarif_zones")
 }
 
-// Grille tarifaire — prix par catégorie de véhicule × zone géographique
+// ---- Grille tarifaire ----
+
 model PrixCategorie {
   id             String    @id @default(uuid())
   categorie      Categorie
@@ -263,26 +349,32 @@ model PrixCategorie {
   zoneId         String
   prixJournalier Decimal   @db.Decimal(10, 2)
   prixSemaine    Decimal?  @db.Decimal(10, 2)
+  tenantId       String
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
   @@unique([categorie, zoneId])
+  @@index([tenantId])
   @@map("prix_categories")
 }
 
-// Paramètres de l'entreprise — ligne unique (id = 1)
+// ---- Paramètres par tenant ----
+
 model Parametre {
-  id            Int      @id @default(1)
-  nomEntreprise String   @default("ASM Multi-Services")
+  id            String   @id @default(uuid())
+  tenantId      String   @unique  // Un seul jeu de paramètres par tenant
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  nomEntreprise String   @default("Mon Entreprise")
   slogan        String   @default("Location de Véhicules")
-  activite      String   @default("Vente et location de voitures — Import/Export")
-  telephone     String   @default("+221 77 418 05 32")
-  telephone2    String   @default("+221 76 474 90 92")
-  email         String   @default("contact@asm-location.sn")
-  adresse       String   @default("Grand Yoff — Zone de Captage")
-  ville         String   @default("Dakar, Sénégal")
-  rccm          String   @default("SN.DKR.2024.A.53708")
-  ninea         String   @default("011803633")
+  activite      String   @default("Vente et location de voitures")
+  telephone     String   @default("")
+  telephone2    String   @default("")
+  email         String   @default("")
+  adresse       String   @default("")
+  ville         String   @default("")
+  rccm          String   @default("")
+  ninea         String   @default("")
   heuresLunVen  String   @default("08h00 – 18h00")
   heuresSamedi  String   @default("09h00 – 15h00")
   noteTransfert String   @default("Transfert aéroport disponible 24h/24 sur réservation")
@@ -295,7 +387,45 @@ model Parametre {
   @@map("parametres")
 }
 
-// Table pour les sessions / tokens révoqués (logout)
+// ---- Paiements d'abonnement SaaS ----
+
+model PaiementAbonnement {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  montant   Decimal  @db.Decimal(10, 2)
+  methode   String   // ESPECES, WAVE, ORANGE_MONEY, FREE_MONEY, VIREMENT, CHEQUE
+  reference String?
+  periode   String   // "2026-03" (AAAA-MM)
+  notes     String?
+  pdfUrl    String?
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@map("paiements_abonnement")
+}
+
+// ---- Configuration des plans (plateforme, sans tenantId) ----
+
+model PlanConfig {
+  id             String   @id @default(uuid())
+  code           String   @unique  // STARTER, PRO, ENTERPRISE
+  nom            String
+  description    String?
+  montantMensuel Decimal  @db.Decimal(10, 2)
+  montantAnnuel  Decimal? @db.Decimal(10, 2)
+  maxAgents      Int      @default(3)
+  maxVehicules   Int      @default(20)
+  features       Json     @default("[]")
+  actif          Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("plan_configs")
+}
+
+// ---- Tokens révoqués ----
+
 model TokenBlacklist {
   id        String   @id @default(uuid())
   token     String   @unique

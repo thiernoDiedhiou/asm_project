@@ -7,6 +7,10 @@ import axios, {
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
+// Base URL pour les fichiers statiques (uploads: logos, photos véhicules, PDFs)
+// Dev: http://localhost:5000 | Prod: vide = chemin relatif servi par nginx
+export const API_FILE_BASE: string = import.meta.env.VITE_API_FILE_BASE || 'http://localhost:5000';
+
 // Instance Axios principale
 const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -34,25 +38,49 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Intercepteur: ajout automatique du token Bearer
+// Intercepteur: ajout automatique du token Bearer + slug tenant (dev multi-tenant)
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // En dev sur localhost, envoyer le slug du tenant courant pour que resolveTenant
+    // middleware identifie le bon tenant sur les routes publiques
+    const tenantSlug = localStorage.getItem('tenantSlug');
+    if (tenantSlug) {
+      config.headers['x-tenant-slug'] = tenantSlug;
+    }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Intercepteur: rafraîchissement automatique du token expiré
+// Force la déconnexion et redirige vers /login avec un message optionnel
+function forceLogout(reason?: string) {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('tenantSlug');
+  // Émettre un événement global pour que l'app puisse réagir (toast, etc.)
+  window.dispatchEvent(new CustomEvent('auth:forceLogout', { detail: { reason } }));
+  const url = reason ? `/login?reason=${encodeURIComponent(reason)}` : '/login';
+  window.location.href = url;
+}
+
+// Intercepteur: rafraîchissement automatique du token expiré + gestion suspension tenant
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
+
+    // 403 = tenant suspendu ou utilisateur désactivé — déconnexion immédiate
+    if (error.response?.status === 403) {
+      const message = (error.response.data as { message?: string })?.message;
+      forceLogout(message || 'Accès suspendu');
+      return Promise.reject(error);
+    }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
@@ -72,8 +100,7 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
 
       if (!refreshToken) {
-        // Pas de refresh token, rediriger vers login
-        window.location.href = '/login';
+        forceLogout();
         return Promise.reject(error);
       }
 
@@ -95,9 +122,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        forceLogout();
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -119,6 +144,10 @@ export const authApi = {
   me: () => api.get('/auth/me'),
   refresh: (refreshToken: string) =>
     api.post('/auth/refresh', { refreshToken }),
+  forgotPassword: (email: string) =>
+    api.post('/auth/forgot-password', { email }),
+  resetPassword: (token: string, nouveauMotDePasse: string) =>
+    api.post('/auth/reset-password', { token, nouveauMotDePasse }),
 };
 
 // Véhicules
@@ -234,6 +263,8 @@ export const publicApi = {
     api.post('/public/reservation', data),
   getSettings: () => api.get('/settings'),
   verifierContrat: (numero: string) => api.get(`/public/contrats/verifier/${numero}`),
+  getTenantInfo: () => api.get('/public/tenant'),
+  getPlans: () => api.get('/public/plans'),
 };
 
 // Zones tarifaires
@@ -249,12 +280,20 @@ export const tarificationApi = {
   getMatrix: () => api.get('/tarification'),
   updateCell: (id: string, data: { prixJournalier: number; prixSemaine?: number | null }) =>
     api.put(`/tarification/${id}`, data),
+  upsertCell: (data: { categorie: string; zoneId: string; prixJournalier: number }) =>
+    api.post('/tarification', data),
 };
 
 // Paramètres de l'entreprise (admin)
 export const settingsApi = {
   get: () => api.get('/settings'),
   update: (data: Record<string, unknown>) => api.put('/settings', data),
+  uploadLogo: (file: File) => {
+    const form = new FormData();
+    form.append('logo', file);
+    return api.post('/settings/logo', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
 };
 
+export { api };
 export default api;

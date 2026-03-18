@@ -1,6 +1,8 @@
 // Application principale - Routing et protection des routes
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useAuthStore } from './store/authStore';
+import { authApi } from './services/api';
 import { AppLayout } from './components/layout/AppLayout';
 import { VitrineLayout } from './layouts/VitrineLayout';
 
@@ -12,6 +14,8 @@ import { ContratVerificationPage } from './pages/vitrine/ContratVerificationPage
 
 // Auth
 import { LoginPage } from './pages/auth/LoginPage';
+import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 
 // Pages principales
 import { DashboardPage } from './pages/dashboard/DashboardPage';
@@ -35,30 +39,81 @@ import { CalendrierPage } from './pages/calendrier/CalendrierPage';
 import { RapportsPage } from './pages/rapports/RapportsPage';
 import { ParametresPage } from './pages/parametres/ParametresPage';
 import { JournalPage } from './pages/journal/JournalPage';
+import { TenantsPage } from './pages/superadmin/TenantsPage';
+import { TenantDetailPage } from './pages/superadmin/TenantDetailPage';
 
-// Protection des routes — redirige vers /login si non authentifié
+// Protection des routes — redirige vers /login si non authentifié, et bloque SUPER_ADMIN
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, accessToken } = useAuthStore();
+  const { isAuthenticated, accessToken, user } = useAuthStore();
   if (!isAuthenticated || !accessToken) {
     return <Navigate to="/login" replace />;
   }
+  // Le SUPER_ADMIN n'a pas de tenant — il ne doit pas accéder aux routes tenant-scoped
+  if (user?.role === 'SUPER_ADMIN') {
+    return <Navigate to="/tenants" replace />;
+  }
   return <>{children}</>;
+}
+
+// Route super-admin uniquement
+function SuperAdminRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, accessToken, user } = useAuthStore();
+  if (!isAuthenticated || !accessToken) return <Navigate to="/login" replace />;
+  if (user?.role !== 'SUPER_ADMIN') return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}
+
+// Composant interne qui vérifie périodiquement la validité de la session
+function SessionWatcher() {
+  const { isAuthenticated, logout } = useAuthStore();
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    async function checkSession() {
+      try {
+        await authApi.me(); // Le intercepteur 403 force le logout automatiquement
+      } catch {
+        // Erreur 401/403 → déjà géré par l'intercepteur axios (forceLogout)
+      }
+    }
+
+    // Vérifier au retour sur l'onglet (l'utilisateur revient après suspension)
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') checkSession();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    // Vérifier toutes les 60 secondes (même sans interaction)
+    const interval = setInterval(checkSession, 60_000);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      clearInterval(interval);
+    };
+  }, [isAuthenticated]);
+
+  return null;
 }
 
 export function App() {
   return (
     <BrowserRouter>
+      <SessionWatcher />
       <Routes>
         {/* ===== Vitrine publique ===== */}
         <Route element={<VitrineLayout />}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/flotte" element={<FlottePage />} />
           <Route path="/reserver" element={<DemandeReservationPage />} />
+          <Route path="/tarifs" element={<FlottePage />} />
           <Route path="/contrats/verifier/:numero" element={<ContratVerificationPage />} />
         </Route>
 
         {/* ===== Auth ===== */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Raccourci /admin → /login */}
         <Route path="/admin" element={<Navigate to="/login" replace />} />
@@ -116,6 +171,18 @@ export function App() {
 
           {/* Journal d'activité */}
           <Route path="/journal" element={<JournalPage />} />
+        </Route>
+
+        {/* ===== Super Admin ===== */}
+        <Route
+          element={
+            <SuperAdminRoute>
+              <AppLayout />
+            </SuperAdminRoute>
+          }
+        >
+          <Route path="/tenants" element={<TenantsPage />} />
+          <Route path="/tenants/:id" element={<TenantDetailPage />} />
         </Route>
 
         {/* Redirection par défaut */}

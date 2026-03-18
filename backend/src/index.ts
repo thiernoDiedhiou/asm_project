@@ -13,6 +13,7 @@ import path from 'path';
 import fs from 'fs';
 
 import { sanitizeInput } from './middlewares/sanitize.middleware';
+import { resolveTenant } from './middlewares/tenant.middleware';
 import authRoutes from './routes/auth.routes';
 import vehiculeRoutes from './routes/vehicule.routes';
 import clientRoutes from './routes/client.routes';
@@ -26,22 +27,40 @@ import journalRoutes from './routes/journal.routes';
 import settingsRoutes from './routes/settings.routes';
 import tarifZoneRoutes from './routes/tarifZone.routes';
 import tarificationRoutes from './routes/tarification.routes';
+import tenantRoutes from './routes/tenant.routes';
+import { initCronJobs } from './services/cron.service';
+import { planService } from './services/plan.service';
+import { setIo } from './utils/socketRegistry';
 import logger from './utils/logger';
 import prisma from './utils/prisma';
 
 const app = express();
 const httpServer = createServer(app);
 
+// ---- Fonction CORS dynamique — autorise tous les sous-domaines *.innosft.com + localhost ----
+const platformDomain = process.env.PLATFORM_DOMAIN || 'innosft.com';
+function isAllowedOrigin(origin: string | undefined): boolean {
+  if (!origin) return true; // same-origin ou Postman
+  if (origin.includes('localhost') || origin.includes('127.0.0.1')) return true;
+  // Autorise exactement *.{platformDomain} (ex: boucotteauto.innosft.com)
+  const pattern = new RegExp(`^https?://[a-z0-9-]+\\.${platformDomain.replace('.', '\\.')}(:\\d+)?$`);
+  return pattern.test(origin);
+}
+
 // ---- Configuration Socket.io ----
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) callback(null, true);
+      else callback(new Error('CORS: origine non autorisée'));
+    },
     methods: ['GET', 'POST'],
   },
 });
 
-// Rendre io accessible depuis les routes
+// Rendre io accessible depuis les routes ET depuis les services
 app.set('io', io);
+setIo(io);
 
 // ---- Middlewares globaux ----
 
@@ -52,13 +71,16 @@ app.use(
   })
 );
 
-// CORS
+// CORS — autorise *.innosft.com + localhost
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) callback(null, true);
+      else callback(new Error('CORS: origine non autorisée'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-tenant-slug'],
   })
 );
 
@@ -100,6 +122,8 @@ const dirsToCreate = [
   uploadDir,
   path.join(uploadDir, 'vehicules'),
   path.join(uploadDir, 'contrats'),
+  path.join(uploadDir, 'abonnements'),
+  path.join(uploadDir, 'logos'),
   'logs',
 ];
 
@@ -113,19 +137,23 @@ dirsToCreate.forEach((dir) => {
 app.use('/uploads', express.static(uploadDir));
 
 // ---- Routes API ----
-app.use('/api/auth', authRoutes);
-app.use('/api/vehicules', vehiculeRoutes);
-app.use('/api/clients', clientRoutes);
-app.use('/api/reservations', reservationRoutes);
-app.use('/api', contratRoutes);
-app.use('/api', dashboardRoutes);
-app.use('/api/maintenances', maintenanceRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/public', publicRoutes);
-app.use('/api/journal', journalRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/tarif-zones', tarifZoneRoutes);
-app.use('/api/tarification', tarificationRoutes);
+// Routes tenant super-admin (pas de resolveTenant — accès cross-tenant)
+app.use('/api/tenants', tenantRoutes);
+
+// Toutes les autres routes API sont scoped au tenant résolu depuis le sous-domaine/domaine
+app.use('/api/auth', resolveTenant, authRoutes);
+app.use('/api/vehicules', resolveTenant, vehiculeRoutes);
+app.use('/api/clients', resolveTenant, clientRoutes);
+app.use('/api/reservations', resolveTenant, reservationRoutes);
+app.use('/api', resolveTenant, contratRoutes);
+app.use('/api', resolveTenant, dashboardRoutes);
+app.use('/api/maintenances', resolveTenant, maintenanceRoutes);
+app.use('/api/users', resolveTenant, userRoutes);
+app.use('/api/public', resolveTenant, publicRoutes);
+app.use('/api/journal', resolveTenant, journalRoutes);
+app.use('/api/settings', resolveTenant, settingsRoutes);
+app.use('/api/tarif-zones', resolveTenant, tarifZoneRoutes);
+app.use('/api/tarification', resolveTenant, tarificationRoutes);
 
 // Route de santé
 app.get('/api/health', async (req, res) => {
@@ -203,6 +231,13 @@ async function startServer() {
     // Vérifier la connexion à la base de données
     await prisma.$connect();
     logger.info('Connexion base de données établie');
+
+    // Initialiser les plans par défaut (upsert — idempotent)
+    await planService.initDefaultPlans();
+    logger.info('Plans d\'abonnement initialisés');
+
+    // Démarrer les tâches planifiées (vérification expirations)
+    initCronJobs();
 
     httpServer.listen(PORT, () => {
       logger.info(`

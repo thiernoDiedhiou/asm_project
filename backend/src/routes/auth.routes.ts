@@ -22,7 +22,13 @@ router.post('/logout', authenticateToken, authController.logout.bind(authControl
 // GET /api/auth/me - Profil utilisateur connecté
 router.get('/me', authenticateToken, authController.me.bind(authController));
 
-// PUT /api/auth/password - Changer le mot de passe
+// PUT /api/auth/password - Changer le mot de passe (connecté)
 router.put('/password', authenticateToken, authController.changePassword.bind(authController));
+
+// POST /api/auth/forgot-password - Demander un reset (public)
+router.post('/forgot-password', authController.forgotPassword.bind(authController));
+
+// POST /api/auth/reset-password - Réinitialiser avec le token (public)
+router.post('/reset-password', authController.resetPassword.bind(authController));
 
 export default router;

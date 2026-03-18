@@ -7,6 +7,7 @@ import {
 import { reservationsApi, clientsApi, vehiculesApi, tarificationApi } from '../../services/api';
 import { useQuery } from '../../components/hooks/useQuery';
 import { formatFCFA } from '../../utils/format';
+import { useTenant } from '../../contexts/TenantContext';
 
 const TYPE_TRAJET = [
   {
@@ -19,7 +20,7 @@ const TYPE_TRAJET = [
     value: 'TRANSFERT_AEROPORT',
     icon: Plane,
     label: 'Transfert aéroport',
-    description: 'Course AIBD — 1 jour facturé',
+    description: 'Course aéroport — 1 jour facturé',
   },
   {
     value: 'LONGUE_DUREE',
@@ -96,11 +97,13 @@ export function ReservationFormPage() {
   const navigate = useNavigate();
   const clientRef   = useRef<HTMLDivElement>(null);
   const vehiculeRef = useRef<HTMLDivElement>(null);
+  const { nomEntreprise } = useTenant();
+  const agenceName = `Agence ${nomEntreprise}`;
 
   const [form, setForm] = useState<FormData>({
     clientId: '', vehiculeId: '',
     dateDebut: '', dateFin: '',
-    lieuPriseEnCharge: 'Agence ASM', lieuRetour: 'Agence ASM',
+    lieuPriseEnCharge: agenceName, lieuRetour: agenceName,
     typeTrajet: 'LOCATION', avance: '', notes: '', zoneId: '',
   });
   const [saving, setSaving] = useState(false);
@@ -187,14 +190,13 @@ export function ReservationFormPage() {
       if (field === 'typeTrajet') {
         if (value === 'TRANSFERT_AEROPORT') {
           updated.dateFin = f.dateDebut;
-          updated.lieuPriseEnCharge = 'Agence ASM';
-          updated.lieuRetour = 'Aéroport AIBD';
+          updated.lieuPriseEnCharge = agenceName;
+          updated.lieuRetour = 'Aéroport';
           const dakarZone = zones.find(z => z.nom.toLowerCase().includes('dakar'));
           if (dakarZone) updated.zoneId = dakarZone.id;
         } else if (f.typeTrajet === 'TRANSFERT_AEROPORT') {
           updated.dateFin = '';
-          if (f.lieuRetour === 'Aéroport AIBD') updated.lieuRetour = 'Agence ASM';
-          if (f.lieuPriseEnCharge === 'Agence ASM') updated.lieuPriseEnCharge = 'Agence ASM';
+          if (f.lieuRetour === 'Aéroport') updated.lieuRetour = agenceName;
           updated.zoneId = '';
         }
       }
@@ -529,7 +531,7 @@ export function ReservationFormPage() {
               />
               <p className="mt-2 text-xs text-gray-400 flex items-center gap-1.5">
                 <Plane className="h-3 w-3" />
-                Transfert aéroport AIBD — durée comptée : 1 jour
+                Transfert aéroport  — durée comptée : 1 jour
               </p>
             </div>
           ) : (

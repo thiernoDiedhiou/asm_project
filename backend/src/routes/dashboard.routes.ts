@@ -50,9 +50,11 @@ router.get('/maintenances', authenticateToken, async (req, res) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
     const skip = (page - 1) * limit;
+    const tenantId = req.tenantId!;
 
     const [maintenances, total] = await Promise.all([
       prisma.maintenance.findMany({
+        where: { tenantId },
         skip,
         take: limit,
         orderBy: { dateDebut: 'desc' },
@@ -66,7 +68,7 @@ router.get('/maintenances', authenticateToken, async (req, res) => {
           },
         },
       }),
-      prisma.maintenance.count(),
+      prisma.maintenance.count({ where: { tenantId } }),
     ]);
 
     sendPaginatedSuccess(res, maintenances, { page, limit, total });
@@ -90,13 +92,14 @@ router.post(
         const m = await tx.maintenance.create({
           data: {
             ...req.body,
+            tenantId: req.tenantId!,
             dateDebut: new Date(req.body.dateDebut),
             dateFin: req.body.dateFin ? new Date(req.body.dateFin) : undefined,
           },
         });
 
         await tx.vehicule.update({
-          where: { id: req.body.vehiculeId },
+          where: { id: req.body.vehiculeId, tenantId: req.tenantId! },
           data: { statut: 'EN_MAINTENANCE' },
         });
 
@@ -118,7 +121,7 @@ router.put('/maintenances/:id', authenticateToken, async (req, res) => {
   try {
     const { dateDebut, dateFin, ...rest } = req.body;
     const maintenance = await prisma.maintenance.update({
-      where: { id: req.params.id },
+      where: { id: req.params.id, tenantId: req.tenantId! },
       data: {
         ...rest,
         ...(dateDebut && { dateDebut: new Date(dateDebut) }),
@@ -129,7 +132,7 @@ router.put('/maintenances/:id', authenticateToken, async (req, res) => {
     // Si la maintenance est terminée, remettre le véhicule disponible
     if (req.body.statut === 'TERMINEE') {
       await prisma.vehicule.update({
-        where: { id: maintenance.vehiculeId },
+        where: { id: maintenance.vehiculeId, tenantId: req.tenantId! },
         data: { statut: 'DISPONIBLE' },
       });
     }
@@ -148,6 +151,7 @@ router.put('/maintenances/:id', authenticateToken, async (req, res) => {
 router.get('/users', authenticateToken, async (req, res) => {
   try {
     const users = await prisma.user.findMany({
+      where: { tenantId: req.tenantId!, role: { not: 'SUPER_ADMIN' } },
       select: {
         id: true,
         nom: true,

@@ -6,7 +6,7 @@ import { sendSuccess, sendError } from '../utils/response';
 export class DashboardController {
   async getStats(req: Request, res: Response): Promise<void> {
     try {
-      const stats = await dashboardService.getStats();
+      const stats = await dashboardService.getStats(req.tenantId!);
       sendSuccess(res, stats);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
@@ -16,7 +16,7 @@ export class DashboardController {
   async getRevenus(req: Request, res: Response): Promise<void> {
     try {
       const periode = (req.query.periode as 'mois' | 'semaine' | 'annee') || 'mois';
-      const revenus = await dashboardService.getRevenus(periode);
+      const revenus = await dashboardService.getRevenus(req.tenantId!, periode);
       sendSuccess(res, revenus);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
@@ -25,7 +25,7 @@ export class DashboardController {
 
   async getVehiculesPerformance(req: Request, res: Response): Promise<void> {
     try {
-      const perf = await dashboardService.getVehiculesPerformance();
+      const perf = await dashboardService.getVehiculesPerformance(req.tenantId!);
       sendSuccess(res, perf);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
@@ -34,7 +34,7 @@ export class DashboardController {
 
   async getAlertes(req: Request, res: Response): Promise<void> {
     try {
-      const alertes = await dashboardService.getAlertes();
+      const alertes = await dashboardService.getAlertes(req.tenantId!);
       sendSuccess(res, alertes);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
@@ -43,7 +43,7 @@ export class DashboardController {
 
   async getRecentesReservations(req: Request, res: Response): Promise<void> {
     try {
-      const reservations = await dashboardService.getRecentesReservations();
+      const reservations = await dashboardService.getRecentesReservations(req.tenantId!);
       sendSuccess(res, reservations);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);

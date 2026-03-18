@@ -14,7 +14,7 @@ export class ReservationController {
   async getAll(req: Request, res: Response): Promise<void> {
     try {
       const filters = req.query as unknown as ReservationFilters;
-      const { reservations, total } = await reservationService.getAll(filters);
+      const { reservations, total } = await reservationService.getAll(filters, req.tenantId!);
       sendPaginatedSuccess(res, reservations, {
         page: filters.page || 1,
         limit: filters.limit || 20,
@@ -30,7 +30,8 @@ export class ReservationController {
       const { mois, annee } = req.query as { mois: string; annee: string };
       const reservations = await reservationService.getCalendrier(
         parseInt(mois),
-        parseInt(annee)
+        parseInt(annee),
+        req.tenantId!
       );
       sendSuccess(res, reservations);
     } catch (error) {
@@ -40,7 +41,7 @@ export class ReservationController {
 
   async getById(req: Request, res: Response): Promise<void> {
     try {
-      const reservation = await reservationService.getById(req.params.id);
+      const reservation = await reservationService.getById(req.params.id, req.tenantId!);
       if (!reservation) { sendNotFound(res, 'Réservation introuvable'); return; }
       sendSuccess(res, reservation);
     } catch (error) {
@@ -51,11 +52,12 @@ export class ReservationController {
   async create(req: Request, res: Response): Promise<void> {
     try {
       if (!req.user) { sendError(res, 'Non authentifié', 401); return; }
-      const result = await reservationService.create(req.body, req.user.userId);
+      const result = await reservationService.create(req.body, req.user.userId, req.tenantId!);
       const { reservation } = result;
 
       logAction({
         userId: req.user.userId,
+        tenantId: req.tenantId!,
         userRole: req.user.role,
         action: ACTIONS.RESERVATION_CREEE,
         entite: ENTITES.RESERVATION,
@@ -79,11 +81,13 @@ export class ReservationController {
       const reservation = await reservationService.updateStatut(
         req.params.id,
         req.body,
-        req.user.userId
+        req.user.userId,
+        req.tenantId!
       );
 
       logAction({
         userId: req.user.userId,
+        tenantId: req.tenantId!,
         userRole: req.user.role,
         action: ACTIONS.RESERVATION_STATUT_MODIFIE,
         entite: ENTITES.RESERVATION,
@@ -103,10 +107,11 @@ export class ReservationController {
       const { dateFin } = req.body;
       if (!dateFin) { sendError(res, 'La nouvelle date de fin est requise', 400); return; }
 
-      const result = await reservationService.prolonger(req.params.id, dateFin, req.user.userId);
+      const result = await reservationService.prolonger(req.params.id, dateFin, req.user.userId, req.tenantId!);
 
       logAction({
         userId: req.user.userId,
+        tenantId: req.tenantId!,
         userRole: req.user.role,
         action: ACTIONS.RESERVATION_STATUT_MODIFIE,
         entite: ENTITES.RESERVATION,
@@ -122,11 +127,12 @@ export class ReservationController {
 
   async delete(req: Request, res: Response): Promise<void> {
     try {
-      await reservationService.delete(req.params.id);
+      await reservationService.delete(req.params.id, req.tenantId!);
 
       if (req.user) {
         logAction({
           userId: req.user.userId,
+          tenantId: req.tenantId!,
           userRole: req.user.role,
           action: ACTIONS.RESERVATION_SUPPRIMEE,
           entite: ENTITES.RESERVATION,

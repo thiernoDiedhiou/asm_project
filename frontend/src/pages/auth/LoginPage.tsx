@@ -1,23 +1,37 @@
-// Page de connexion ASM Multi-Services
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// Page de connexion
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { Eye, EyeOff, Car, Lock, Mail, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Car, Lock, Mail, Loader2, AlertTriangle } from 'lucide-react';
+import { publicApi } from '../../services/api';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [nomEntreprise, setNomEntreprise] = useState('');
+  const [adresse, setAdresse] = useState('');
   const { login, isLoading } = useAuthStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const suspensionReason = searchParams.get('reason');
+
+  useEffect(() => {
+    publicApi.getSettings().then(res => {
+      const s = res.data?.data;
+      if (s?.nomEntreprise) setNomEntreprise(s.nomEntreprise);
+      if (s?.adresse || s?.ville) setAdresse([s.adresse, s.ville].filter(Boolean).join(', '));
+    }).catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
       await login(email, motDePasse);
-      navigate('/dashboard');
+      const { user } = useAuthStore.getState();
+      navigate(user?.role === 'SUPER_ADMIN' ? '/tenants' : '/dashboard');
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data
@@ -42,7 +56,7 @@ export function LoginPage() {
             <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-asm-vert mb-4">
               <Car className="h-8 w-8 text-asm-or" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">ASM Multi-Services</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{nomEntreprise || 'SenLocaDesk'}</h1>
             <p className="text-gray-500 text-sm mt-1">
               Système de gestion de location de véhicules
             </p>
@@ -52,6 +66,17 @@ export function LoginPage() {
               <div className="h-1 w-8 bg-asm-vert rounded-full" />
             </div>
           </div>
+
+          {/* Bandeau suspension tenant */}
+          {suspensionReason && (
+            <div className="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-red-700">Session terminée</p>
+                <p className="text-xs text-red-600 mt-0.5">{suspensionReason}</p>
+              </div>
+            </div>
+          )}
 
           {/* Formulaire */}
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -109,6 +134,13 @@ export function LoginPage() {
               </div>
             )}
 
+            {/* Lien mot de passe oublié */}
+            <div className="text-right -mt-2">
+              <Link to="/forgot-password" className="text-xs text-gray-500 hover:text-asm-vert transition-colors">
+                Mot de passe oublié ?
+              </Link>
+            </div>
+
             {/* Bouton connexion */}
             <button
               type="submit"
@@ -130,7 +162,7 @@ export function LoginPage() {
 
         {/* Pied de page */}
         <p className="text-center text-white/60 text-xs mt-6">
-          Grand Yoff - Zone de Captage, Dakar, Sénégal
+          {adresse || 'Powered by Innosoft Creation'}
         </p>
       </div>
     </div>

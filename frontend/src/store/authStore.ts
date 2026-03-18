@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { authApi } from '../services/api';
 
-export type Role = 'ADMIN' | 'AGENT' | 'COMPTABLE';
+export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'AGENT' | 'COMPTABLE';
 
 export interface AuthUser {
   id: string;
