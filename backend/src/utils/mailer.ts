@@ -165,3 +165,90 @@ ${notes ? `Notes : ${notes}` : ''}`;
     html,
   });
 }
+
+// ─── Email de contact depuis la landing page ───────────────────────────────
+
+export interface ContactFormData {
+  prenom: string;
+  nom: string;
+  email: string;
+  telephone?: string;
+  agence?: string;
+  flotte?: string;
+  message?: string;
+}
+
+export async function sendContactFormEmail(data: ContactFormData): Promise<void> {
+  const to = process.env.CONTACT_EMAIL || process.env.SMTP_USER;
+  if (!to || !process.env.SMTP_USER || !process.env.SMTP_PASS) return;
+
+  const { prenom, nom, email, telephone, agence, flotte, message } = data;
+
+  const subject = `[ASM Location] Nouvelle demande — ${prenom} ${nom}`;
+
+  const html = `
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"/></head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:24px 0;">
+    <tr><td align="center">
+      <table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.09);">
+
+        <tr>
+          <td style="background:#2563eb;padding:24px 32px;">
+            <p style="margin:0;color:rgba(255,255,255,.7);font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:bold;">ASM Location · Essai gratuit</p>
+            <h1 style="margin:8px 0 0;color:#ffffff;font-size:22px;">Nouvelle demande de contact</h1>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:28px 32px;">
+            <h2 style="margin:0 0 14px;color:#2563eb;font-size:15px;border-bottom:2px solid #eff6ff;padding-bottom:6px;">Coordonnées</h2>
+            <table width="100%" cellpadding="5" cellspacing="0" style="font-size:14px;color:#334155;">
+              <tr><td style="color:#64748b;width:38%;">Nom</td><td><strong>${prenom} ${nom}</strong></td></tr>
+              <tr><td style="color:#64748b;">Email</td><td><a href="mailto:${email}" style="color:#2563eb;">${email}</a></td></tr>
+              ${telephone ? `<tr><td style="color:#64748b;">Téléphone</td><td><a href="tel:${telephone}" style="color:#2563eb;">${telephone}</a></td></tr>` : ''}
+              ${agence ? `<tr><td style="color:#64748b;">Agence</td><td>${agence}</td></tr>` : ''}
+              ${flotte ? `<tr><td style="color:#64748b;">Taille flotte</td><td>${flotte} véhicule(s)</td></tr>` : ''}
+            </table>
+
+            ${message ? `
+            <h2 style="margin:24px 0 14px;color:#2563eb;font-size:15px;border-bottom:2px solid #eff6ff;padding-bottom:6px;">Message</h2>
+            <p style="font-size:14px;color:#334155;white-space:pre-wrap;background:#f8fafc;padding:14px;border-radius:6px;border:1px solid #e2e8f0;">${message}</p>
+            ` : ''}
+
+            <div style="margin-top:28px;text-align:center;">
+              <a href="mailto:${email}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:100px;font-size:14px;font-weight:bold;">
+                Répondre à ${prenom} →
+              </a>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="background:#f8fafc;padding:14px 32px;text-align:center;border-top:1px solid #e2e8f0;">
+            <p style="margin:0;font-size:12px;color:#94a3b8;">ASM Location — Propulsé par <strong>Innosoft Creation</strong></p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  const text = `Nouvelle demande de contact — ASM Location
+Nom : ${prenom} ${nom}
+Email : ${email}
+${telephone ? `Téléphone : ${telephone}\n` : ''}${agence ? `Agence : ${agence}\n` : ''}${flotte ? `Flotte : ${flotte}\n` : ''}${message ? `\nMessage :\n${message}` : ''}`;
+
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM || `"ASM Location" <${process.env.SMTP_USER}>`,
+    to,
+    replyTo: email,
+    subject,
+    text,
+    html,
+  });
+}

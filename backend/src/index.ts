@@ -146,8 +146,9 @@ app.use('/uploads', express.static(uploadDir));
 // Routes tenant super-admin (pas de resolveTenant — accès cross-tenant)
 app.use('/api/tenants', tenantRoutes);
 
-// Route plateforme — sans résolution tenant (appelée depuis la landing page)
+// Routes plateforme — sans résolution tenant (appelées depuis la landing page)
 app.get('/api/public/agences', publicController.getAgencesPubliques.bind(publicController));
+app.post('/api/public/contact', publicController.sendContactForm.bind(publicController));
 
 // Toutes les autres routes API sont scoped au tenant résolu depuis le sous-domaine/domaine
 app.use('/api/auth', resolveTenant, authRoutes);

@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import { sendSuccess, sendError } from '../utils/response';
-import { sendNotifNouvelleReservation } from '../utils/mailer';
+import { sendNotifNouvelleReservation, sendContactFormEmail } from '../utils/mailer';
 
 // Génère le prochain numéro RES-YYMM-NNNN (même logique que reservation.service.ts)
 async function generateNumeroReservation(tenantId: string, offset = 0): Promise<string> {
@@ -404,6 +404,34 @@ export class PublicController {
       sendSuccess(res, tenant);
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
+    }
+  }
+
+  /**
+   * POST /api/public/contact
+   * Reçoit le formulaire de contact de la landing page et envoie un email.
+   * Aucune résolution de tenant requise.
+   */
+  async sendContactForm(req: Request, res: Response): Promise<void> {
+    try {
+      const { prenom, nom, email, telephone, agence, flotte, message } = req.body;
+
+      if (!prenom || !nom || !email) {
+        sendError(res, 'Prénom, nom et email sont requis', 400);
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        sendError(res, 'Adresse email invalide', 400);
+        return;
+      }
+
+      await sendContactFormEmail({ prenom, nom, email, telephone, agence, flotte, message });
+
+      sendSuccess(res, null, 'Votre demande a bien été envoyée. Nous vous contacterons sous 24 h.', 200);
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur lors de l\'envoi', 500);
     }
   }
 }

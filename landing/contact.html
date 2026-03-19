@@ -254,10 +254,12 @@
           <textarea id="message" name="message" rows="3" placeholder="Décrivez vos besoins ou posez vos questions…"></textarea>
         </div>
 
-        <button type="submit" class="btn-submit">
-          Envoyer ma demande
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span id="btnLabel">Envoyer ma demande</span>
+          <svg id="btnArrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <svg id="btnSpinner" style="display:none;animation:spin .8s linear infinite;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
         </button>
+        <p id="errorMsg" style="display:none;color:#dc2626;font-size:13px;margin-top:10px;text-align:center;"></p>
       </form>
 
       <div class="contact-trust">
@@ -287,39 +289,84 @@
   </div>
 </main>
 
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
 <script>
-  document.getElementById('contactForm').addEventListener('submit', function(e) {
+  // URL de l'API — adapter si le backend est sur un autre domaine
+  const API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:5000/api/public/contact'
+    : '/api/public/contact';
+
+  const form       = document.getElementById('contactForm');
+  const submitBtn  = document.getElementById('submitBtn');
+  const btnLabel   = document.getElementById('btnLabel');
+  const btnArrow   = document.getElementById('btnArrow');
+  const btnSpinner = document.getElementById('btnSpinner');
+  const errorMsg   = document.getElementById('errorMsg');
+
+  function setLoading(loading) {
+    submitBtn.disabled = loading;
+    btnLabel.textContent = loading ? 'Envoi en cours…' : 'Envoyer ma demande';
+    btnArrow.style.display   = loading ? 'none'         : '';
+    btnSpinner.style.display = loading ? ''             : 'none';
+  }
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.style.display = 'block';
+  }
+
+  function hideError() {
+    errorMsg.style.display = 'none';
+  }
+
+  form.addEventListener('submit', async function(e) {
     e.preventDefault();
+    hideError();
 
     const prenom = document.getElementById('prenom').value.trim();
     const nom    = document.getElementById('nom').value.trim();
     const email  = document.getElementById('email').value.trim();
 
     if (!prenom || !nom || !email) {
-      alert('Veuillez remplir les champs obligatoires (prénom, nom, email).');
+      showError('Veuillez remplir les champs obligatoires (prénom, nom, email).');
       return;
     }
 
-    // Compose mailto
-    const sujet = encodeURIComponent('Demande d\'essai gratuit ASM Location');
-    const agence = document.getElementById('agence').value.trim();
-    const tel    = document.getElementById('tel').value.trim();
-    const flotte = document.getElementById('flotte').value;
-    const msg    = document.getElementById('message').value.trim();
+    const payload = {
+      prenom,
+      nom,
+      email,
+      telephone: document.getElementById('tel').value.trim()     || undefined,
+      agence:    document.getElementById('agence').value.trim()  || undefined,
+      flotte:    document.getElementById('flotte').value         || undefined,
+      message:   document.getElementById('message').value.trim() || undefined,
+    };
 
-    const corps = encodeURIComponent(
-      `Prénom : ${prenom}\nNom : ${nom}\nEmail : ${email}` +
-      (tel    ? `\nTéléphone : ${tel}`    : '') +
-      (agence ? `\nAgence : ${agence}`    : '') +
-      (flotte ? `\nFlotte : ${flotte}`    : '') +
-      (msg    ? `\n\nMessage :\n${msg}`   : '')
-    );
+    setLoading(true);
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-    window.location.href = `mailto:contact@innosft.com?subject=${sujet}&body=${corps}`;
+      const data = await res.json();
 
-    // Show success state
-    document.getElementById('form-content').style.display = 'none';
-    document.getElementById('successMsg').style.display = 'block';
+      if (!res.ok) {
+        showError(data.message || 'Une erreur est survenue. Veuillez réessayer.');
+        return;
+      }
+
+      // Afficher l'état succès
+      document.getElementById('form-content').style.display = 'none';
+      document.getElementById('successMsg').style.display   = 'block';
+    } catch (_err) {
+      showError('Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.');
+    } finally {
+      setLoading(false);
+    }
   });
 </script>
 
