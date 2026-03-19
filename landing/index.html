@@ -698,10 +698,110 @@ footer {
 .reveal.in { opacity: 1; transform: none; }
 
 /* ═══════════════════════════════════════════
+   AGENCES
+═══════════════════════════════════════════ */
+#agences { padding: 104px 0; background: var(--wash); }
+
+.agences-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.agence-card {
+  background: #fff; border: 1px solid var(--line);
+  border-radius: var(--r-xl); overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: border-color .22s, box-shadow .22s, transform .22s;
+}
+.agence-card:hover {
+  border-color: rgba(37,99,235,.22);
+  box-shadow: var(--s2);
+  transform: translateY(-2px);
+}
+
+/* Bandeau coloré en haut */
+.agence-banner {
+  height: 6px;
+  background: var(--blue);
+  flex-shrink: 0;
+}
+
+.agence-body { padding: 22px; flex: 1; display: flex; flex-direction: column; gap: 14px; }
+
+/* Logo / Initiales */
+.agence-head { display: flex; align-items: center; gap: 13px; }
+.agence-logo {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: var(--blue-xl); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; overflow: hidden;
+}
+.agence-logo img  { width: 100%; height: 100%; object-fit: cover; }
+.agence-logo span {
+  font-family: 'Sora', sans-serif;
+  font-size: 17px; font-weight: 800; color: var(--blue);
+}
+.agence-name  { font-size: 15.5px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.agence-activ { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* Infos contact */
+.agence-infos { display: flex; flex-direction: column; gap: 7px; }
+.agence-info  {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--ink-3);
+}
+.agence-info svg { color: var(--muted); flex-shrink: 0; }
+
+/* Ville badge */
+.agence-ville {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11.5px; font-weight: 600;
+  background: var(--blue-xl); color: var(--blue);
+  padding: 3px 10px; border-radius: 100px;
+  align-self: flex-start;
+}
+
+/* Footer carte */
+.agence-footer {
+  padding: 14px 22px;
+  border-top: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.agence-heures { font-size: 11.5px; color: var(--muted); }
+
+/* Skeleton loader */
+.agence-skeleton { animation: shimmer 1.4s ease-in-out infinite; }
+.agence-skeleton .sk { background: var(--line); border-radius: 6px; }
+@keyframes shimmer {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .45; }
+}
+
+/* Empty / Error state */
+.agences-empty {
+  grid-column: 1 / -1; text-align: center;
+  padding: 60px 24px; color: var(--muted);
+  font-size: 15px;
+}
+.agences-empty p { margin-top: 8px; font-size: 13px; color: var(--soft); }
+
+/* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
 @media (max-width: 1024px) {
-  .hero-inner { grid-template-columns: 1fr; }
+  .agences-grid { grid-template-columns: 1fr 1fr; }
+  .hero-inner {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-top: 56px;
+    padding-bottom: 72px;
+    text-align: center;
+  }
+  .hero-p { max-width: 100%; margin-inline: auto; }
+  .hero-cta { justify-content: center; }
+  .hero-trust { justify-content: center; }
   .hero-visual { display: none; }
   .bento { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
   .b7,.b5,.b4,.b12 { grid-column: span 1; grid-row: span 1; }
@@ -715,7 +815,15 @@ footer {
 }
 
 @media (max-width: 640px) {
+  .agences-grid { grid-template-columns: 1fr; }
   .nav-links { display: none; }
+  .nav-end .btn-stroke { display: none; }
+  .hero-inner { padding-top: 48px; padding-bottom: 60px; }
+  .hero-h1 { font-size: clamp(34px, 9vw, 48px); }
+  .hero-p { font-size: 15px; }
+  .btn-xl { padding: 14px 26px; font-size: 15px; }
+  .hero-cta { flex-direction: column; align-items: center; }
+  .hero-cta .btn { width: 100%; max-width: 320px; justify-content: center; }
   .bento { grid-template-columns: 1fr; }
   .b12 .mini-grid { grid-template-columns: 1fr 1fr; }
   .metrics-band { grid-template-columns: 1fr 1fr; }
@@ -746,6 +854,7 @@ footer {
       <a href="#how">Démarrage</a>
       <a href="#pricing">Tarifs</a>
       <a href="#testi">Avis</a>
+      <a href="#agences">Agences</a>
     </nav>
 
     <div class="nav-end">
@@ -1157,6 +1266,84 @@ footer {
   </div>
 </section>
 
+<!-- ── AGENCES ─────────────────────────────── -->
+<section id="agences">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="sec-eyebrow-dot"></span>Nos agences partenaires</div>
+      <h2 class="sec-h2">Trouvez une agence<br/>près de chez vous.</h2>
+      <p class="sec-p">Toutes ces agences utilisent ASM Location. Consultez leurs informations et accédez directement à leur catalogue de véhicules disponibles.</p>
+    </div>
+
+    <div class="agences-grid" id="agences-grid">
+      <!-- Skeletons affichés pendant le chargement -->
+      <div class="agence-card agence-skeleton">
+        <div class="agence-banner" style="background:var(--line)"></div>
+        <div class="agence-body">
+          <div class="agence-head">
+            <div class="agence-logo"><span class="sk" style="width:48px;height:48px;border-radius:10px"></span></div>
+            <div style="flex:1">
+              <div class="sk" style="height:14px;width:70%;margin-bottom:6px"></div>
+              <div class="sk" style="height:11px;width:45%"></div>
+            </div>
+          </div>
+          <div class="agence-infos">
+            <div class="sk" style="height:12px;width:80%"></div>
+            <div class="sk" style="height:12px;width:60%"></div>
+            <div class="sk" style="height:12px;width:50%"></div>
+          </div>
+        </div>
+        <div class="agence-footer" style="border-top:1px solid var(--line)">
+          <div class="sk" style="height:11px;width:40%"></div>
+          <div class="sk" style="height:30px;width:100px;border-radius:100px"></div>
+        </div>
+      </div>
+      <div class="agence-card agence-skeleton" style="animation-delay:.15s">
+        <div class="agence-banner" style="background:var(--line)"></div>
+        <div class="agence-body">
+          <div class="agence-head">
+            <div class="agence-logo"><span class="sk" style="width:48px;height:48px;border-radius:10px"></span></div>
+            <div style="flex:1">
+              <div class="sk" style="height:14px;width:65%;margin-bottom:6px"></div>
+              <div class="sk" style="height:11px;width:40%"></div>
+            </div>
+          </div>
+          <div class="agence-infos">
+            <div class="sk" style="height:12px;width:75%"></div>
+            <div class="sk" style="height:12px;width:55%"></div>
+            <div class="sk" style="height:12px;width:45%"></div>
+          </div>
+        </div>
+        <div class="agence-footer" style="border-top:1px solid var(--line)">
+          <div class="sk" style="height:11px;width:35%"></div>
+          <div class="sk" style="height:30px;width:100px;border-radius:100px"></div>
+        </div>
+      </div>
+      <div class="agence-card agence-skeleton" style="animation-delay:.3s">
+        <div class="agence-banner" style="background:var(--line)"></div>
+        <div class="agence-body">
+          <div class="agence-head">
+            <div class="agence-logo"><span class="sk" style="width:48px;height:48px;border-radius:10px"></span></div>
+            <div style="flex:1">
+              <div class="sk" style="height:14px;width:75%;margin-bottom:6px"></div>
+              <div class="sk" style="height:11px;width:50%"></div>
+            </div>
+          </div>
+          <div class="agence-infos">
+            <div class="sk" style="height:12px;width:85%"></div>
+            <div class="sk" style="height:12px;width:60%"></div>
+            <div class="sk" style="height:12px;width:40%"></div>
+          </div>
+        </div>
+        <div class="agence-footer" style="border-top:1px solid var(--line)">
+          <div class="sk" style="height:11px;width:38%"></div>
+          <div class="sk" style="height:30px;width:100px;border-radius:100px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ── CTA ──────────────────────────────────── -->
 <section id="cta">
   <div class="cta-ring cr1"></div>
@@ -1280,6 +1467,96 @@ footer {
   }, { threshold: 0.4 });
   const mb = document.querySelector('.metrics-band');
   if (mb) co.observe(mb);
+
+  // ── Chargement dynamique des agences ──────────────────────
+  const PLATFORM_DOMAIN = 'location.innosft.com';
+
+  function initials(name) {
+    return name.split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  }
+
+  function renderAgenceCard(a) {
+    const color = a.couleurPrimaire || '#2563eb';
+    const vitrineUrl = `https://${a.slug}.${PLATFORM_DOMAIN}`;
+    const logoHtml = a.logo
+      ? `<img src="${a.logo}" alt="${a.nomEntreprise}" loading="lazy"/>`
+      : `<span>${initials(a.nomEntreprise)}</span>`;
+
+    const adresseHtml = a.adresse
+      ? `<div class="agence-info">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          ${a.adresse}
+        </div>` : '';
+
+    const telHtml = a.telephone
+      ? `<div class="agence-info">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.18 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.54-.54a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/></svg>
+          <a href="tel:${a.telephone}" style="color:inherit">${a.telephone}</a>
+        </div>` : '';
+
+    const emailHtml = a.email
+      ? `<div class="agence-info">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+          <a href="mailto:${a.email}" style="color:inherit">${a.email}</a>
+        </div>` : '';
+
+    const heuresHtml = a.heures
+      ? `<span class="agence-heures">🕐 ${a.heures}</span>`
+      : '';
+
+    return `
+      <div class="agence-card reveal">
+        <div class="agence-banner" style="background:${color}"></div>
+        <div class="agence-body">
+          <div class="agence-head">
+            <div class="agence-logo" style="background:${color}18;border-color:${color}22">
+              ${logoHtml}
+            </div>
+            <div>
+              <div class="agence-name">${a.nomEntreprise}</div>
+              <div class="agence-activ">${a.activite || a.slogan || 'Location de véhicules'}</div>
+            </div>
+          </div>
+          ${a.ville ? `<div class="agence-ville">📍 ${a.ville}</div>` : ''}
+          <div class="agence-infos">
+            ${adresseHtml}
+            ${telHtml}
+            ${emailHtml}
+          </div>
+        </div>
+        <div class="agence-footer">
+          ${heuresHtml}
+          <a href="${vitrineUrl}" target="_blank" rel="noopener"
+             class="btn btn-blue btn-sm" style="background:${color};box-shadow:0 2px 10px ${color}44">
+            Voir la flotte
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>`;
+  }
+
+  async function loadAgences() {
+    const grid = document.getElementById('agences-grid');
+    try {
+      const res = await fetch('/api/public/agences');
+      if (!res.ok) throw new Error('Erreur réseau');
+      const json = await res.json();
+      const agences = json.data || json;
+
+      if (!agences.length) {
+        grid.innerHTML = `<div class="agences-empty">🏢 Aucune agence disponible pour le moment.<p>Soyez la première agence à rejoindre la plateforme !</p></div>`;
+        return;
+      }
+
+      grid.innerHTML = agences.map(renderAgenceCard).join('');
+      // Déclencher le reveal sur les nouvelles cartes
+      grid.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+    } catch {
+      grid.innerHTML = `<div class="agences-empty">⚠️ Impossible de charger les agences.<p>Veuillez réessayer plus tard.</p></div>`;
+    }
+  }
+
+  loadAgences();
 </script>
 </body>
 </html>

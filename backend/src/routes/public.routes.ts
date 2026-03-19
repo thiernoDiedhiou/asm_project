@@ -29,6 +29,12 @@ router.get(
   publicController.verifierContrat.bind(publicController)
 );
 
+// GET /api/public/agences — liste publique de toutes les agences actives (landing page)
+router.get(
+  '/agences',
+  publicController.getAgencesPubliques.bind(publicController)
+);
+
 // GET /api/public/tenant — infos publiques de branding du tenant courant
 router.get(
   '/tenant',

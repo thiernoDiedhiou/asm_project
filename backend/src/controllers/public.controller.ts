@@ -334,6 +334,56 @@ export class PublicController {
   }
 
   /**
+   * GET /api/public/agences
+   * Retourne la liste de toutes les agences actives de la plateforme
+   * avec leurs infos publiques (vitrine, contact, adresse).
+   * Aucune authentification requise — utilisé par la landing page.
+   */
+  async getAgencesPubliques(_req: Request, res: Response): Promise<void> {
+    try {
+      const tenants = await prisma.tenant.findMany({
+        where: { actif: true },
+        select: {
+          slug: true,
+          nomEntreprise: true,
+          slogan: true,
+          activite: true,
+          logo: true,
+          couleurPrimaire: true,
+          parametre: {
+            select: {
+              telephone: true,
+              email: true,
+              adresse: true,
+              ville: true,
+              heuresLunVen: true,
+            },
+          },
+        },
+        orderBy: { nomEntreprise: 'asc' },
+      });
+
+      const agences = tenants.map((t) => ({
+        slug: t.slug,
+        nomEntreprise: t.nomEntreprise,
+        slogan: t.slogan,
+        activite: t.activite,
+        logo: t.logo,
+        couleurPrimaire: t.couleurPrimaire,
+        telephone: t.parametre?.telephone || '',
+        email: t.parametre?.email || '',
+        adresse: t.parametre?.adresse || '',
+        ville: t.parametre?.ville || '',
+        heures: t.parametre?.heuresLunVen || '',
+      }));
+
+      sendSuccess(res, agences);
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
+    }
+  }
+
+  /**
    * GET /api/public/tenant
    * Retourne les informations publiques de branding du tenant courant.
    */
