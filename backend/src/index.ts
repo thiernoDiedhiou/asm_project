@@ -23,6 +23,7 @@ import dashboardRoutes from './routes/dashboard.routes';
 import maintenanceRoutes from './routes/maintenance.routes';
 import userRoutes from './routes/user.routes';
 import publicRoutes from './routes/public.routes';
+import { publicController } from './controllers/public.controller';
 import journalRoutes from './routes/journal.routes';
 import settingsRoutes from './routes/settings.routes';
 import tarifZoneRoutes from './routes/tarifZone.routes';
@@ -140,6 +141,9 @@ app.use('/uploads', express.static(uploadDir));
 // Routes tenant super-admin (pas de resolveTenant — accès cross-tenant)
 app.use('/api/tenants', tenantRoutes);
 
+// Route plateforme — sans résolution tenant (appelée depuis la landing page)
+app.get('/api/public/agences', publicController.getAgencesPubliques.bind(publicController));
+
 // Toutes les autres routes API sont scoped au tenant résolu depuis le sous-domaine/domaine
 app.use('/api/auth', resolveTenant, authRoutes);
 app.use('/api/vehicules', resolveTenant, vehiculeRoutes);
@@ -156,7 +160,7 @@ app.use('/api/tarif-zones', resolveTenant, tarifZoneRoutes);
 app.use('/api/tarification', resolveTenant, tarificationRoutes);
 
 // Route de santé
-app.get('/api/health', async (req, res) => {
+app.get('/api/health', async (_req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
     res.json({
