@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nous contacter · ASM Location</title>
+  <meta name="description" content="Contactez l'équipe ASM Location pour démarrer votre essai gratuit ou obtenir plus d'informations."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:    #2563eb;
+      --blue-dk: #1d4ed8;
+      --blue-xl: #eff6ff;
+      --amber:   #f59e0b;
+      --amber-dk:#d97706;
+      --ink:     #0f172a;
+      --ink-2:   #1e293b;
+      --ink-3:   #334155;
+      --muted:   #64748b;
+      --line:    #e2e8f0;
+      --wash:    #f8fafc;
+      --white:   #ffffff;
+      --r:       10px;
+      --s1: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+      --s2: 0 4px 16px rgba(15,23,42,.08), 0 2px 6px rgba(15,23,42,.05);
+      --s3: 0 12px 40px rgba(15,23,42,.12), 0 4px 12px rgba(15,23,42,.07);
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--wash);
+      color: var(--ink-3);
+      line-height: 1.65;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; inset-x: 0; z-index: 999;
+      background: rgba(255,255,255,.94);
+      backdrop-filter: blur(24px) saturate(180%);
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 1px 0 rgba(15,23,42,.04);
+    }
+    .nav-inner {
+      max-width: 1160px; margin-inline: auto; padding-inline: 24px;
+      height: 64px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px;
+      color: var(--blue); letter-spacing: -.02em;
+    }
+    .nav-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13.5px; font-weight: 600; color: var(--ink-3);
+      padding: 8px 16px; border-radius: 100px;
+      border: 1.5px solid var(--line); background: var(--white);
+      transition: all .18s;
+    }
+    .nav-back:hover { border-color: #cbd5e1; background: var(--wash); }
+
+    /* ── MAIN ── */
+    main {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 100px 24px 60px;
+    }
+
+    .contact-card {
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: var(--s3);
+      border: 1px solid var(--line);
+      padding: 56px 48px;
+      max-width: 560px;
+      width: 100%;
+    }
+
+    .contact-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 13px; border-radius: 100px;
+      font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+      background: var(--blue-xl); color: var(--blue);
+      border: 1px solid rgba(37,99,235,.14);
+      margin-bottom: 20px;
+    }
+    .contact-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); }
+
+    .contact-h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(26px, 4vw, 36px);
+      font-weight: 800; letter-spacing: -.035em; line-height: 1.15;
+      color: var(--ink); margin-bottom: 12px;
+    }
+    .contact-h1 span { color: var(--blue); }
+
+    .contact-sub {
+      font-size: 15px; color: var(--muted); margin-bottom: 36px; line-height: 1.7;
+    }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: var(--ink-3); margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid var(--line); border-radius: var(--r);
+      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink);
+      background: var(--wash);
+      transition: border-color .18s, box-shadow .18s;
+      outline: none;
+      resize: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+      background: var(--white);
+    }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: var(--muted); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .btn-submit {
+      width: 100%; padding: 14px 24px;
+      background: var(--blue); color: #fff;
+      border: none; border-radius: 100px;
+      font-family: 'Inter', sans-serif; font-weight: 700; font-size: 15px;
+      cursor: pointer; margin-top: 8px;
+      box-shadow: 0 2px 10px rgba(37,99,235,.28);
+      transition: all .18s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-submit:hover {
+      background: var(--blue-dk);
+      box-shadow: 0 4px 18px rgba(37,99,235,.38);
+      transform: translateY(-1px);
+    }
+
+    .contact-trust {
+      display: flex; align-items: center; gap: 20px;
+      margin-top: 24px; padding-top: 24px;
+      border-top: 1px solid var(--line);
+      flex-wrap: wrap;
+    }
+    .trust-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12.5px; color: var(--muted); font-weight: 500;
+    }
+    .trust-item svg { color: #059669; flex-shrink: 0; }
+
+    /* Success message */
+    .success-msg {
+      display: none;
+      text-align: center; padding: 48px 24px;
+    }
+    .success-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: #ecfdf5; border: 2px solid #059669;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .success-icon svg { color: #059669; }
+    .success-msg h2 {
+      font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 800;
+      color: var(--ink); margin-bottom: 10px;
+    }
+    .success-msg p { font-size: 14px; color: var(--muted); }
+
+    @media (max-width: 560px) {
+      .contact-card { padding: 36px 24px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">ASM Location</a>
+    <a href="index.html" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Retour
+    </a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+  <div class="contact-card">
+    <div id="form-content">
+      <div class="contact-eyebrow">
+        <span class="contact-dot"></span>
+        Démarrage gratuit
+      </div>
+
+      <h1 class="contact-h1">Lancez votre agence<br/><span>avec ASM Location</span></h1>
+      <p class="contact-sub">Remplissez ce formulaire et notre équipe vous contacte sous 24 h pour configurer votre espace.</p>
+
+      <form id="contactForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prenom">Prénom *</label>
+            <input type="text" id="prenom" name="prenom" placeholder="Votre prénom" required/>
+          </div>
+          <div class="form-group">
+            <label for="nom">Nom *</label>
+            <input type="text" id="nom" name="nom" placeholder="Votre nom" required/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email professionnel *</label>
+          <input type="email" id="email" name="email" placeholder="vous@votre-agence.com" required/>
+        </div>
+
+        <div class="form-group">
+          <label for="tel">Téléphone / WhatsApp</label>
+          <input type="tel" id="tel" name="tel" placeholder="+225 07 00 00 00 00"/>
+        </div>
+
+        <div class="form-group">
+          <label for="agence">Nom de votre agence</label>
+          <input type="text" id="agence" name="agence" placeholder="Ex : Prestige Auto Location"/>
+        </div>
+
+        <div class="form-group">
+          <label for="flotte">Taille de votre flotte</label>
+          <select id="flotte" name="flotte">
+            <option value="">-- Sélectionnez --</option>
+            <option value="1-5">1 – 5 véhicules</option>
+            <option value="6-20">6 – 20 véhicules</option>
+            <option value="21-50">21 – 50 véhicules</option>
+            <option value="50+">Plus de 50 véhicules</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="message">Message (optionnel)</label>
+          <textarea id="message" name="message" rows="3" placeholder="Décrivez vos besoins ou posez vos questions…"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          Envoyer ma demande
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+
+      <div class="contact-trust">
+        <div class="trust-item">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Essai gratuit 14 jours
+        </div>
+        <div class="trust-item">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Sans carte bancaire
+        </div>
+        <div class="trust-item">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Réponse sous 24 h
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="success-msg" id="successMsg">
+      <div class="success-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <h2>Demande envoyée !</h2>
+      <p>Merci, notre équipe vous contactera dans les prochaines 24 heures pour démarrer votre essai gratuit.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+  document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const prenom = document.getElementById('prenom').value.trim();
+    const nom    = document.getElementById('nom').value.trim();
+    const email  = document.getElementById('email').value.trim();
+
+    if (!prenom || !nom || !email) {
+      alert('Veuillez remplir les champs obligatoires (prénom, nom, email).');
+      return;
+    }
+
+    // Compose mailto
+    const sujet = encodeURIComponent('Demande d\'essai gratuit ASM Location');
+    const agence = document.getElementById('agence').value.trim();
+    const tel    = document.getElementById('tel').value.trim();
+    const flotte = document.getElementById('flotte').value;
+    const msg    = document.getElementById('message').value.trim();
+
+    const corps = encodeURIComponent(
+      `Prénom : ${prenom}\nNom : ${nom}\nEmail : ${email}` +
+      (tel    ? `\nTéléphone : ${tel}`    : '') +
+      (agence ? `\nAgence : ${agence}`    : '') +
+      (flotte ? `\nFlotte : ${flotte}`    : '') +
+      (msg    ? `\n\nMessage :\n${msg}`   : '')
+    );
+
+    window.location.href = `mailto:contact@innosft.com?subject=${sujet}&body=${corps}`;
+
+    // Show success state
+    document.getElementById('form-content').style.display = 'none';
+    document.getElementById('successMsg').style.display = 'block';
+  });
+</script>
+
+</body>
+</html>
