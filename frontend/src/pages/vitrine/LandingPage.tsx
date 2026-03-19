@@ -15,6 +15,124 @@ import {
 } from 'lucide-react';
 import { publicApi } from '../../services/api';
 
+// ── Keyframes injected once for the floating car animation ──
+const CAR_ANIM_CSS = `
+  @keyframes vitrine-bob   { 0%,100%{transform:translateY(0)}   50%{transform:translateY(-12px)} }
+  @keyframes vitrine-shade { 0%,100%{transform:scaleX(1);opacity:.7} 50%{transform:scaleX(.8);opacity:.3} }
+  @keyframes vitrine-fc    { 0%,100%{transform:translateY(0)}   50%{transform:translateY(-7px)} }
+`;
+
+function FloatingCarVisual({ disponibles }: { disponibles: number }) {
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: CAR_ANIM_CSS }} />
+      <div style={{ position: 'relative', width: '100%', animation: 'vitrine-bob 5s ease-in-out infinite' }}>
+
+        {/* ── Top-left floating card ── */}
+        <div style={{
+          position: 'absolute', top: '4px', left: '-10px',
+          background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px',
+          padding: '11px 15px', boxShadow: '0 4px 24px rgba(0,0,0,.12)',
+          zIndex: 2, animation: 'vitrine-fc 6s ease-in-out infinite', minWidth: '140px',
+        }}>
+          <div style={{ fontSize: '10px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '2px' }}>
+            Flotte disponible
+          </div>
+          <div style={{ fontSize: '20px', fontWeight: 900, lineHeight: 1.1, color: 'var(--color-primary)' }}>
+            {disponibles > 0 ? disponibles : '–'}
+            <span style={{ fontSize: '12px', fontWeight: 400, color: '#94a3b8' }}> véhicules</span>
+          </div>
+          <div style={{ fontSize: '10.5px', fontWeight: 600, marginTop: '2px', color: '#059669' }}>↑ Prêts à partir</div>
+        </div>
+
+        {/* ── Bottom-right floating card ── */}
+        <div style={{
+          position: 'absolute', bottom: '20px', right: '-10px',
+          background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px',
+          padding: '11px 15px', boxShadow: '0 4px 24px rgba(0,0,0,.12)',
+          zIndex: 2, animation: 'vitrine-fc 6s ease-in-out infinite', animationDelay: '-2.5s', minWidth: '130px',
+        }}>
+          <div style={{ fontSize: '10px', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '2px' }}>
+            Réservation
+          </div>
+          <div style={{ fontSize: '20px', fontWeight: 900, lineHeight: 1.1, color: '#f59e0b' }}>En ligne</div>
+          <div style={{ fontSize: '10.5px', fontWeight: 600, marginTop: '2px', color: '#d97706' }}>↑ Rapide & simple</div>
+        </div>
+
+        {/* ── Car SVG ── */}
+        <svg viewBox="0 0 500 240" fill="none" xmlns="http://www.w3.org/2000/svg"
+          style={{ width: '100%', filter: 'drop-shadow(0 14px 44px rgba(0,0,0,.22))' }}>
+          <rect x="40" y="140" width="420" height="70" rx="12" fill="url(#vcb1)"/>
+          <path d="M130 140 L160 85 Q200 60 250 55 Q300 50 340 65 L380 100 L390 140Z" fill="url(#vcb2)"/>
+          <path d="M155 130 L178 88 Q210 70 250 65 Q285 62 315 72 L345 100 L355 130Z" fill="url(#vcw)"/>
+          <line x1="250" y1="140" x2="250" y2="208" stroke="rgba(255,255,255,.08)" strokeWidth="1"/>
+          <rect x="195" y="170" width="28" height="4" rx="2" fill="rgba(255,255,255,.12)"/>
+          <rect x="277" y="170" width="28" height="4" rx="2" fill="rgba(255,255,255,.12)"/>
+          <ellipse cx="450" cy="162" rx="13" ry="8" fill="url(#vcl)" opacity=".9"/>
+          <path d="M463 158 L490 146 L490 178 L463 166Z" fill="url(#vcb3)" opacity=".22"/>
+          <rect x="50" y="156" width="15" height="9" rx="3" fill="#ef4444" opacity=".7"/>
+          {/* Front wheel */}
+          <circle cx="150" cy="210" r="30" fill="#111827"/>
+          <circle cx="150" cy="210" r="22" fill="#1e293b"/>
+          <circle cx="150" cy="210" r="13" fill="#0f172a"/>
+          <circle cx="150" cy="210" r="5"  fill="url(#vcr)"/>
+          <line x1="150" y1="188" x2="150" y2="210" stroke="rgba(255,255,255,.28)" strokeWidth="1.5"/>
+          <line x1="172" y1="210" x2="150" y2="210" stroke="rgba(255,255,255,.28)" strokeWidth="1.5"/>
+          <line x1="150" y1="232" x2="150" y2="210" stroke="rgba(255,255,255,.28)" strokeWidth="1.5"/>
+          <line x1="128" y1="210" x2="150" y2="210" stroke="rgba(255,255,255,.28)" strokeWidth="1.5"/>
+          {/* Rear wheel */}
+          <circle cx="360" cy="210" r="30" fill="#111827"/>
+          <circle cx="360" cy="210" r="22" fill="#1e293b"/>
+          <circle cx="360" cy="210" r="13" fill="#0f172a"/>
+          <circle cx="360" cy="210" r="5"  fill="url(#vcr2)"/>
+          <line x1="360" y1="188" x2="360" y2="210" stroke="rgba(255,255,255,.28)" strokeWidth="1.5"/>
+          <line x1="382" y1="210" x2="360" y2="210" stroke="rgba(255,255,255,.28)" strokeWidth="1.5"/>
+          <line x1="360" y1="232" x2="360" y2="210" stroke="rgba(255,255,255,.28)" strokeWidth="1.5"/>
+          <line x1="338" y1="210" x2="360" y2="210" stroke="rgba(255,255,255,.28)" strokeWidth="1.5"/>
+          <defs>
+            <linearGradient id="vcb1" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style={{ stopColor: 'var(--color-primary)', stopOpacity: 0.85 }}/>
+              <stop offset="100%" style={{ stopColor: 'var(--color-primary)', stopOpacity: 0.6 }}/>
+            </linearGradient>
+            <linearGradient id="vcb2" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style={{ stopColor: 'var(--color-primary)', stopOpacity: 0.9 }}/>
+              <stop offset="100%" style={{ stopColor: 'var(--color-primary)', stopOpacity: 0.7 }}/>
+            </linearGradient>
+            <linearGradient id="vcw" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.22"/>
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0.06"/>
+            </linearGradient>
+            <linearGradient id="vcl" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#fcd34d"/>
+              <stop offset="100%" stopColor="#fef9c3"/>
+            </linearGradient>
+            <linearGradient id="vcb3" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#fcd34d"/>
+              <stop offset="100%" stopColor="transparent"/>
+            </linearGradient>
+            <radialGradient id="vcr">
+              <stop offset="0%" stopColor="rgba(255,255,255,.8)"/>
+              <stop offset="100%" style={{ stopColor: 'var(--color-primary)' }}/>
+            </radialGradient>
+            <radialGradient id="vcr2">
+              <stop offset="0%" stopColor="rgba(255,255,255,.8)"/>
+              <stop offset="100%" style={{ stopColor: 'var(--color-primary)' }}/>
+            </radialGradient>
+          </defs>
+        </svg>
+
+        {/* ── Shadow ── */}
+        <div style={{
+          position: 'absolute', bottom: '-14px', left: '12%', right: '12%',
+          height: '22px', borderRadius: '50%',
+          background: 'rgba(0,0,0,.18)', filter: 'blur(14px)',
+          animation: 'vitrine-shade 5s ease-in-out infinite',
+        }}/>
+      </div>
+    </>
+  );
+}
+
 interface PromoSettings {
   bannierePromo?: string;
   promoSousTexte?: string;
@@ -103,6 +221,7 @@ function VehiculeCard({ v, onReserver }: { v: VehiculePublic; onReserver: () => 
 export function LandingPage() {
   const navigate = useNavigate();
   const [vehicules, setVehicules] = useState<VehiculePublic[]>([]);
+  const [totalDisponibles, setTotalDisponibles] = useState(0);
   const [promo, setPromo] = useState<PromoSettings>({});
   const [nomEntreprise, setNomEntreprise] = useState('');
   const [ville, setVille] = useState('');
@@ -111,6 +230,7 @@ export function LandingPage() {
   useEffect(() => {
     publicApi.getVehicules().then((res) => {
       const data = res.data?.data || [];
+      setTotalDisponibles(data.length);
       setVehicules(data.slice(0, 3));
     }).catch(() => {});
 
@@ -164,35 +284,45 @@ export function LandingPage() {
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-white/15 text-white text-sm font-medium px-4 py-2 rounded-full mb-6">
-              <Star className="h-4 w-4 text-asm-or fill-asm-or" />
-              {activite || 'Location de véhicules'}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+            {/* ── Left: text ── */}
+            <div>
+              <div className="inline-flex items-center gap-2 bg-white/15 text-white text-sm font-medium px-4 py-2 rounded-full mb-6">
+                <Star className="h-4 w-4 text-asm-or fill-asm-or" />
+                {activite || 'Location de véhicules'}
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
+                Louez un véhicule
+                <span className="text-asm-or block">en toute confiance</span>
+              </h1>
+              <p className="text-white/80 text-lg mb-8 leading-relaxed">
+                {nomEntreprise || 'Votre agence'} vous offre une flotte de véhicules modernes pour tous vos
+                besoins{ville ? ` à ${ville} et ses environs` : ''}. Tarifs clairs, service fiable, zéro surprise.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={() => navigate('/flotte')}
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-asm-vert font-bold rounded-xl shadow-lg hover:bg-gray-50 transition-colors text-base"
+                >
+                  <Car className="h-5 w-5" />
+                  Voir notre flotte
+                </button>
+                <button
+                  onClick={() => navigate('/reserver')}
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-asm-or text-asm-vert font-bold rounded-xl shadow-lg hover:bg-yellow-400 transition-colors text-base"
+                >
+                  Réserver maintenant
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </div>
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
-              Louez un véhicule
-              <span className="text-asm-or block">en toute confiance</span>
-            </h1>
-            <p className="text-white/80 text-lg mb-8 leading-relaxed">
-              {nomEntreprise || 'Votre agence'} vous offre une flotte de véhicules modernes pour tous vos
-              besoins{ville ? ` à ${ville} et ses environs` : ''}. Tarifs clairs, service fiable, zéro surprise.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => navigate('/flotte')}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-asm-vert font-bold rounded-xl shadow-lg hover:bg-gray-50 transition-colors text-base"
-              >
-                <Car className="h-5 w-5" />
-                Voir notre flotte
-              </button>
-              <button
-                onClick={() => navigate('/reserver')}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-asm-or text-asm-vert font-bold rounded-xl shadow-lg hover:bg-yellow-400 transition-colors text-base"
-              >
-                Réserver maintenant
-                <ChevronRight className="h-5 w-5" />
-              </button>
+
+            {/* ── Right: floating car ── */}
+            <div className="hidden lg:flex items-center justify-center px-6 py-4">
+              <FloatingCarVisual disponibles={totalDisponibles} />
             </div>
+
           </div>
         </div>
       </section>
