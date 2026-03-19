@@ -59,11 +59,14 @@ function FloatingCarVisual({ disponibles }: { disponibles: number }) {
           <div style={{ fontSize: '10.5px', fontWeight: 600, marginTop: '2px', color: '#d97706' }}>↑ Rapide & simple</div>
         </div>
 
-        {/* ── Car SVG — silhouette réaliste de berline ── */}
+        {/* ── Car SVG — berline premium midnight blue ── */}
         <svg viewBox="0 0 540 215" fill="none" xmlns="http://www.w3.org/2000/svg"
-          style={{ width: '100%', filter: 'drop-shadow(0 14px 40px rgba(0,0,0,.30))' }}>
+          style={{ width: '100%', filter: 'drop-shadow(0 18px 50px rgba(0,0,0,.50))' }}>
 
-          {/* ── Carrosserie principale avec découpes jantes ── */}
+          {/* ── Halo ambiant sous la voiture ── */}
+          <ellipse cx="270" cy="210" rx="195" ry="8" fill="rgba(14,30,64,0.55)"/>
+
+          {/* ── Carrosserie principale ── */}
           <path d="
             M 62 174
             C 50 164 46 150 50 136
@@ -86,10 +89,24 @@ function FloatingCarVisual({ disponibles }: { disponibles: number }) {
             Z
           " fill="url(#vcBody)"/>
 
-          {/* ── Bandeau chromé bas de caisse ── */}
-          <rect x="113" y="180" width="252" height="5" rx="2.5" fill="#cbd5e1"/>
+          {/* ── Panneau bas de caisse (assombri) ── */}
+          <path d="
+            M 113 162 L 113 182
+            A 35 22 0 0 0 183 182
+            L 365 182
+            A 35 22 0 0 0 435 182
+            L 454 178
+            C 460 174 464 168 466 163 Z
+          " fill="rgba(0,0,0,0.18)"/>
 
-          {/* ── Vitres (serre) ── */}
+          {/* ── Reflet capot / toit ── */}
+          <path d="M 190 72 Q 292 50 412 62 Q 400 52 330 38 Q 262 38 212 56 Q 196 64 190 72 Z"
+            fill="rgba(255,255,255,0.07)"/>
+
+          {/* ── Bande chromée bas de caisse ── */}
+          <rect x="113" y="180" width="252" height="5" rx="2.5" fill="url(#vcChrome)"/>
+
+          {/* ── Vitres ── */}
           <path d="
             M 204 120
             L 224 63
@@ -101,113 +118,142 @@ function FloatingCarVisual({ disponibles }: { disponibles: number }) {
             Z
           " fill="url(#vcGlass)"/>
 
-          {/* ── Reflet vitre avant ── */}
-          <path d="M 218 118 L 236 64 C 246 50 256 44 262 42 L 248 44 C 232 50 220 68 210 90 Z"
-            fill="rgba(255,255,255,0.07)"/>
+          {/* ── Reflets vitre ── */}
+          <path d="M 212 118 L 232 64 C 242 50 252 44 258 42 L 244 44 C 228 50 216 68 206 90 Z"
+            fill="rgba(255,255,255,0.05)"/>
+          <path d="M 340 42 L 348 42 L 428 118 L 420 118 Z"
+            fill="rgba(255,255,255,0.04)"/>
 
-          {/* ── Montant A (pare-brise) ── */}
-          <line x1="262" y1="40" x2="204" y2="120" stroke="rgba(255,255,255,0.18)" strokeWidth="2.5"/>
+          {/* ── Montant A ── */}
+          <line x1="262" y1="40" x2="204" y2="120" stroke="rgba(255,255,255,0.15)" strokeWidth="2.5"/>
 
-          {/* ── Montant B (entre vitres) ── */}
-          <rect x="316" y="40" width="11" height="80" rx="2" fill="rgba(0,0,0,0.6)"/>
+          {/* ── Montant B ── */}
+          <rect x="316" y="40" width="11" height="80" rx="2" fill="rgba(0,0,0,0.65)"/>
 
-          {/* ── Ligne de ceinture (waistline) ── */}
+          {/* ── Ligne de ceinture ── */}
           <path d="M 112 120 Q 272 114 430 120"
-            stroke="rgba(255,255,255,0.40)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+            stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
 
-          {/* ── Reflet de carrosserie (highlight) ── */}
-          <path d="M 116 144 Q 274 134 442 144"
-            stroke="rgba(255,255,255,0.24)" strokeWidth="4" fill="none" strokeLinecap="round"/>
+          {/* ── Highlight principal carrosserie ── */}
+          <path d="M 116 137 Q 274 127 442 137"
+            stroke="rgba(255,255,255,0.20)" strokeWidth="5" fill="none" strokeLinecap="round"/>
 
           {/* ── Ligne de porte ── */}
-          <path d="M 116 158 Q 274 154 432 155"
-            stroke="rgba(255,255,255,0.10)" strokeWidth="1" fill="none"/>
+          <path d="M 116 158 Q 274 153 432 155"
+            stroke="rgba(255,255,255,0.07)" strokeWidth="1.2" fill="none"/>
 
-          {/* ── Poignées de porte ── */}
-          <rect x="224" y="153" width="34" height="6" rx="3" fill="rgba(255,255,255,0.32)"/>
-          <rect x="350" y="151" width="34" height="6" rx="3" fill="rgba(255,255,255,0.32)"/>
+          {/* ── Poignées chromées ── */}
+          <rect x="224" y="153" width="34" height="6" rx="3" fill="rgba(203,213,225,0.55)"/>
+          <rect x="350" y="151" width="34" height="6" rx="3" fill="rgba(203,213,225,0.55)"/>
 
           {/* ── Rétroviseur ── */}
-          <path d="M 203 118 L 188 115 L 186 126 L 201 128 Z" fill="#e8edf3"/>
-          <rect x="188" y="115" width="1.5" height="13" rx="0.75" fill="#cbd5e1"/>
+          <path d="M 203 118 L 188 115 L 186 126 L 201 128 Z" fill="url(#vcMirrorGrad)"/>
+          <rect x="188" y="115" width="1.5" height="13" rx="0.75" fill="#4a6fa5"/>
 
-          {/* ── Phare avant (full LED) ── */}
-          {/* Boîtier */}
-          <path d="M 53 148 L 84 136 L 86 164 L 56 169 Z" fill="#f0f4f8" rx="3"/>
-          {/* Fond noir du phare */}
-          <path d="M 57 150 L 82 140 L 83 162 L 59 166 Z" fill="#1e293b"/>
-          {/* Oeil LED */}
-          <ellipse cx="70" cy="153" rx="9" ry="7" fill="#0f172a"/>
+          {/* ── Phare avant LED ── */}
+          <path d="M 52 148 L 84 136 L 86 165 L 55 170 Z" fill="#0a1528"/>
+          <path d="M 56 150 L 82 140 L 83 163 L 58 167 Z" fill="#060e1a"/>
+          {/* DRL barre */}
+          <rect x="57" y="136" width="27" height="4" rx="2" fill="white" opacity="0.96"/>
+          <rect x="70" y="136" width="1.5" height="4" fill="rgba(255,255,255,0.45)"/>
+          {/* Optique principale */}
+          <ellipse cx="70" cy="153" rx="9" ry="7" fill="#040b15"/>
           <ellipse cx="70" cy="153" rx="6" ry="4.5" fill="url(#vcHeadlight)"/>
-          {/* DRL (barre lumineuse) */}
-          <rect x="57" y="136" width="27" height="4" rx="2" fill="white" opacity="0.95"/>
-          {/* Séparation DRL */}
-          <rect x="70" y="136" width="1.5" height="4" fill="#f0f4f8" opacity="0.6"/>
+          {/* Anneau halo LED */}
+          <ellipse cx="70" cy="153" rx="7.5" ry="5.8" fill="none" stroke="rgba(147,197,253,0.50)" strokeWidth="1.5"/>
+          {/* Bande LED signature */}
+          <path d="M 57 159 L 82 150" stroke="rgba(147,197,253,0.55)" strokeWidth="1.5" strokeLinecap="round"/>
 
           {/* ── Calandre avant ── */}
-          <path d="M 50 168 Q 56 160 74 160 L 75 170 Q 59 172 52 175 Z" fill="#1e293b" opacity="0.85"/>
-          <line x1="56" y1="163" x2="57" y2="172" stroke="#334155" strokeWidth="1"/>
-          <line x1="62" y1="161" x2="63" y2="171" stroke="#334155" strokeWidth="1"/>
-          <line x1="68" y1="160" x2="69" y2="170" stroke="#334155" strokeWidth="1"/>
+          <path d="M 49 168 Q 56 160 74 160 L 75 171 Q 58 173 51 176 Z" fill="#060e1a" opacity="0.92"/>
+          <line x1="56" y1="163" x2="57" y2="172" stroke="#1e3a5f" strokeWidth="1.2"/>
+          <line x1="62" y1="161" x2="63" y2="171" stroke="#1e3a5f" strokeWidth="1.2"/>
+          <line x1="68" y1="160" x2="69" y2="170" stroke="#1e3a5f" strokeWidth="1.2"/>
+          {/* Feu de brouillard */}
+          <ellipse cx="62" cy="174" rx="5" ry="3" fill="rgba(253,224,71,0.85)"/>
 
-          {/* ── Feux arrière ── */}
-          <path d="M 456 144 L 476 154 L 474 174 L 454 168 Z" fill="#0f172a"/>
-          <path d="M 458 147 L 473 155 L 471 171 L 456 166 Z" fill="url(#vcTaillight)"/>
-          {/* Barre de feux LED */}
-          <rect x="454" y="140" width="20" height="4" rx="2" fill="#fca5a5" opacity="0.80"/>
+          {/* ── Feux arrière LED ── */}
+          <path d="M 456 144 L 477 154 L 475 174 L 454 168 Z" fill="#060e1a"/>
+          <path d="M 458 147 L 474 155 L 472 171 L 456 166 Z" fill="url(#vcTaillight)"/>
+          {/* Barre LED supérieure */}
+          <rect x="454" y="140" width="21" height="4.5" rx="2.25" fill="#f87171" opacity="0.92"/>
+          {/* Halo rouge */}
+          <rect x="452" y="138" width="25" height="10" rx="5" fill="rgba(239,68,68,0.18)"/>
 
-          {/* ── Coffre / hayon ligne ── */}
-          <path d="M 454 178 C 462 162 468 144 472 138" stroke="rgba(255,255,255,0.12)" strokeWidth="1" fill="none"/>
+          {/* ── Ligne coffre ── */}
+          <path d="M 454 178 C 462 162 468 144 472 138" stroke="rgba(255,255,255,0.10)" strokeWidth="1.2" fill="none"/>
 
-          {/* ── Roue arrière ── */}
-          <circle cx="400" cy="199" r="34" fill="#111827"/>
-          <circle cx="400" cy="199" r="27" fill="#1e293b"/>
-          {/* Jante 5 branches */}
-          <line x1="400" y1="199" x2="400" y2="172" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
-          <line x1="400" y1="199" x2="426" y2="191" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
-          <line x1="400" y1="199" x2="416" y2="222" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
-          <line x1="400" y1="199" x2="384" y2="222" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
-          <line x1="400" y1="199" x2="374" y2="191" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
-          {/* Anneau jante */}
-          <circle cx="400" cy="199" r="18" fill="none" stroke="#475569" strokeWidth="1.5"/>
-          {/* Centre */}
-          <circle cx="400" cy="199" r="9" fill="#0f172a"/>
-          <circle cx="400" cy="199" r="5" fill="url(#vcHub)"/>
+          {/* ── Roue arrière — jante 10 branches ── */}
+          <circle cx="400" cy="199" r="34" fill="#07090f"/>
+          <circle cx="400" cy="199" r="27" fill="#0f1520"/>
+          {Array.from({ length: 10 }, (_, i) => {
+            const a = (i * 36 - 90) * (Math.PI / 180);
+            return (
+              <line key={`rs${i}`}
+                x1={400} y1={199}
+                x2={400 + 23 * Math.cos(a)}
+                y2={199 + 23 * Math.sin(a)}
+                stroke="#64748b" strokeWidth="3" strokeLinecap="round"
+              />
+            );
+          })}
+          <circle cx="400" cy="199" r="19" fill="none" stroke="#334155" strokeWidth="2"/>
+          <circle cx="400" cy="199" r="10" fill="#07090f"/>
+          <circle cx="400" cy="199" r="5.5" fill="url(#vcHub)"/>
 
-          {/* ── Roue avant ── */}
-          <circle cx="148" cy="199" r="34" fill="#111827"/>
-          <circle cx="148" cy="199" r="27" fill="#1e293b"/>
-          {/* Jante 5 branches */}
-          <line x1="148" y1="199" x2="148" y2="172" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
-          <line x1="148" y1="199" x2="174" y2="191" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
-          <line x1="148" y1="199" x2="164" y2="222" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
-          <line x1="148" y1="199" x2="132" y2="222" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
-          <line x1="148" y1="199" x2="122" y2="191" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
-          {/* Anneau jante */}
-          <circle cx="148" cy="199" r="18" fill="none" stroke="#475569" strokeWidth="1.5"/>
-          {/* Centre */}
-          <circle cx="148" cy="199" r="9" fill="#0f172a"/>
-          <circle cx="148" cy="199" r="5" fill="url(#vcHub)"/>
+          {/* ── Roue avant — jante 10 branches ── */}
+          <circle cx="148" cy="199" r="34" fill="#07090f"/>
+          <circle cx="148" cy="199" r="27" fill="#0f1520"/>
+          {Array.from({ length: 10 }, (_, i) => {
+            const a = (i * 36 - 90) * (Math.PI / 180);
+            return (
+              <line key={`fs${i}`}
+                x1={148} y1={199}
+                x2={148 + 23 * Math.cos(a)}
+                y2={199 + 23 * Math.sin(a)}
+                stroke="#64748b" strokeWidth="3" strokeLinecap="round"
+              />
+            );
+          })}
+          <circle cx="148" cy="199" r="19" fill="none" stroke="#334155" strokeWidth="2"/>
+          <circle cx="148" cy="199" r="10" fill="#07090f"/>
+          <circle cx="148" cy="199" r="5.5" fill="url(#vcHub)"/>
 
           <defs>
-            <linearGradient id="vcBody" x1="30%" y1="0%" x2="70%" y2="100%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="1"/>
-              <stop offset="60%" stopColor="#f1f5f9" stopOpacity="0.97"/>
-              <stop offset="100%" stopColor="#e2e8f0" stopOpacity="0.94"/>
+            {/* Carrosserie bleu midnight premium */}
+            <linearGradient id="vcBody" x1="20%" y1="0%" x2="80%" y2="100%">
+              <stop offset="0%" stopColor="#1e3a5f"/>
+              <stop offset="45%" stopColor="#152d4c"/>
+              <stop offset="100%" stopColor="#0d1f36"/>
             </linearGradient>
+            {/* Vitres teintées bleu nuit */}
             <linearGradient id="vcGlass" x1="15%" y1="0%" x2="85%" y2="100%">
-              <stop offset="0%" stopColor="#0f172a" stopOpacity="0.92"/>
-              <stop offset="100%" stopColor="#1e293b" stopOpacity="0.85"/>
+              <stop offset="0%" stopColor="#0d1f36" stopOpacity="0.96"/>
+              <stop offset="100%" stopColor="#162d4e" stopOpacity="0.88"/>
             </linearGradient>
+            {/* Chrome sill */}
+            <linearGradient id="vcChrome" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#e2e8f0"/>
+              <stop offset="50%" stopColor="#94a3b8"/>
+              <stop offset="100%" stopColor="#cbd5e1"/>
+            </linearGradient>
+            {/* Rétroviseur */}
+            <linearGradient id="vcMirrorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#1e3a5f"/>
+              <stop offset="100%" stopColor="#0d1f36"/>
+            </linearGradient>
+            {/* Phare LED blanc-bleu */}
             <radialGradient id="vcHeadlight" cx="40%" cy="40%">
-              <stop offset="0%" stopColor="#bfdbfe" stopOpacity="0.9"/>
-              <stop offset="60%" stopColor="#fcd34d" stopOpacity="0.7"/>
-              <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.5"/>
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="1"/>
+              <stop offset="35%" stopColor="#bfdbfe" stopOpacity="0.92"/>
+              <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.35"/>
             </radialGradient>
+            {/* Feux arrière rouge vif */}
             <linearGradient id="vcTaillight" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ef4444" stopOpacity="0.9"/>
-              <stop offset="100%" stopColor="#b91c1c" stopOpacity="0.7"/>
+              <stop offset="0%" stopColor="#ef4444" stopOpacity="0.97"/>
+              <stop offset="100%" stopColor="#b91c1c" stopOpacity="0.82"/>
             </linearGradient>
+            {/* Centre jante */}
             <radialGradient id="vcHub" cx="35%" cy="35%">
               <stop offset="0%" stopColor="#94a3b8"/>
               <stop offset="100%" stopColor="#334155"/>
@@ -219,7 +265,7 @@ function FloatingCarVisual({ disponibles }: { disponibles: number }) {
         <div style={{
           position: 'absolute', bottom: '-14px', left: '10%', right: '10%',
           height: '22px', borderRadius: '50%',
-          background: 'rgba(0,0,0,.20)', filter: 'blur(14px)',
+          background: 'rgba(0,0,0,.25)', filter: 'blur(16px)',
           animation: 'vitrine-shade 5s ease-in-out infinite',
         }}/>
       </div>
