@@ -3,1346 +3,1441 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ASM Location · Logiciel SaaS pour agences de location de véhicules</title>
-  <meta name="description" content="Pilotez votre flotte, gérez vos contrats et encaissez vos paiements depuis une seule plateforme. La solution SaaS pensée pour les agences de location en Afrique."/>
+  <title>ASM Location — Logiciel de gestion pour agences de location</title>
+  <meta name="description" content="La plateforme SaaS qui modernise la gestion de votre agence de location de véhicules. Flotte, contrats, paiements — tout en un."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Urbanist:wght@700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 
   <style>
-    /* ════════════════════════════════════════════
-       RESET & TOKENS
-    ════════════════════════════════════════════ */
+    /* ─── Base ─── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --ink:      #ffffff;
-      --surface:  #f1f5f9;
-      --glass:    rgba(0,0,0,.032);
-      --stroke:   rgba(0,0,0,.08);
-      --blue:     #2563eb;
-      --blue-lt:  #1d4ed8;
-      --amber:    #d97706;
-      --amber-lt: #b45309;
-      --emerald:  #059669;
-      --text:     #0f172a;
-      --muted:    #64748b;
-      --r:        18px;
-      font-size: 16px;
+      --white:   #ffffff;
+      --off:     #fafafa;
+      --border:  #e5e7eb;
+      --light:   #f3f4f6;
+      --muted:   #6b7280;
+      --dark:    #374151;
+      --ink:     #111827;
+      --blue:    #2563eb;
+      --blue-dk: #1d4ed8;
+      --green:   #16a34a;
+      --amber:   #d97706;
+      --red:     #dc2626;
     }
-    html { scroll-behavior: smooth; }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
     body {
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      background: var(--ink);
-      color: var(--text);
-      overflow-x: hidden;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--white);
+      color: var(--ink);
       line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 3px; }
+
     a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
 
-    .wrap { max-width: 1200px; margin-inline: auto; padding-inline: 28px; }
+    .container {
+      max-width: 1120px;
+      margin-inline: auto;
+      padding-inline: 32px;
+    }
 
-    /* ════════════════════════════════════════════
-       NAVBAR
-    ════════════════════════════════════════════ */
-    #nav {
-      position: fixed; top: 0; inset-x: 0; z-index: 999;
-      transition: background .4s, border-color .4s;
-    }
-    #nav.solid {
-      background: rgba(255,255,255,.92);
-      backdrop-filter: blur(20px) saturate(160%);
-      border-bottom: 1px solid var(--stroke);
-    }
-    .nav-row {
-      display: flex; align-items: center;
-      height: 68px; gap: 40px;
-    }
-    .brand {
-      display: flex; align-items: center; gap: 11px; flex-shrink: 0;
-    }
-    .brand-mark {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--blue) 0%, #1d4ed8 100%);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 20px rgba(37,99,235,.5);
-    }
-    .brand-mark svg { display: block; }
-    .brand-name {
-      font-family: 'Urbanist', sans-serif;
-      font-size: 19px; font-weight: 800; letter-spacing: -.02em;
-      background: linear-gradient(90deg, var(--text) 40%, var(--blue));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .nav-links {
-      display: flex; gap: 28px; margin-left: auto;
-    }
-    .nav-links a {
-      font-size: 14px; font-weight: 500; color: var(--muted);
-      transition: color .2s;
-    }
-    .nav-links a:hover { color: var(--text); }
-    .nav-end { display: flex; gap: 10px; align-items: center; }
+    /* ─── Typography ─── */
+    .serif { font-family: 'Instrument Serif', Georgia, serif; }
 
+    /* ─── Buttons ─── */
     .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 10px 22px; border-radius: 100px;
-      font-size: 14px; font-weight: 600; cursor: pointer; border: none;
-      transition: all .2s; white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: inherit; font-size: 14px; font-weight: 500;
+      padding: 10px 20px; border-radius: 8px; border: none;
+      cursor: pointer; transition: all .15s; white-space: nowrap;
+      text-decoration: none;
     }
-    .btn-ghost {
-      background: var(--glass); color: var(--text);
-      border: 1px solid var(--stroke);
+    .btn-primary {
+      background: var(--ink); color: #fff;
     }
-    .btn-ghost:hover { background: rgba(255,255,255,.08); }
+    .btn-primary:hover { background: #1f2937; }
+
+    .btn-secondary {
+      background: var(--white); color: var(--ink);
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 2px rgba(0,0,0,.05);
+    }
+    .btn-secondary:hover { background: var(--off); }
+
     .btn-blue {
       background: var(--blue); color: #fff;
-      box-shadow: 0 0 24px rgba(37,99,235,.45);
     }
-    .btn-blue:hover {
-      background: #3b82f6;
-      box-shadow: 0 0 36px rgba(37,99,235,.65);
-      transform: translateY(-1px);
-    }
-    .btn-amber {
-      background: linear-gradient(135deg, var(--amber), #d97706);
-      color: #000; font-weight: 700;
-      box-shadow: 0 0 24px rgba(245,158,11,.35);
-    }
-    .btn-amber:hover {
-      box-shadow: 0 0 36px rgba(245,158,11,.55);
-      transform: translateY(-1px);
-    }
-    .btn-lg { padding: 14px 32px; font-size: 16px; }
-    .btn-xl { padding: 16px 40px; font-size: 17px; }
+    .btn-blue:hover { background: var(--blue-dk); }
 
-    /* ════════════════════════════════════════════
-       HERO
-    ════════════════════════════════════════════ */
-    #hero {
-      min-height: 100vh;
-      display: flex; flex-direction: column; justify-content: center;
-      padding-top: 100px; padding-bottom: 60px;
-      position: relative; overflow: hidden;
+    .btn-lg { padding: 13px 28px; font-size: 15px; font-weight: 600; border-radius: 10px; }
+    .btn-xl { padding: 15px 32px; font-size: 16px; font-weight: 600; border-radius: 10px; }
+
+    /* Arrow icon */
+    .arrow {
+      display: inline-block; transition: transform .15s;
+    }
+    .btn:hover .arrow { transform: translateX(3px); }
+
+    /* ─── NAV ─── */
+    header {
+      position: fixed; top: 0; inset-x: 0; z-index: 100;
+      background: rgba(255,255,255,.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      display: flex; align-items: center;
+      height: 60px; gap: 8px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 15px; font-weight: 700; color: var(--ink);
+      margin-right: auto;
+    }
+    .logo-icon {
+      width: 30px; height: 30px; border-radius: 7px;
+      background: var(--ink);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-icon svg { display: block; }
+    .nav-links {
+      display: flex; align-items: center; gap: 4px;
+      margin-right: 16px;
+    }
+    .nav-links a {
+      font-size: 14px; color: var(--muted); font-weight: 500;
+      padding: 6px 12px; border-radius: 6px;
+      transition: color .15s, background .15s;
+    }
+    .nav-links a:hover { color: var(--ink); background: var(--light); }
+
+    /* ─── HERO ─── */
+    .hero {
+      padding-top: 140px;
+      padding-bottom: 96px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
     }
 
-    /* Animated background */
-    .hero-canvas {
+    /* Subtle dot grid */
+    .hero::before {
+      content: '';
       position: absolute; inset: 0; pointer-events: none;
-    }
-    .glow {
-      position: absolute; border-radius: 50%;
-      filter: blur(100px); opacity: .16; animation: drift 10s ease-in-out infinite;
-    }
-    .glow-1 { width: 700px; height: 500px; background: #bfdbfe; top: -150px; left: -150px; }
-    .glow-2 { width: 500px; height: 500px; background: #fde68a; bottom: -100px; right: -100px; animation-delay: -5s; opacity: .4; }
-    .glow-3 { width: 400px; height: 300px; background: #ddd6fe; top: 40%; left: 45%; animation-delay: -3s; }
-    @keyframes drift {
-      0%,100% { transform: translate(0,0) scale(1); }
-      50% { transform: translate(40px,-40px) scale(1.08); }
-    }
-
-    /* Road line */
-    .road {
-      position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, transparent, var(--blue), var(--amber), var(--blue), transparent);
+      background-image: radial-gradient(circle, #d1d5db 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black, transparent);
       opacity: .5;
     }
-    .road::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: inherit;
-      animation: road-scan 3s linear infinite;
-      filter: blur(8px);
-    }
-    @keyframes road-scan { from { transform: scaleX(0) translateX(0); } to { transform: scaleX(1); } }
 
-    /* Grid */
-    .hero-grid-bg {
-      position: absolute; inset: 0;
-      background-image:
-        linear-gradient(rgba(37,99,235,.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(37,99,235,.07) 1px, transparent 1px);
-      background-size: 64px 64px;
-      mask-image: radial-gradient(ellipse 100% 90% at 50% 0%, black 20%, transparent 100%);
-    }
+    .hero-content { position: relative; z-index: 1; }
 
-    .hero-inner {
-      position: relative; z-index: 1;
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 60px; align-items: center;
-    }
-
-    /* Pill badge */
-    .pill {
+    .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 8px;
-      padding: 5px 14px 5px 8px; border-radius: 100px;
-      background: rgba(37,99,235,.1); border: 1px solid rgba(37,99,235,.28);
-      font-size: 12.5px; font-weight: 600; color: var(--blue-lt);
-      margin-bottom: 24px;
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      background: var(--white); border: 1px solid var(--border);
+      padding: 5px 14px; border-radius: 100px;
+      margin-bottom: 32px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
     }
-    .pill-dot {
-      width: 22px; height: 22px; border-radius: 50%;
-      background: var(--blue); display: flex; align-items: center; justify-content: center;
-      font-size: 11px;
+    .eyebrow-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 2px rgba(22,163,74,.2);
     }
 
     .hero-h1 {
-      font-family: 'Urbanist', sans-serif;
-      font-size: clamp(44px, 5.5vw, 76px);
-      font-weight: 900; line-height: 1.0; letter-spacing: -.035em;
-      margin-bottom: 22px;
+      font-size: clamp(44px, 6vw, 80px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -.03em;
+      color: var(--ink);
+      margin-bottom: 24px;
+      max-width: 840px;
+      margin-inline: auto;
     }
-    .hi { color: var(--amber); display: inline-block; position: relative; }
-    .hi::after {
-      content: '';
-      position: absolute; left: 0; bottom: -4px; right: 0; height: 4px;
-      background: linear-gradient(90deg, var(--amber), transparent);
-      border-radius: 2px;
-    }
-
-    .hero-p {
-      font-size: 17px; color: var(--muted); line-height: 1.75;
-      max-width: 480px; margin-bottom: 36px;
+    .hero-h1 em {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--blue);
     }
 
-    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 48px; }
+    .hero-sub {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 520px;
+      margin-inline: auto;
+      margin-bottom: 40px;
+      line-height: 1.7;
+      font-weight: 400;
+    }
 
-    .trust-row {
-      display: flex; align-items: center; gap: 14px;
+    .hero-cta {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; flex-wrap: wrap;
+      margin-bottom: 64px;
+    }
+
+    .hero-proof {
+      display: flex; align-items: center; justify-content: center;
+      gap: 24px;
       font-size: 13px; color: var(--muted);
     }
-    .trust-faces { display: flex; }
-    .face {
-      width: 30px; height: 30px; border-radius: 50%;
-      border: 2px solid var(--ink);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 700;
-      margin-left: -9px;
-    }
-    .face:first-child { margin-left: 0; }
-    .f1 { background: linear-gradient(135deg, #2563eb, #7c3aed); }
-    .f2 { background: linear-gradient(135deg, #f59e0b, #ef4444); }
-    .f3 { background: linear-gradient(135deg, #10b981, #2563eb); }
-    .f4 { background: linear-gradient(135deg, #8b5cf6, #ec4899); }
+    .proof-item { display: flex; align-items: center; gap: 6px; }
+    .proof-check { color: var(--green); font-size: 14px; font-weight: 700; }
 
-    /* ── CAR SVG ── */
-    .hero-visual {
+    /* ─── Dashboard preview ─── */
+    .dashboard-wrap {
+      margin-top: 72px;
       position: relative;
-      display: flex; align-items: center; justify-content: center;
     }
-    .car-wrap {
-      position: relative; width: 100%;
-      animation: car-float 4s ease-in-out infinite;
-    }
-    @keyframes car-float {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-14px); }
-    }
-    .car-shadow {
-      position: absolute; bottom: -20px; left: 10%; right: 10%;
-      height: 30px; border-radius: 50%;
-      background: rgba(37,99,235,.25);
-      filter: blur(20px);
-      animation: shadow-pulse 4s ease-in-out infinite;
-    }
-    @keyframes shadow-pulse {
-      0%,100% { transform: scaleX(1); opacity: .6; }
-      50% { transform: scaleX(.8); opacity: .3; }
+    .dashboard-wrap::before {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 200px;
+      background: linear-gradient(to top, var(--white), transparent);
+      z-index: 2; pointer-events: none;
     }
 
-    /* Floating stat cards */
-    .float-card {
-      position: absolute;
-      background: rgba(255,255,255,.95); backdrop-filter: blur(16px);
-      border: 1px solid var(--stroke); border-radius: 14px;
-      padding: 12px 18px;
-      animation: fc-float 5s ease-in-out infinite;
-      z-index: 2;
-    }
-    .float-card:nth-child(2) { animation-delay: -2s; }
-    .float-card:nth-child(3) { animation-delay: -4s; }
-    @keyframes fc-float {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-    .fc-a { top: 0; left: -20px; }
-    .fc-b { bottom: 30px; right: -20px; }
-    .fc-c { top: 50%; left: 50%; transform: translate(-50%,-50%); }
-    .fc-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
-    .fc-val { font-family: 'Urbanist', sans-serif; font-size: 22px; font-weight: 900; }
-    .fc-sub { font-size: 11px; font-weight: 600; }
-    .c-blue { color: var(--blue-lt); }
-    .c-amber { color: var(--amber); }
-    .c-green { color: var(--emerald); }
-
-    /* ════════════════════════════════════════════
-       LOGOS
-    ════════════════════════════════════════════ */
-    #logos {
-      padding: 40px 0;
-      border-top: 1px solid var(--stroke);
-      border-bottom: 1px solid var(--stroke);
-      background: #f8fafc;
-    }
-    .logos-head { text-align:center; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-bottom:24px; }
-    .logos-row { display:flex; align-items:center; justify-content:center; gap:32px; flex-wrap:wrap; }
-    .logo-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 22px; border-radius: 100px;
-      border: 1px solid var(--stroke);
-      background: var(--glass);
-      font-size: 14px; font-weight: 700; color: var(--muted);
-      transition: color .2s, border-color .2s;
-    }
-    .logo-item:hover { color: var(--text); border-color: rgba(255,255,255,.18); }
-    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
-
-    /* ════════════════════════════════════════════
-       METRICS STRIP
-    ════════════════════════════════════════════ */
-    #metrics { padding: 80px 0; }
-    .metrics-grid {
-      display: grid; grid-template-columns: repeat(4,1fr);
-      gap: 1px; background: var(--stroke);
-      border: 1px solid var(--stroke); border-radius: var(--r);
+    .dashboard-frame {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow:
+        0 0 0 1px var(--border),
+        0 20px 60px rgba(0,0,0,.08),
+        0 4px 16px rgba(0,0,0,.04);
       overflow: hidden;
+      max-width: 900px;
+      margin-inline: auto;
     }
-    .metric {
-      background: #fff;
-      padding: 40px 28px;
-      text-align: center;
-      transition: background .25s;
+
+    /* Browser chrome */
+    .df-chrome {
+      height: 44px;
+      background: var(--off);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 16px; gap: 16px;
+    }
+    .df-dots { display: flex; gap: 6px; }
+    .df-dots span {
+      width: 11px; height: 11px; border-radius: 50%;
+    }
+    .df-d1 { background: #ff5f57; }
+    .df-d2 { background: #ffbd2e; }
+    .df-d3 { background: #28ca41; }
+    .df-url {
+      flex: 1; background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px; padding: 5px 12px;
+      font-size: 12px; color: var(--muted);
+      text-align: center; max-width: 320px; margin-inline: auto;
+    }
+
+    /* Dashboard body */
+    .df-body {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+    }
+
+    /* Sidebar */
+    .df-sidebar {
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      background: var(--off);
+    }
+    .df-tenant {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border-radius: 8px;
+      background: var(--white); border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .df-t-avatar {
+      width: 24px; height: 24px; border-radius: 6px;
+      background: var(--blue);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: #fff;
+    }
+    .df-t-name { font-size: 12px; font-weight: 600; }
+    .df-t-plan { font-size: 10px; color: var(--muted); }
+
+    .df-nav-section { margin-bottom: 16px; }
+    .df-nav-label {
+      font-size: 10px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .06em;
+      padding: 0 10px; margin-bottom: 4px;
+    }
+    .df-nav-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; border-radius: 7px;
+      font-size: 12px; font-weight: 500; color: var(--dark);
+      margin-bottom: 1px;
+    }
+    .df-nav-item.active {
+      background: var(--white);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    .df-nav-dot {
+      width: 14px; height: 14px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px;
+    }
+
+    /* Main area */
+    .df-main { padding: 20px; }
+    .df-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .df-title { font-size: 14px; font-weight: 700; }
+    .df-subtitle { font-size: 11px; color: var(--muted); }
+    .df-add {
+      background: var(--ink); color: #fff;
+      font-size: 11px; font-weight: 600;
+      padding: 6px 12px; border-radius: 6px;
+    }
+
+    /* KPI row */
+    .df-kpis {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 10px; margin-bottom: 16px;
+    }
+    .df-kpi {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+    }
+    .df-kpi-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; font-weight: 500; }
+    .df-kpi-val { font-size: 20px; font-weight: 700; line-height: 1; margin-bottom: 3px; }
+    .df-kpi-change { font-size: 10px; font-weight: 600; }
+    .up { color: var(--green); }
+    .down { color: var(--red); }
+
+    /* Chart */
+    .df-chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .df-chart {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px;
+    }
+    .df-chart-title { font-size: 11px; font-weight: 600; margin-bottom: 12px; }
+    .bars {
+      display: flex; align-items: flex-end; gap: 5px; height: 64px;
+    }
+    .bar {
+      flex: 1; border-radius: 4px 4px 0 0;
+      background: var(--light);
+      transition: background .2s;
       position: relative; overflow: hidden;
     }
-    .metric::before {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(37,99,235,.07), transparent);
-      opacity: 0; transition: opacity .3s;
-    }
-    .metric:hover { background: rgba(255,255,255,.03); }
-    .metric:hover::before { opacity: 1; }
-    .metric-icon { font-size: 28px; margin-bottom: 12px; display: block; }
-    .metric-val {
-      font-family: 'Urbanist', sans-serif;
-      font-size: 50px; font-weight: 900; line-height: 1;
-      background: linear-gradient(135deg, var(--text) 0%, var(--blue) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      margin-bottom: 6px;
-    }
-    .metric-label { font-size: 13px; color: var(--muted); }
+    .bar.fill { background: var(--ink); }
+    .bar.fill-sm { background: #d1d5db; }
+    .bar.accent { background: var(--blue); }
 
-    /* ════════════════════════════════════════════
-       BENTO FEATURES
-    ════════════════════════════════════════════ */
-    #features { padding: 100px 0; }
+    /* Fleet list */
+    .df-list {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .df-list-header {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      padding: 8px 14px;
+      background: var(--off); border-bottom: 1px solid var(--border);
+      font-size: 10px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .04em;
+    }
+    .df-list-row {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      padding: 9px 14px; border-bottom: 1px solid var(--border);
+      font-size: 11px; align-items: center;
+    }
+    .df-list-row:last-child { border-bottom: none; }
+    .df-vehicle-name { font-weight: 600; }
+    .df-vehicle-plate { font-size: 10px; color: var(--muted); }
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 600; padding: 2px 8px;
+      border-radius: 100px;
+    }
+    .s-avail { background: #dcfce7; color: var(--green); }
+    .s-rented { background: #fef3c7; color: var(--amber); }
+    .s-maint  { background: var(--light); color: var(--muted); }
 
-    .sec-tag {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 4px 14px; border-radius: 100px;
-      border: 1px solid rgba(245,158,11,.3);
-      background: rgba(245,158,11,.08);
-      font-size: 12px; font-weight: 700; color: var(--amber);
+    /* ─── LOGOS ─── */
+    .logos {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .logos-label {
+      text-align: center; font-size: 12px; font-weight: 500;
+      color: var(--muted); letter-spacing: .06em;
+      text-transform: uppercase; margin-bottom: 24px;
+    }
+    .logos-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 40px; flex-wrap: wrap;
+    }
+    .logo-name {
+      font-size: 15px; font-weight: 700; color: var(--light);
+      letter-spacing: -.02em;
+      -webkit-text-stroke: 1px var(--border);
+      color: transparent;
+    }
+
+    /* ─── METRICS ─── */
+    .metrics-section { padding: 96px 0; }
+    .metrics-grid {
+      display: grid; grid-template-columns: repeat(4,1fr);
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 16px;
+      overflow: hidden;
+    }
+    .metric-cell {
+      background: var(--white);
+      padding: 40px 32px;
+      text-align: center;
+    }
+    .metric-num {
+      font-size: 52px; font-weight: 700;
+      letter-spacing: -.03em; line-height: 1;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .metric-desc { font-size: 14px; color: var(--muted); }
+
+    /* ─── SECTION HEADER ─── */
+    .sec {
+      padding: 96px 0;
+    }
+    .sec-label {
+      font-size: 12px; font-weight: 600; color: var(--blue);
       letter-spacing: .08em; text-transform: uppercase;
       margin-bottom: 14px;
     }
     .sec-h2 {
-      font-family: 'Urbanist', sans-serif;
       font-size: clamp(32px, 4vw, 52px);
-      font-weight: 900; letter-spacing: -.03em; line-height: 1.05;
-      margin-bottom: 14px;
+      font-weight: 700; letter-spacing: -.025em; line-height: 1.1;
+      color: var(--ink); margin-bottom: 16px;
     }
-    .sec-p { font-size: 16px; color: var(--muted); max-width: 540px; line-height: 1.75; }
-    .sec-head { margin-bottom: 56px; }
+    .sec-h2 em {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic; font-weight: 400;
+    }
+    .sec-p {
+      font-size: 17px; color: var(--muted); max-width: 480px;
+      line-height: 1.75;
+    }
+    .sec-head { margin-bottom: 64px; }
 
-    /* Bento grid */
-    .bento {
+    /* ─── FEATURES GRID ─── */
+    .features-grid {
       display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      grid-auto-rows: 80px;
-      gap: 14px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
     }
-    .bcard {
-      background: var(--glass);
-      border: 1px solid var(--stroke);
-      border-radius: var(--r);
-      padding: 28px;
-      overflow: hidden; position: relative;
-      transition: transform .25s, border-color .3s, box-shadow .3s;
+    .feat {
+      background: var(--white);
+      padding: 36px 32px;
+      transition: background .15s;
     }
-    .bcard:hover {
-      transform: translateY(-3px);
-      border-color: rgba(37,99,235,.35);
-      box-shadow: 0 20px 60px rgba(0,0,0,.35), 0 0 0 1px rgba(37,99,235,.08);
-    }
-    .bcard::after {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(37,99,235,.06), transparent 60%);
-      opacity: 0; transition: opacity .3s;
-    }
-    .bcard:hover::after { opacity: 1; }
-
-    /* Sizes */
-    .b-wide  { grid-column: span 7; grid-row: span 4; }
-    .b-tall  { grid-column: span 5; grid-row: span 4; }
-    .b-half  { grid-column: span 4; grid-row: span 3; }
-    .b-third { grid-column: span 4; grid-row: span 3; }
-    .b-qtr   { grid-column: span 4; grid-row: span 3; }
-    .b-full  { grid-column: span 12; grid-row: span 3; }
-
-    .bc-icon {
-      width: 44px; height: 44px; border-radius: 12px;
-      background: #f1f5f9; border: 1px solid var(--stroke);
+    .feat:hover { background: var(--off); }
+    .feat-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--light); border: 1px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      font-size: 20px; margin-bottom: 16px; flex-shrink: 0;
+      font-size: 18px; margin-bottom: 20px;
     }
-    .bc-h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
-    .bc-p { font-size: 13px; color: var(--muted); line-height: 1.65; }
-    .bc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
-    .bc-tag {
-      background: #f1f5f9; border: 1px solid var(--stroke);
-      padding: 3px 11px; border-radius: 100px;
-      font-size: 11px; font-weight: 600; color: var(--muted);
+    .feat-h3 {
+      font-size: 16px; font-weight: 700;
+      color: var(--ink); margin-bottom: 8px;
+    }
+    .feat-p {
+      font-size: 14px; color: var(--muted); line-height: 1.7;
     }
 
-    /* Fleet visual inside bento */
-    .mini-fleet { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
-    .mf-row {
-      display: flex; align-items: center; gap: 10px;
-      background: #f8fafc; border-radius: 10px;
-      padding: 9px 14px; border: 1px solid var(--stroke);
+    /* Feature large — spans 2 cols */
+    .feat-lg {
+      grid-column: span 2;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
     }
-    .mf-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .st-ok   { background: var(--emerald); box-shadow: 0 0 6px var(--emerald); }
-    .st-busy { background: var(--amber);   box-shadow: 0 0 6px var(--amber); }
-    .st-serv { background: var(--muted); }
-    .mf-name { flex: 1; font-size: 13px; font-weight: 500; }
-    .mf-badge {
-      font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 100px;
-    }
-    .bd-ok   { background: rgba(16,185,129,.15); color: var(--emerald); }
-    .bd-busy { background: rgba(245,158,11,.15); color: var(--amber); }
-    .bd-serv { background: rgba(100,116,139,.15); color: var(--muted); }
 
-    /* Contract preview inside bento */
-    .contract-preview {
-      margin-top: 16px;
-      background: rgba(255,255,255,.03); border-radius: 12px;
-      border: 1px solid var(--stroke); overflow: hidden;
+    /* ─── PRODUCT DETAIL ─── */
+    .product-split {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 80px; align-items: center;
     }
-    .cp-header {
-      background: linear-gradient(90deg, rgba(37,99,235,.2), rgba(37,99,235,.05));
-      padding: 10px 14px; display: flex; align-items: center; gap: 8px;
-      font-size: 12px; font-weight: 700; color: var(--blue-lt);
+    .product-split.reverse { direction: rtl; }
+    .product-split.reverse > * { direction: ltr; }
+
+    .product-visual {
+      background: var(--off);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
     }
-    .cp-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
-    .cp-row { display: flex; justify-content: space-between; font-size: 12px; }
-    .cp-key { color: var(--muted); }
-    .cp-val { font-weight: 600; }
-    .cp-footer {
-      padding: 10px 14px; border-top: 1px solid var(--stroke);
+    .pv-header {
+      height: 40px; background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px; padding: 0 14px;
+    }
+    .pv-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .pv-body { padding: 20px; }
+
+    /* Contract card visual */
+    .contract-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,.06);
+    }
+    .cc-top {
+      padding: 16px 18px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between;
+    }
+    .cc-id { font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 500; }
+    .cc-client { font-size: 14px; font-weight: 700; }
+    .cc-badge {
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 100px; background: #dcfce7; color: var(--green);
+    }
+    .cc-rows { padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; }
+    .cc-row { display: flex; justify-content: space-between; font-size: 13px; }
+    .cc-key { color: var(--muted); }
+    .cc-val { font-weight: 600; }
+    .cc-footer {
+      padding: 12px 18px; background: var(--off);
+      border-top: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
     }
-    .qr-box {
-      width: 36px; height: 36px; border-radius: 6px;
-      background: rgba(255,255,255,.9);
-      display: grid; grid-template-columns: 1fr 1fr 1fr;
-      gap: 2px; padding: 4px;
-    }
-    .qr-box span { background: #111; border-radius: 1px; }
-    .cp-btn {
-      font-size: 11px; font-weight: 700;
-      background: var(--blue); color: #fff;
-      padding: 5px 12px; border-radius: 100px;
+    .cc-total { font-size: 13px; font-weight: 700; }
+    .cc-total span { font-size: 18px; color: var(--ink); }
+    .cc-dl {
+      font-size: 12px; font-weight: 600; color: var(--blue);
+      display: flex; align-items: center; gap: 5px;
+      background: #eff6ff; padding: 6px 14px; border-radius: 100px;
     }
 
-    /* Chart bars inside bento */
-    .mini-chart {
-      margin-top: 16px;
-      display: flex; align-items: flex-end; gap: 6px; height: 80px;
+    /* Fleet visual */
+    .fleet-rows { display: flex; flex-direction: column; gap: 8px; }
+    .fleet-row {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
     }
-    .mc-bar {
-      flex: 1; border-radius: 4px 4px 0 0;
-      background: linear-gradient(to top, var(--blue), rgba(37,99,235,.3));
-      animation: mc-grow .8s cubic-bezier(.34,1.56,.64,1) both;
-    }
-    @keyframes mc-grow { from { height: 0 !important; } }
-    .mc-bar:nth-child(2) { animation-delay: .1s; }
-    .mc-bar:nth-child(3) { animation-delay: .15s; }
-    .mc-bar:nth-child(4) { animation-delay: .2s; }
-    .mc-bar:nth-child(5) { animation-delay: .25s; }
-    .mc-bar:nth-child(6) { animation-delay: .3s; }
-    .mc-bar:nth-child(7) { animation-delay: .35s; }
-    .mc-bar.hi { background: linear-gradient(to top, var(--amber), rgba(245,158,11,.3)); }
+    .fr-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .fr-ok   { background: var(--green); }
+    .fr-busy { background: var(--amber); }
+    .fr-mnt  { background: #9ca3af; }
+    .fr-info { flex: 1; }
+    .fr-name { font-size: 13px; font-weight: 600; }
+    .fr-plate { font-size: 11px; color: var(--muted); }
+    .fr-price { font-size: 12px; font-weight: 700; color: var(--ink); }
 
-    /* Roles inside bento */
-    .roles-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
-    .role-row {
+    /* Payments visual */
+    .pay-list { display: flex; flex-direction: column; gap: 6px; }
+    .pay-row {
       display: flex; align-items: center; gap: 10px;
-      padding: 8px 12px; border-radius: 10px;
-      border: 1px solid var(--stroke);
-      background: #f8fafc;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px;
     }
-    .role-avatar {
-      width: 32px; height: 32px; border-radius: 50%;
+    .pay-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 700; flex-shrink: 0;
+      font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
     }
-    .ra-admin   { background: linear-gradient(135deg,var(--blue),#7c3aed); }
-    .ra-agent   { background: linear-gradient(135deg,var(--emerald),var(--blue)); }
-    .ra-compta  { background: linear-gradient(135deg,var(--amber),#ef4444); }
-    .role-info { flex: 1; }
-    .role-name { font-size: 12px; font-weight: 700; }
-    .role-perms { font-size: 11px; color: var(--muted); }
-    .role-badge {
-      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px;
-    }
-    .rb-full { background: rgba(37,99,235,.2); color: var(--blue-lt); }
-    .rb-ops  { background: rgba(16,185,129,.2); color: var(--emerald); }
-    .rb-read { background: rgba(245,158,11,.2); color: var(--amber-lt); }
+    .pa1 { background: #2563eb; }
+    .pa2 { background: #7c3aed; }
+    .pa3 { background: #059669; }
+    .pa4 { background: #d97706; }
+    .pay-client { font-size: 12px; font-weight: 600; flex: 1; }
+    .pay-date { font-size: 11px; color: var(--muted); }
+    .pay-amount { font-size: 13px; font-weight: 700; }
+    .pay-status { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; }
+    .ps-ok { background: #dcfce7; color: var(--green); }
+    .ps-pend { background: #fef3c7; color: var(--amber); }
 
-    /* Speed badge bento */
-    .speed-visual {
-      margin-top: 20px;
-      display: flex; align-items: center; justify-content: center;
+    /* ─── HOW IT WORKS ─── */
+    .how-sec {
+      padding: 96px 0;
+      background: var(--ink);
     }
-    .speed-ring {
-      width: 110px; height: 110px;
-      border-radius: 50%;
-      border: 3px solid var(--stroke);
-      position: relative;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .speed-ring::before {
-      content: '';
-      position: absolute; inset: -3px;
-      border-radius: 50%;
-      background: conic-gradient(var(--emerald) 0% 95%, transparent 95%);
-      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
-      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
-    }
-    .speed-pct { font-family:'Urbanist',sans-serif; font-size:28px; font-weight:900; color:var(--emerald); }
-    .speed-label { font-size:11px; color:var(--muted); text-align:center; margin-top:8px; }
+    .how-sec .sec-label { color: #60a5fa; }
+    .how-sec .sec-h2 { color: #fff; }
+    .how-sec .sec-p { color: #9ca3af; }
+    .how-sec .sec-head { margin-bottom: 64px; }
 
-    /* ════════════════════════════════════════════
-       HOW IT WORKS
-    ════════════════════════════════════════════ */
-    #how {
-      padding: 100px 0;
-      background: linear-gradient(180deg, #fff 0%, #f1f5f9 50%, #fff 100%);
-      position: relative; overflow: hidden;
+    .steps-row {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 2px; background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px; overflow: hidden;
     }
-    #how::before {
-      content: '';
-      position: absolute; left: 50%; top: 50%;
-      transform: translate(-50%,-50%);
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(37,99,235,.08), transparent 70%);
-      pointer-events: none;
+    .step {
+      background: #111827;
+      padding: 40px 32px;
     }
-
-    .steps-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 20px; position: relative; z-index: 1;
-    }
-    .steps-grid::before {
-      content: '';
-      position: absolute; top: 36px; left: calc(100%/6); right: calc(100%/6);
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--blue), var(--amber), var(--blue), transparent);
-    }
-    .step-card {
-      background: var(--glass); border: 1px solid var(--stroke);
-      border-radius: var(--r); padding: 32px;
-      text-align: center;
-      transition: transform .25s, border-color .3s;
-    }
-    .step-card:hover { transform: translateY(-4px); border-color: rgba(37,99,235,.3); }
     .step-num {
-      width: 72px; height: 72px; border-radius: 50%;
-      background: #fff; border: 2px solid rgba(37,99,235,.3);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Urbanist',sans-serif; font-size: 28px; font-weight: 900;
-      color: var(--blue-lt); margin: 0 auto 20px;
-      position: relative; z-index: 1;
-      box-shadow: 0 0 30px rgba(37,99,235,.2);
+      font-size: 12px; font-weight: 700; color: #6b7280;
+      letter-spacing: .08em; text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
     }
-    .step-icon { font-size: 24px; margin-bottom: 12px; display: block; }
-    .step-h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
-    .step-p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+    .step-num::after {
+      content: ''; flex: 1; height: 1px;
+      background: rgba(255,255,255,.08);
+    }
+    .step-h3 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+    .step-p { font-size: 14px; color: #9ca3af; line-height: 1.7; }
 
-    /* ════════════════════════════════════════════
-       PRICING
-    ════════════════════════════════════════════ */
-    #pricing { padding: 100px 0; }
-
-    .plans {
+    /* ─── PRICING ─── */
+    .plans-row {
       display: grid; grid-template-columns: repeat(3,1fr);
       gap: 20px; align-items: start;
     }
-    .plan {
-      border-radius: var(--r); padding: 36px;
-      border: 1px solid var(--stroke);
-      background: var(--glass);
-      transition: transform .25s, box-shadow .3s;
-    }
-    .plan:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,.3); }
-    .plan.featured {
-      background: linear-gradient(160deg, rgba(37,99,235,.14), rgba(37,99,235,.04));
-      border-color: rgba(37,99,235,.45);
+    .plan-card {
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 32px;
+      background: var(--white);
       position: relative;
     }
-    .feat-badge {
-      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
-      background: linear-gradient(90deg, var(--blue), #7c3aed);
-      color: #fff; font-size: 11px; font-weight: 800;
-      padding: 4px 18px; border-radius: 100px;
-      letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+    .plan-card.featured {
+      border-color: var(--ink);
+      box-shadow: 0 8px 40px rgba(0,0,0,.12);
     }
-    .plan-tier { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 14px; }
+    .plan-badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: var(--ink); color: #fff;
+      font-size: 11px; font-weight: 700;
+      padding: 4px 16px; border-radius: 100px;
+      letter-spacing: .04em; white-space: nowrap;
+    }
+    .plan-name {
+      font-size: 13px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .08em;
+      margin-bottom: 16px;
+    }
     .plan-price {
-      font-family: 'Urbanist', sans-serif;
-      font-size: 52px; font-weight: 900; line-height: 1; margin-bottom: 4px;
+      font-size: 48px; font-weight: 700;
+      letter-spacing: -.03em; line-height: 1;
+      color: var(--ink); margin-bottom: 4px;
     }
-    .plan-price sub { font-size: 20px; font-weight: 500; color: var(--muted); vertical-align: middle; }
-    .plan-billing { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
-    .plan-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .plan-price small {
+      font-size: 18px; font-weight: 500; color: var(--muted);
+    }
+    .plan-cycle { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    .plan-divider {
+      height: 1px; background: var(--border); margin-bottom: 24px;
+    }
+    .plan-feats { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
     .pf {
-      display: flex; align-items: flex-start; gap: 10px; font-size: 14px;
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: var(--dark);
     }
-    .pf-check { color: var(--emerald); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
-    .pf-x { color: var(--muted); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
-    .pf.off { color: var(--muted); }
+    .pf-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .pf-icon.ok { color: var(--green); }
+    .pf-icon.no { color: #d1d5db; }
+    .pf.dim { color: var(--muted); }
 
-    /* ════════════════════════════════════════════
-       TESTIMONIALS
-    ════════════════════════════════════════════ */
-    #testi {
-      padding: 100px 0;
-      background: #f8fafc;
+    /* ─── TESTIMONIALS ─── */
+    .testi-sec {
+      padding: 96px 0;
+      background: var(--off);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
     }
     .testi-grid {
       display: grid; grid-template-columns: repeat(3,1fr);
-      gap: 18px;
+      gap: 20px;
     }
     .tcard {
-      background: var(--glass); border: 1px solid var(--stroke);
-      border-radius: var(--r); padding: 28px;
-      transition: transform .25s, border-color .3s;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px;
     }
-    .tcard:hover { transform: translateY(-3px); border-color: rgba(245,158,11,.25); }
-    .stars { color: var(--amber); font-size: 14px; margin-bottom: 14px; letter-spacing: 2px; }
-    .ttext { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 20px; font-style: italic; }
-    .tauthor { display: flex; align-items: center; gap: 12px; }
-    .tavatar {
-      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    .t-stars { color: #f59e0b; font-size: 13px; letter-spacing: 2px; margin-bottom: 16px; }
+    .t-quote {
+      font-size: 15px; color: var(--dark); line-height: 1.75;
+      margin-bottom: 24px;
+    }
+    .t-author { display: flex; align-items: center; gap: 12px; }
+    .t-av {
+      width: 38px; height: 38px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 14px;
+      font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
     }
-    .ta1 { background: linear-gradient(135deg, var(--blue), #7c3aed); }
-    .ta2 { background: linear-gradient(135deg, var(--amber), #ef4444); }
-    .ta3 { background: linear-gradient(135deg, var(--emerald), var(--blue)); }
-    .tname { font-size: 14px; font-weight: 700; }
-    .trole { font-size: 12px; color: var(--muted); }
+    .av1 { background: linear-gradient(135deg,#2563eb,#7c3aed); }
+    .av2 { background: linear-gradient(135deg,#d97706,#dc2626); }
+    .av3 { background: linear-gradient(135deg,#059669,#2563eb); }
+    .t-name { font-size: 14px; font-weight: 700; }
+    .t-role { font-size: 12px; color: var(--muted); }
 
-    /* ════════════════════════════════════════════
-       CTA FINALE
-    ════════════════════════════════════════════ */
-    #cta {
-      padding: 130px 0;
+    /* ─── CTA ─── */
+    .cta-sec {
+      padding: 120px 0;
       text-align: center;
-      position: relative; overflow: hidden;
     }
-    .cta-ring {
-      position: absolute; border-radius: 50%;
-      border: 1px solid; opacity: .1;
-      top: 50%; left: 50%; transform: translate(-50%,-50%);
-    }
-    .cr1 { width: 400px; height: 400px; border-color: var(--blue); }
-    .cr2 { width: 650px; height: 650px; border-color: var(--amber); animation: spin-slow 30s linear infinite; }
-    .cr3 { width: 900px; height: 900px; border-color: var(--blue); animation: spin-slow 50s linear infinite reverse; }
-    @keyframes spin-slow { to { transform: translate(-50%,-50%) rotate(360deg); } }
-
-    .cta-glow {
-      position: absolute; width: 600px; height: 300px;
-      top: 50%; left: 50%; transform: translate(-50%,-50%);
-      background: radial-gradient(ellipse, rgba(37,99,235,.15), transparent 70%);
-      pointer-events: none;
-    }
-    .cta-inner { position: relative; z-index: 1; }
     .cta-h2 {
-      font-family: 'Urbanist', sans-serif;
-      font-size: clamp(40px, 5vw, 68px);
-      font-weight: 900; letter-spacing: -.035em; line-height: 1.05;
-      margin-bottom: 16px;
+      font-size: clamp(40px, 5.5vw, 72px);
+      font-weight: 700; letter-spacing: -.03em; line-height: 1.05;
+      color: var(--ink); margin-bottom: 16px;
     }
-    .cta-sub { font-size: 17px; color: var(--muted); margin-bottom: 40px; }
-    .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .cta-note { margin-top: 20px; font-size: 13px; color: var(--muted); }
-    .cta-note span { color: var(--emerald); }
+    .cta-h2 em {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic; font-weight: 400; color: var(--blue);
+    }
+    .cta-p {
+      font-size: 18px; color: var(--muted); margin-bottom: 40px;
+    }
+    .cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .cta-note { margin-top: 16px; font-size: 13px; color: var(--muted); }
 
-    /* ════════════════════════════════════════════
-       FOOTER
-    ════════════════════════════════════════════ */
+    /* ─── FOOTER ─── */
     footer {
-      border-top: 1px solid var(--stroke);
-      padding: 60px 0 36px;
-      background: #f8fafc;
+      border-top: 1px solid var(--border);
+      padding: 56px 0 32px;
+      background: var(--white);
     }
-    .footer-grid {
-      display: grid; grid-template-columns: 2.2fr 1fr 1fr 1fr;
+    .foot-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
       gap: 48px; margin-bottom: 48px;
     }
-    .fb-about { font-size: 13px; color: var(--muted); margin-top: 12px; line-height: 1.75; max-width: 250px; }
-    .fc-head { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 16px; color: var(--text); }
-    .fc-link {
-      display: block; font-size: 13px; color: var(--muted);
-      margin-bottom: 10px; transition: color .2s;
+    .foot-brand-p {
+      font-size: 13px; color: var(--muted); margin-top: 12px;
+      line-height: 1.7; max-width: 220px;
     }
-    .fc-link:hover { color: var(--text); }
+    .foot-col h4 {
+      font-size: 12px; font-weight: 700; color: var(--ink);
+      text-transform: uppercase; letter-spacing: .06em;
+      margin-bottom: 14px;
+    }
+    .foot-col a {
+      display: block; font-size: 14px; color: var(--muted);
+      margin-bottom: 9px; transition: color .15s;
+    }
+    .foot-col a:hover { color: var(--ink); }
     .foot-bottom {
-      border-top: 1px solid var(--stroke); padding-top: 24px;
+      border-top: 1px solid var(--border); padding-top: 24px;
       display: flex; align-items: center; justify-content: space-between;
-      font-size: 12px; color: var(--muted);
+      font-size: 13px; color: var(--muted);
     }
-    .foot-links { display: flex; gap: 20px; }
-    .foot-links a { color: var(--muted); transition: color .2s; }
-    .foot-links a:hover { color: var(--text); }
+    .foot-socials { display: flex; gap: 20px; }
+    .foot-socials a { color: var(--muted); transition: color .15s; }
+    .foot-socials a:hover { color: var(--ink); }
 
-    /* ════════════════════════════════════════════
-       RESPONSIVE
-    ════════════════════════════════════════════ */
+    /* ─── Animations ─── */
+    .fade-up {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+    .fade-up.show { opacity: 1; transform: translateY(0); }
+
+    /* ─── Responsive ─── */
     @media (max-width: 1024px) {
-      .hero-inner { grid-template-columns: 1fr; }
-      .hero-visual { display: none; }
-      .bento { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
-      .b-wide,.b-tall,.b-half,.b-third,.b-qtr,.b-full { grid-column: span 1; grid-row: span 1; }
-      .plans { grid-template-columns: 1fr; }
-      .steps-grid { grid-template-columns: 1fr; }
-      .steps-grid::before { display: none; }
+      .df-body { grid-template-columns: 1fr; }
+      .df-sidebar { display: none; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .feat-lg { grid-column: span 2; }
+      .plans-row { grid-template-columns: 1fr; }
       .testi-grid { grid-template-columns: 1fr; }
       .metrics-grid { grid-template-columns: 1fr 1fr; }
-      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .foot-grid { grid-template-columns: 1fr 1fr; }
+      .product-split { grid-template-columns: 1fr; gap: 40px; }
+      .product-split.reverse { direction: ltr; }
     }
     @media (max-width: 640px) {
       .nav-links { display: none; }
-      .bento { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .feat-lg { grid-column: span 1; display: block; }
+      .steps-row { grid-template-columns: 1fr; }
       .metrics-grid { grid-template-columns: 1fr 1fr; }
-      .footer-grid { grid-template-columns: 1fr; }
-      .foot-bottom { flex-direction: column; gap: 12px; text-align: center; }
+      .foot-grid { grid-template-columns: 1fr; }
+      .foot-bottom { flex-direction: column; gap: 12px; }
+      .df-kpis { grid-template-columns: 1fr 1fr; }
+      .df-chart-row { grid-template-columns: 1fr; }
     }
-
-    /* ── Reveal animation ── */
-    .reveal {
-      opacity: 0; transform: translateY(28px);
-      transition: opacity .6s ease, transform .6s ease;
-    }
-    .reveal.in { opacity: 1; transform: translateY(0); }
   </style>
 </head>
 <body>
 
-<!-- ════════ NAVBAR ════════ -->
-<nav id="nav">
-  <div class="wrap nav-row">
-    <a href="/" class="brand">
-      <div class="brand-mark">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+<!-- ════ NAV ════ -->
+<header>
+  <div class="container nav">
+    <a href="/" class="logo">
+      <div class="logo-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14l4 4v4a2 2 0 01-2 2h-2"/>
           <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
         </svg>
       </div>
-      <span class="brand-name">ASM Location</span>
+      ASM Location
     </a>
 
     <nav class="nav-links">
       <a href="#features">Fonctionnalités</a>
-      <a href="#how">Démarrage</a>
+      <a href="#how">Comment ça marche</a>
       <a href="#pricing">Tarifs</a>
-      <a href="#testi">Avis</a>
     </nav>
 
-    <div class="nav-end">
-      <a href="#" class="btn btn-ghost">Connexion</a>
-      <a href="#cta" class="btn btn-amber">Essai gratuit</a>
-    </div>
+    <a href="#" class="btn btn-secondary" style="margin-right:8px;">Connexion</a>
+    <a href="#cta" class="btn btn-primary">Démarrer gratuitement</a>
   </div>
-</nav>
+</header>
 
-<!-- ════════ HERO ════════ -->
-<section id="hero">
-  <div class="hero-canvas">
-    <div class="glow glow-1"></div>
-    <div class="glow glow-2"></div>
-    <div class="glow glow-3"></div>
-    <div class="hero-grid-bg"></div>
-  </div>
-  <div class="road"></div>
+<!-- ════ HERO ════ -->
+<section class="hero">
+  <div class="container hero-content">
 
-  <div class="wrap hero-inner">
-    <!-- Left -->
-    <div>
-      <div class="pill">
-        <span class="pill-dot">🚗</span>
-        Plateforme SaaS · Location de véhicules
+    <div class="hero-eyebrow">
+      <span class="eyebrow-dot"></span>
+      Plateforme SaaS · Location de véhicules · Afrique de l'Ouest
+    </div>
+
+    <h1 class="hero-h1">
+      Gérez votre agence<br/>avec <em>élégance</em><br/>et efficacité.
+    </h1>
+
+    <p class="hero-sub">
+      Flotte, clients, contrats, paiements — tout centralisé dans une interface pensée pour les agences modernes.
+    </p>
+
+    <div class="hero-cta">
+      <a href="#cta" class="btn btn-primary btn-xl">
+        Créer mon agence <span class="arrow">→</span>
+      </a>
+      <a href="#features" class="btn btn-secondary btn-lg">Voir les fonctionnalités</a>
+    </div>
+
+    <div class="hero-proof">
+      <div class="proof-item">
+        <span class="proof-check">✓</span>
+        Aucune carte requise
       </div>
-
-      <h1 class="hero-h1">
-        Votre agence,<br/>
-        <span class="hi">pilotée</span><br/>
-        à pleine vitesse.
-      </h1>
-
-      <p class="hero-p">
-        ASM Location est le logiciel tout-en-un pour gérer votre flotte,
-        vos clients, vos contrats et vos encaissements.
-        Moins de paperasse. Plus de locations.
-      </p>
-
-      <div class="hero-actions">
-        <a href="#cta" class="btn btn-amber btn-xl">
-          Démarrer gratuitement
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-        <a href="#features" class="btn btn-ghost btn-lg">Voir la démo</a>
+      <div class="proof-item">
+        <span class="proof-check">✓</span>
+        14 jours d'essai gratuit
       </div>
-
-      <div class="trust-row">
-        <div class="trust-faces">
-          <span class="face f1">BA</span>
-          <span class="face f2">ZA</span>
-          <span class="face f3">KD</span>
-          <span class="face f4">+</span>
-        </div>
-        <span>Adopté par <strong style="color:var(--text)">+50 agences</strong> en Afrique de l'Ouest</span>
+      <div class="proof-item">
+        <span class="proof-check">✓</span>
+        Opérationnel en 30 min
       </div>
     </div>
 
-    <!-- Right — Car visual -->
-    <div class="hero-visual">
-      <div class="car-wrap">
-        <!-- Floating cards -->
-        <div class="float-card fc-a">
-          <div class="fc-label">Flotte disponible</div>
-          <div class="fc-val c-green">18 <span style="font-size:14px">/ 24</span></div>
-          <div class="fc-sub c-green">↑ 96% disponibilité</div>
+    <!-- Dashboard preview -->
+    <div class="dashboard-wrap fade-up">
+      <div class="dashboard-frame">
+        <!-- Browser chrome -->
+        <div class="df-chrome">
+          <div class="df-dots">
+            <span class="df-d1"></span>
+            <span class="df-d2"></span>
+            <span class="df-d3"></span>
+          </div>
+          <div class="df-url">boucotteauto.location.innosft.com</div>
         </div>
 
-        <div class="float-card fc-b">
-          <div class="fc-label">Revenus ce mois</div>
-          <div class="fc-val c-amber">4,2M<span style="font-size:14px"> F</span></div>
-          <div class="fc-sub c-amber">↑ +23% vs mois dernier</div>
+        <!-- App body -->
+        <div class="df-body">
+
+          <!-- Sidebar -->
+          <div class="df-sidebar">
+            <div class="df-tenant">
+              <div class="df-t-avatar">BA</div>
+              <div>
+                <div class="df-t-name">Boucotte Auto</div>
+                <div class="df-t-plan">Plan Pro</div>
+              </div>
+            </div>
+
+            <div class="df-nav-section">
+              <div class="df-nav-label">Principal</div>
+              <div class="df-nav-item active">
+                <div class="df-nav-dot">📊</div> Tableau de bord
+              </div>
+              <div class="df-nav-item">
+                <div class="df-nav-dot">🚗</div> Flotte
+              </div>
+              <div class="df-nav-item">
+                <div class="df-nav-dot">👥</div> Clients
+              </div>
+              <div class="df-nav-item">
+                <div class="df-nav-dot">📄</div> Contrats
+              </div>
+            </div>
+            <div class="df-nav-section">
+              <div class="df-nav-label">Finance</div>
+              <div class="df-nav-item">
+                <div class="df-nav-dot">💳</div> Paiements
+              </div>
+              <div class="df-nav-item">
+                <div class="df-nav-dot">📈</div> Rapports
+              </div>
+            </div>
+          </div>
+
+          <!-- Main -->
+          <div class="df-main">
+            <div class="df-header">
+              <div>
+                <div class="df-title">Tableau de bord</div>
+                <div class="df-subtitle">Mars 2025 · Boucotte Auto</div>
+              </div>
+              <div class="df-add">+ Nouveau contrat</div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="df-kpis">
+              <div class="df-kpi">
+                <div class="df-kpi-label">Revenus mars</div>
+                <div class="df-kpi-val">4,2M</div>
+                <div class="df-kpi-change up">↑ 23%</div>
+              </div>
+              <div class="df-kpi">
+                <div class="df-kpi-label">Véhicules dispo</div>
+                <div class="df-kpi-val">18<span style="font-size:14px;color:#6b7280">/24</span></div>
+                <div class="df-kpi-change up">↑ 96%</div>
+              </div>
+              <div class="df-kpi">
+                <div class="df-kpi-label">Contrats actifs</div>
+                <div class="df-kpi-val">6</div>
+                <div class="df-kpi-change up">↑ +2</div>
+              </div>
+              <div class="df-kpi">
+                <div class="df-kpi-label">Clients total</div>
+                <div class="df-kpi-val">187</div>
+                <div class="df-kpi-change up">↑ +12</div>
+              </div>
+            </div>
+
+            <!-- Chart + fleet -->
+            <div class="df-chart-row">
+              <div class="df-chart">
+                <div class="df-chart-title">Revenus — 7 derniers jours</div>
+                <div class="bars">
+                  <div class="bar fill-sm" style="height:42%"></div>
+                  <div class="bar fill-sm" style="height:65%"></div>
+                  <div class="bar fill-sm" style="height:55%"></div>
+                  <div class="bar fill" style="height:100%"></div>
+                  <div class="bar fill-sm" style="height:72%"></div>
+                  <div class="bar accent" style="height:85%"></div>
+                  <div class="bar accent" style="height:90%"></div>
+                </div>
+              </div>
+              <div class="df-chart">
+                <div class="df-chart-title">Occupation flotte</div>
+                <div class="bars">
+                  <div class="bar fill" style="height:80%"></div>
+                  <div class="bar fill" style="height:90%"></div>
+                  <div class="bar fill" style="height:75%"></div>
+                  <div class="bar fill" style="height:100%"></div>
+                  <div class="bar fill-sm" style="height:60%"></div>
+                  <div class="bar fill-sm" style="height:70%"></div>
+                  <div class="bar fill-sm" style="height:65%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fleet list -->
+            <div class="df-list">
+              <div class="df-list-header">
+                <span>Véhicule</span><span>Catégorie</span><span>Tarif / jour</span><span>Statut</span>
+              </div>
+              <div class="df-list-row">
+                <div>
+                  <div class="df-vehicle-name">Toyota Hilux</div>
+                  <div class="df-vehicle-plate">DK-4521-A</div>
+                </div>
+                <span>4x4 Premium</span>
+                <span style="font-weight:600">35 000 F</span>
+                <span class="status-pill s-avail">● Disponible</span>
+              </div>
+              <div class="df-list-row">
+                <div>
+                  <div class="df-vehicle-name">Peugeot 3008</div>
+                  <div class="df-vehicle-plate">DK-9810-B</div>
+                </div>
+                <span>SUV</span>
+                <span style="font-weight:600">28 000 F</span>
+                <span class="status-pill s-rented">● En location</span>
+              </div>
+              <div class="df-list-row">
+                <div>
+                  <div class="df-vehicle-name">Hyundai Tucson</div>
+                  <div class="df-vehicle-plate">DK-6677-D</div>
+                </div>
+                <span>SUV</span>
+                <span style="font-weight:600">26 000 F</span>
+                <span class="status-pill s-maint">● Maintenance</span>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <!-- Car SVG -->
-        <svg viewBox="0 0 500 240" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;filter:drop-shadow(0 20px 60px rgba(37,99,235,.3))">
-          <!-- Car body -->
-          <rect x="40" y="140" width="420" height="70" rx="12" fill="#0d1a2e"/>
-          <rect x="40" y="140" width="420" height="70" rx="12" fill="url(#bodyGrad)"/>
-          <!-- Cabin -->
-          <path d="M130 140 L160 85 Q200 60 250 55 Q300 50 340 65 L380 100 L390 140Z" fill="#0d1a2e"/>
-          <path d="M130 140 L160 85 Q200 60 250 55 Q300 50 340 65 L380 100 L390 140Z" fill="url(#cabinGrad)"/>
-          <!-- Windows -->
-          <path d="M155 130 L178 88 Q210 70 250 65 Q285 62 315 72 L345 100 L355 130Z" fill="url(#windowGrad)" rx="4"/>
-          <!-- Door line -->
-          <line x1="250" y1="140" x2="250" y2="208" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
-          <!-- Door handles -->
-          <rect x="195" y="170" width="30" height="5" rx="2.5" fill="rgba(255,255,255,.2)"/>
-          <rect x="275" y="170" width="30" height="5" rx="2.5" fill="rgba(255,255,255,.2)"/>
-          <!-- Front lights -->
-          <ellipse cx="450" cy="162" rx="14" ry="8" fill="url(#lightGrad)" opacity=".9"/>
-          <path d="M464 158 L490 148 L490 176 L464 166Z" fill="url(#beamGrad)" opacity=".3"/>
-          <!-- Rear lights -->
-          <rect x="50" y="155" width="18" height="12" rx="4" fill="#ef4444" opacity=".8"/>
-          <!-- Wheels -->
-          <circle cx="150" cy="210" r="32" fill="#111827"/>
-          <circle cx="150" cy="210" r="24" fill="#1e293b"/>
-          <circle cx="150" cy="210" r="14" fill="#0f172a"/>
-          <circle cx="150" cy="210" r="6" fill="url(#rimGrad)"/>
-          <!-- Wheel spokes -->
-          <line x1="150" y1="186" x2="150" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-          <line x1="174" y1="210" x2="150" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-          <line x1="150" y1="234" x2="150" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-          <line x1="126" y1="210" x2="150" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-
-          <circle cx="360" cy="210" r="32" fill="#111827"/>
-          <circle cx="360" cy="210" r="24" fill="#1e293b"/>
-          <circle cx="360" cy="210" r="14" fill="#0f172a"/>
-          <circle cx="360" cy="210" r="6" fill="url(#rimGrad2)"/>
-          <line x1="360" y1="186" x2="360" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-          <line x1="384" y1="210" x2="360" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-          <line x1="360" y1="234" x2="360" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-          <line x1="336" y1="210" x2="360" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-
-          <!-- Ground reflection -->
-          <ellipse cx="250" cy="242" rx="200" ry="6" fill="url(#groundGrad)" opacity=".4"/>
-
-          <!-- Speed lines -->
-          <line x1="0" y1="140" x2="80" y2="140" stroke="url(#speedGrad)" stroke-width="2" opacity=".6"/>
-          <line x1="0" y1="150" x2="60" y2="150" stroke="url(#speedGrad)" stroke-width="1.5" opacity=".4"/>
-          <line x1="0" y1="160" x2="40" y2="160" stroke="url(#speedGrad)" stroke-width="1" opacity=".3"/>
-
-          <defs>
-            <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#1e40af" stop-opacity=".8"/>
-              <stop offset="100%" stop-color="#1e3a8a" stop-opacity=".6"/>
-            </linearGradient>
-            <linearGradient id="cabinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#1d4ed8" stop-opacity=".9"/>
-              <stop offset="100%" stop-color="#1e40af" stop-opacity=".7"/>
-            </linearGradient>
-            <linearGradient id="windowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#bfdbfe" stop-opacity=".3"/>
-              <stop offset="100%" stop-color="#93c5fd" stop-opacity=".1"/>
-            </linearGradient>
-            <linearGradient id="lightGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#fcd34d"/>
-              <stop offset="100%" stop-color="#fef3c7"/>
-            </linearGradient>
-            <linearGradient id="beamGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#fcd34d"/>
-              <stop offset="100%" stop-color="transparent"/>
-            </linearGradient>
-            <radialGradient id="rimGrad">
-              <stop offset="0%" stop-color="#60a5fa"/>
-              <stop offset="100%" stop-color="#2563eb"/>
-            </radialGradient>
-            <radialGradient id="rimGrad2">
-              <stop offset="0%" stop-color="#60a5fa"/>
-              <stop offset="100%" stop-color="#2563eb"/>
-            </radialGradient>
-            <linearGradient id="groundGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="transparent"/>
-              <stop offset="50%" stop-color="#2563eb"/>
-              <stop offset="100%" stop-color="transparent"/>
-            </linearGradient>
-            <linearGradient id="speedGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="transparent"/>
-              <stop offset="100%" stop-color="#60a5fa"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <div class="car-shadow"></div>
       </div>
     </div>
+
   </div>
 </section>
 
-<!-- ════════ LOGOS ════════ -->
-<section id="logos">
-  <div class="wrap">
-    <p class="logos-head">Ils font confiance à ASM Location</p>
+<!-- ════ LOGOS ════ -->
+<section class="logos">
+  <div class="container">
+    <p class="logos-label">Ils font confiance à ASM Location</p>
     <div class="logos-row">
-      <div class="logo-item"><span class="logo-dot"></span>Boucotte Auto</div>
-      <div class="logo-item"><span class="logo-dot"></span>ZigAuto</div>
-      <div class="logo-item"><span class="logo-dot"></span>KaranCars</div>
-      <div class="logo-item"><span class="logo-dot"></span>Dakar Wheels</div>
-      <div class="logo-item"><span class="logo-dot"></span>SenRental</div>
+      <span class="logo-name">Boucotte Auto</span>
+      <span class="logo-name">ZigAuto</span>
+      <span class="logo-name">KaranCars</span>
+      <span class="logo-name">Dakar Wheels</span>
+      <span class="logo-name">SenRental</span>
     </div>
   </div>
 </section>
 
-<!-- ════════ METRICS ════════ -->
-<section id="metrics">
-  <div class="wrap">
-    <div class="metrics-grid reveal">
-      <div class="metric">
-        <span class="metric-icon">🏢</span>
-        <div class="metric-val" data-count="50" data-suffix="+">0+</div>
-        <div class="metric-label">Agences actives</div>
+<!-- ════ METRICS ════ -->
+<section class="metrics-section">
+  <div class="container">
+    <div class="metrics-grid fade-up">
+      <div class="metric-cell">
+        <div class="metric-num" data-count="50" data-suffix="+">50+</div>
+        <div class="metric-desc">Agences actives</div>
       </div>
-      <div class="metric">
-        <span class="metric-icon">📄</span>
-        <div class="metric-val" data-count="5000" data-suffix="+">0+</div>
-        <div class="metric-label">Contrats générés</div>
+      <div class="metric-cell">
+        <div class="metric-num" data-count="5000" data-suffix="+">5 000+</div>
+        <div class="metric-desc">Contrats générés</div>
       </div>
-      <div class="metric">
-        <span class="metric-icon">⚡</span>
-        <div class="metric-val" data-count="99" data-suffix=".9%">0%</div>
-        <div class="metric-label">Uptime garanti</div>
+      <div class="metric-cell">
+        <div class="metric-num" data-count="99" data-suffix=".9%">99.9%</div>
+        <div class="metric-desc">Uptime garanti</div>
       </div>
-      <div class="metric">
-        <span class="metric-icon">🌍</span>
-        <div class="metric-val" data-count="6" data-suffix=" pays">0</div>
-        <div class="metric-label">Pays couverts</div>
+      <div class="metric-cell">
+        <div class="metric-num" data-count="6" data-suffix=" pays">6 pays</div>
+        <div class="metric-desc">Présence en Afrique</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ════════ FEATURES BENTO ════════ -->
-<section id="features">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <div class="sec-tag">🔧 Fonctionnalités</div>
-      <h2 class="sec-h2">Tout ce qu'une agence<br/>moderne exige.</h2>
-      <p class="sec-p">Du premier appel client à la restitution des clés — chaque étape automatisée, tracée, sécurisée.</p>
+<!-- ════ FEATURES ════ -->
+<section class="sec" id="features">
+  <div class="container">
+    <div class="sec-head fade-up">
+      <div class="sec-label">Fonctionnalités</div>
+      <h2 class="sec-h2">Tout ce dont votre<br/>agence a <em>besoin.</em></h2>
+      <p class="sec-p">Une suite complète d'outils pensés pour simplifier chaque aspect de la gestion d'une agence de location.</p>
     </div>
 
-    <div class="bento">
-
-      <!-- Fleet management — wide -->
-      <div class="bcard b-wide reveal">
-        <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:4px;">
-          <div class="bc-icon">🚗</div>
+    <div class="features-grid fade-up">
+      <div class="feat feat-lg">
+        <div style="display:flex;flex-direction:column;justify-content:space-between;height:100%;">
           <div>
-            <div class="bc-h3">Gestion de flotte en temps réel</div>
-            <div class="bc-p">Visualisez l'état de chaque véhicule instantanément. Bloquez un véhicule pour un client en 1 clic, planifiez les maintenances, suivez le kilométrage.</div>
-            <div class="bc-tags">
-              <span class="bc-tag">Disponibilité live</span>
-              <span class="bc-tag">Photos & docs</span>
-              <span class="bc-tag">Historique complet</span>
+            <div class="feat-icon">🚗</div>
+            <div class="feat-h3">Gestion de flotte en temps réel</div>
+            <p class="feat-p">Visualisez l'état de chaque véhicule, planifiez les maintenances, suivez le kilométrage et bloquez un véhicule pour un client en un clic.</p>
+          </div>
+          <div class="fleet-rows" style="margin-top:24px;">
+            <div class="fleet-row">
+              <div class="fr-status fr-ok"></div>
+              <div class="fr-info"><div class="fr-name">Toyota Hilux</div><div class="fr-plate">DK-4521-A</div></div>
+              <div class="fr-price">35 000 F/j</div>
+            </div>
+            <div class="fleet-row">
+              <div class="fr-status fr-busy"></div>
+              <div class="fr-info"><div class="fr-name">Peugeot 3008</div><div class="fr-plate">DK-9810-B</div></div>
+              <div class="fr-price">En location</div>
+            </div>
+            <div class="fleet-row">
+              <div class="fr-status fr-mnt"></div>
+              <div class="fr-info"><div class="fr-name">Hyundai Tucson</div><div class="fr-plate">DK-6677-D</div></div>
+              <div class="fr-price">Maintenance</div>
             </div>
           </div>
         </div>
-        <div class="mini-fleet">
-          <div class="mf-row">
-            <div class="mf-status st-ok"></div>
-            <span class="mf-name">Toyota Hilux · DK-4521-A</span>
-            <span class="mf-badge bd-ok">Disponible</span>
-          </div>
-          <div class="mf-row">
-            <div class="mf-status st-busy"></div>
-            <span class="mf-name">Peugeot 3008 · DK-9810-B</span>
-            <span class="mf-badge bd-busy">En location</span>
-          </div>
-          <div class="mf-row">
-            <div class="mf-status st-serv"></div>
-            <span class="mf-name">Hyundai Tucson · DK-6677-D</span>
-            <span class="mf-badge bd-serv">Maintenance</span>
-          </div>
-        </div>
       </div>
 
-      <!-- Contracts — tall -->
-      <div class="bcard b-tall reveal">
-        <div class="bc-icon">📄</div>
-        <div class="bc-h3">Contrats PDF en 1 clic</div>
-        <div class="bc-p">Générez des contrats professionnels automatiquement. QR code d'authentification, archivage numérique, zéro impression.</div>
-        <div class="contract-preview" style="background:#f8fafc;border-color:#e2e8f0;">
-          <div class="cp-header" style="background:linear-gradient(90deg,rgba(37,99,235,.1),rgba(37,99,235,.02));">
-            📋 &nbsp;CONTRAT #2024-0187
-          </div>
-          <div class="cp-body">
-            <div class="cp-row"><span class="cp-key">Client</span><span class="cp-val">Ibrahima Diallo</span></div>
-            <div class="cp-row"><span class="cp-key">Véhicule</span><span class="cp-val">Toyota Hilux</span></div>
-            <div class="cp-row"><span class="cp-key">Durée</span><span class="cp-val">5 jours</span></div>
-            <div class="cp-row"><span class="cp-key">Montant</span><span class="cp-val" style="color:var(--amber)">175 000 F</span></div>
-          </div>
-          <div class="cp-footer">
-            <div class="qr-box">
-              <span></span><span style="background:transparent"></span><span></span>
-              <span style="background:transparent"></span><span></span><span style="background:transparent"></span>
-              <span></span><span style="background:transparent"></span><span></span>
-            </div>
-            <div class="cp-btn">⬇ Télécharger PDF</div>
-          </div>
-        </div>
+      <div class="feat">
+        <div class="feat-icon">📄</div>
+        <div class="feat-h3">Contrats PDF automatisés</div>
+        <p class="feat-p">Générez des contrats professionnels en un clic, avec QR code d'authentification et archivage numérique.</p>
       </div>
 
-      <!-- Revenue chart -->
-      <div class="bcard b-half reveal">
-        <div class="bc-icon">📊</div>
-        <div class="bc-h3">Revenus & analytics</div>
-        <div class="bc-p">Suivez vos performances en temps réel.</div>
-        <div class="mini-chart">
-          <div class="mc-bar" style="height:45%"></div>
-          <div class="mc-bar" style="height:65%"></div>
-          <div class="mc-bar" style="height:55%"></div>
-          <div class="mc-bar hi" style="height:100%"></div>
-          <div class="mc-bar" style="height:70%"></div>
-          <div class="mc-bar" style="height:85%"></div>
-          <div class="mc-bar" style="height:90%"></div>
-        </div>
-        <div style="font-size:11px;color:var(--muted);text-align:right;margin-top:6px;">Revenus — 7 derniers jours</div>
+      <div class="feat">
+        <div class="feat-icon">💳</div>
+        <div class="feat-h3">Suivi des paiements</div>
+        <p class="feat-p">Enregistrez acomptes et soldes, générez des reçus, suivez les encaissements avec un journal comptable complet.</p>
       </div>
 
-      <!-- Roles -->
-      <div class="bcard b-third reveal">
-        <div class="bc-icon">🔐</div>
-        <div class="bc-h3">Multi-rôles & sécurité</div>
-        <div class="bc-p">Contrôle d'accès granulaire.</div>
-        <div class="roles-list">
-          <div class="role-row">
-            <div class="role-avatar ra-admin">AD</div>
-            <div class="role-info">
-              <div class="role-name">Administrateur</div>
-              <div class="role-perms">Accès complet</div>
-            </div>
-            <span class="role-badge rb-full">Full</span>
-          </div>
-          <div class="role-row">
-            <div class="role-avatar ra-agent">AG</div>
-            <div class="role-info">
-              <div class="role-name">Agent</div>
-              <div class="role-perms">Réservations & clients</div>
-            </div>
-            <span class="role-badge rb-ops">Ops</span>
-          </div>
-          <div class="role-row">
-            <div class="role-avatar ra-compta">CO</div>
-            <div class="role-info">
-              <div class="role-name">Comptable</div>
-              <div class="role-perms">Paiements & rapports</div>
-            </div>
-            <span class="role-badge rb-read">Read</span>
-          </div>
-        </div>
+      <div class="feat">
+        <div class="feat-icon">👥</div>
+        <div class="feat-h3">CRM Clients</div>
+        <p class="feat-p">Centralisez l'historique, les documents et les notes pour chaque client. Retrouvez tout en une seconde.</p>
       </div>
 
-      <!-- Uptime -->
-      <div class="bcard b-qtr reveal">
-        <div class="bc-icon">🟢</div>
-        <div class="bc-h3">Fiabilité maximale</div>
-        <div class="bc-p">Infrastructure dédiée à l'Afrique.</div>
-        <div class="speed-visual">
-          <div>
-            <div class="speed-ring">
-              <div class="speed-pct">99%</div>
-            </div>
-            <div class="speed-label">Uptime plateforme</div>
-          </div>
-        </div>
+      <div class="feat">
+        <div class="feat-icon">📅</div>
+        <div class="feat-h3">Calendrier de réservations</div>
+        <p class="feat-p">Vue planning interactive. Détection automatique des conflits. Planning semaine ou mois en un coup d'œil.</p>
       </div>
 
-      <!-- Bottom full row -->
-      <div class="bcard b-full reveal" style="display:grid;grid-template-columns:repeat(4,1fr);gap:28px;align-items:center;">
-        <div>
-          <div class="bc-icon">👥</div>
-          <div class="bc-h3">CRM Clients</div>
-          <div class="bc-p">Centralisez historique, documents et notes pour chaque client.</div>
-        </div>
-        <div>
-          <div class="bc-icon">📅</div>
-          <div class="bc-h3">Calendrier</div>
-          <div class="bc-p">Vue planning interactive, détection des conflits en temps réel.</div>
-        </div>
-        <div>
-          <div class="bc-icon">💳</div>
-          <div class="bc-h3">Paiements</div>
-          <div class="bc-p">Acomptes, soldes, reçus numériques et journal comptable.</div>
-        </div>
-        <div>
-          <div class="bc-icon">🌐</div>
-          <div class="bc-h3">Vitrine publique</div>
-          <div class="bc-p">Page de réservation en ligne pour vos clients, prête à l'emploi.</div>
-        </div>
+      <div class="feat">
+        <div class="feat-icon">📊</div>
+        <div class="feat-h3">Rapports & analytics</div>
+        <p class="feat-p">Revenus, taux d'occupation, performances par véhicule. Prenez des décisions fondées sur vos données.</p>
       </div>
 
-    </div>
-  </div>
-</section>
-
-<!-- ════════ HOW IT WORKS ════════ -->
-<section id="how">
-  <div class="wrap">
-    <div class="sec-head reveal" style="text-align:center;max-width:600px;margin-inline:auto;">
-      <div class="sec-tag">🚀 Démarrage</div>
-      <h2 class="sec-h2">Opérationnel en<br/>moins de 30 minutes.</h2>
-      <p class="sec-p" style="margin-inline:auto;">Pas d'installation, pas de configuration complexe. Votre agence est en ligne en trois étapes.</p>
-    </div>
-
-    <div class="steps-grid">
-      <div class="step-card reveal">
-        <div class="step-num">01</div>
-        <span class="step-icon">🏢</span>
-        <div class="step-h3">Créez votre espace</div>
-        <div class="step-p">Renseignez le nom de votre agence, choisissez votre sous-domaine, importez votre logo. Votre tableau de bord est actif immédiatement.</div>
+      <div class="feat">
+        <div class="feat-icon">🔐</div>
+        <div class="feat-h3">Multi-rôles & accès</div>
+        <p class="feat-p">Admin, Agent, Comptable — chacun accède uniquement à ce dont il a besoin. Journal d'activité complet.</p>
       </div>
-      <div class="step-card reveal">
-        <div class="step-num">02</div>
-        <span class="step-icon">🚗</span>
-        <div class="step-h3">Ajoutez votre flotte</div>
-        <div class="step-p">Importez vos véhicules avec photos, immatriculations, catégories et tarifs par zone. La disponibilité se met à jour automatiquement.</div>
-      </div>
-      <div class="step-card reveal">
-        <div class="step-num">03</div>
-        <span class="step-icon">💰</span>
-        <div class="step-h3">Louez & encaissez</div>
-        <div class="step-p">Créez des réservations, générez vos contrats PDF en 1 clic et suivez vos encaissements. Votre agence tourne, vous gardez le contrôle.</div>
+
+      <div class="feat">
+        <div class="feat-icon">🌐</div>
+        <div class="feat-h3">Vitrine publique</div>
+        <p class="feat-p">Une page de réservation en ligne pour vos clients, avec votre flotte, vos tarifs et votre identité visuelle.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ════════ PRICING ════════ -->
-<section id="pricing">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <div class="sec-tag">💎 Tarifs</div>
-      <h2 class="sec-h2">Simple, transparent,<br/>sans surprise.</h2>
+<!-- ════ PRODUCT DETAIL 1 — Contracts ════ -->
+<section class="sec" style="padding-top:0; border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="product-split fade-up">
+      <div>
+        <div class="sec-label">Contrats</div>
+        <h2 class="sec-h2">Un contrat signé<br/>en <em>30 secondes.</em></h2>
+        <p class="sec-p" style="margin-bottom:28px;">Sélectionnez le client, le véhicule, les dates — le contrat PDF est généré avec QR code d'authentification. Plus de paperasse, zéro erreur.</p>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="proof-item"><span class="proof-check">✓</span> PDF professionnel avec en-tête personnalisé</div>
+          <div class="proof-item"><span class="proof-check">✓</span> QR code de vérification d'authenticité</div>
+          <div class="proof-item"><span class="proof-check">✓</span> Archivage automatique et recherche rapide</div>
+          <div class="proof-item"><span class="proof-check">✓</span> Clôture du contrat avec calcul du solde</div>
+        </div>
+      </div>
+      <div class="product-visual">
+        <div class="pv-header">
+          <div class="pv-dot" style="background:#ff5f57"></div>
+          <div class="pv-dot" style="background:#ffbd2e"></div>
+          <div class="pv-dot" style="background:#28ca41"></div>
+          <span style="font-size:11px;color:var(--muted);margin-left:8px;">Contrat · ASM Location</span>
+        </div>
+        <div class="pv-body">
+          <div class="contract-card">
+            <div class="cc-top">
+              <div>
+                <div class="cc-id">CONTRAT #2024-0187</div>
+                <div class="cc-client">Ibrahima Diallo</div>
+              </div>
+              <span class="cc-badge">Actif</span>
+            </div>
+            <div class="cc-rows">
+              <div class="cc-row"><span class="cc-key">Véhicule</span><span class="cc-val">Toyota Hilux · DK-4521-A</span></div>
+              <div class="cc-row"><span class="cc-key">Départ</span><span class="cc-val">18 mars 2025, 09h00</span></div>
+              <div class="cc-row"><span class="cc-key">Retour</span><span class="cc-val">23 mars 2025, 18h00</span></div>
+              <div class="cc-row"><span class="cc-key">Durée</span><span class="cc-val">5 jours</span></div>
+              <div class="cc-row"><span class="cc-key">Acompte versé</span><span class="cc-val" style="color:var(--green)">87 500 F</span></div>
+            </div>
+            <div class="cc-footer">
+              <div class="cc-total">Total <span>175 000 F</span></div>
+              <div class="cc-dl">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Télécharger PDF
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ PRODUCT DETAIL 2 — Payments ════ -->
+<section class="sec" style="border-top:1px solid var(--border); background:var(--off);">
+  <div class="container">
+    <div class="product-split reverse fade-up">
+      <div>
+        <div class="sec-label">Paiements</div>
+        <h2 class="sec-h2">Encaissez sans<br/><em>friction.</em></h2>
+        <p class="sec-p" style="margin-bottom:28px;">Enregistrez chaque paiement, validez les encaissements et suivez les soldes clients en temps réel. Votre comptable a tout ce dont il a besoin.</p>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="proof-item"><span class="proof-check">✓</span> Acomptes et soldes par contrat</div>
+          <div class="proof-item"><span class="proof-check">✓</span> Reçus numériques générés automatiquement</div>
+          <div class="proof-item"><span class="proof-check">✓</span> Journal comptable complet et exportable</div>
+          <div class="proof-item"><span class="proof-check">✓</span> Accès dédié pour votre comptable</div>
+        </div>
+      </div>
+      <div class="product-visual">
+        <div class="pv-header">
+          <div class="pv-dot" style="background:#ff5f57"></div>
+          <div class="pv-dot" style="background:#ffbd2e"></div>
+          <div class="pv-dot" style="background:#28ca41"></div>
+          <span style="font-size:11px;color:var(--muted);margin-left:8px;">Paiements · Mars 2025</span>
+        </div>
+        <div class="pv-body">
+          <div class="pay-list">
+            <div class="pay-row">
+              <div class="pay-avatar pa1">ID</div>
+              <div>
+                <div class="pay-client">Ibrahima Diallo</div>
+                <div class="pay-date">18 mars 2025</div>
+              </div>
+              <div style="text-align:right">
+                <div class="pay-amount">87 500 F</div>
+                <span class="pay-status ps-ok">Validé</span>
+              </div>
+            </div>
+            <div class="pay-row">
+              <div class="pay-avatar pa2">MK</div>
+              <div>
+                <div class="pay-client">Moussa Konaté</div>
+                <div class="pay-date">17 mars 2025</div>
+              </div>
+              <div style="text-align:right">
+                <div class="pay-amount">140 000 F</div>
+                <span class="pay-status ps-ok">Validé</span>
+              </div>
+            </div>
+            <div class="pay-row">
+              <div class="pay-avatar pa3">AD</div>
+              <div>
+                <div class="pay-client">Aïssatou Diallo</div>
+                <div class="pay-date">16 mars 2025</div>
+              </div>
+              <div style="text-align:right">
+                <div class="pay-amount">56 000 F</div>
+                <span class="pay-status ps-pend">En attente</span>
+              </div>
+            </div>
+            <div class="pay-row">
+              <div class="pay-avatar pa4">OB</div>
+              <div>
+                <div class="pay-client">Omar Ba</div>
+                <div class="pay-date">15 mars 2025</div>
+              </div>
+              <div style="text-align:right">
+                <div class="pay-amount">210 000 F</div>
+                <span class="pay-status ps-ok">Validé</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:14px;padding:14px;background:var(--white);border:1px solid var(--border);border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:13px;color:var(--muted);">Total encaissé ce mois</div>
+            <div style="font-size:20px;font-weight:700;color:var(--ink);">4 200 000 F</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ HOW IT WORKS ════ -->
+<section class="how-sec" id="how">
+  <div class="container">
+    <div class="sec-head fade-up">
+      <div class="sec-label">Démarrage</div>
+      <h2 class="sec-h2" style="color:#fff;">Opérationnel<br/><em style="color:#60a5fa;">en 30 minutes.</em></h2>
+      <p class="sec-p">Pas d'installation. Pas de formation longue. Votre agence est en ligne aujourd'hui.</p>
+    </div>
+
+    <div class="steps-row fade-up">
+      <div class="step">
+        <div class="step-num">Étape 01</div>
+        <div class="step-h3">Créez votre espace agence</div>
+        <p class="step-p">Choisissez votre sous-domaine, importez votre logo, configurez vos couleurs. Votre tableau de bord personnalisé est actif en 2 minutes.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">Étape 02</div>
+        <div class="step-h3">Importez votre flotte</div>
+        <p class="step-p">Ajoutez vos véhicules avec photos, immatriculations, catégories et tarifs par zone. La disponibilité se synchronise automatiquement.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">Étape 03</div>
+        <div class="step-h3">Louez et encaissez</div>
+        <p class="step-p">Créez vos premières réservations, générez vos contrats PDF en un clic et suivez vos encaissements. Votre agence tourne.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ PRICING ════ -->
+<section class="sec" id="pricing">
+  <div class="container">
+    <div class="sec-head fade-up">
+      <div class="sec-label">Tarifs</div>
+      <h2 class="sec-h2">Simple et<br/><em>transparent.</em></h2>
       <p class="sec-p">Commencez gratuitement. Évoluez quand vous le souhaitez. Aucun frais caché.</p>
     </div>
 
-    <div class="plans">
-      <div class="plan reveal">
-        <div class="plan-tier">Starter</div>
+    <div class="plans-row fade-up">
+      <div class="plan-card">
+        <div class="plan-name">Starter</div>
         <div class="plan-price">Gratuit</div>
-        <div class="plan-billing">14 jours · toutes fonctionnalités</div>
-        <div class="plan-features">
-          <div class="pf"><span class="pf-check">✓</span> Jusqu'à 10 véhicules</div>
-          <div class="pf"><span class="pf-check">✓</span> 50 contrats / mois</div>
-          <div class="pf"><span class="pf-check">✓</span> 1 utilisateur</div>
-          <div class="pf"><span class="pf-check">✓</span> Tableau de bord</div>
-          <div class="pf off"><span class="pf-x">✗</span> Rapports avancés</div>
-          <div class="pf off"><span class="pf-x">✗</span> Vitrine publique</div>
+        <div class="plan-cycle">14 jours · toutes fonctionnalités incluses</div>
+        <div class="plan-divider"></div>
+        <div class="plan-feats">
+          <div class="pf"><span class="pf-icon ok">✓</span> Jusqu'à 10 véhicules</div>
+          <div class="pf"><span class="pf-icon ok">✓</span> 50 contrats par mois</div>
+          <div class="pf"><span class="pf-icon ok">✓</span> 1 utilisateur</div>
+          <div class="pf"><span class="pf-icon ok">✓</span> Tableau de bord</div>
+          <div class="pf dim"><span class="pf-icon no">✗</span> Rapports avancés</div>
+          <div class="pf dim"><span class="pf-icon no">✗</span> Vitrine publique</div>
         </div>
-        <a href="#cta" class="btn btn-ghost" style="width:100%;border-radius:12px;padding:14px;">Commencer l'essai</a>
+        <a href="#cta" class="btn btn-secondary" style="width:100%;justify-content:center;border-radius:10px;padding:13px;">Commencer l'essai</a>
       </div>
 
-      <div class="plan featured reveal">
-        <div class="feat-badge">⭐ Le plus populaire</div>
-        <div class="plan-tier">Pro</div>
-        <div class="plan-price">49 000<sub> F</sub></div>
-        <div class="plan-billing">par mois · facturé mensuellement</div>
-        <div class="plan-features">
-          <div class="pf"><span class="pf-check">✓</span> Véhicules illimités</div>
-          <div class="pf"><span class="pf-check">✓</span> Contrats illimités</div>
-          <div class="pf"><span class="pf-check">✓</span> 5 utilisateurs</div>
-          <div class="pf"><span class="pf-check">✓</span> Rapports & analytics</div>
-          <div class="pf"><span class="pf-check">✓</span> Vitrine publique</div>
-          <div class="pf"><span class="pf-check">✓</span> Support prioritaire</div>
+      <div class="plan-card featured">
+        <div class="plan-badge">Le plus populaire</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">49 000 <small>F</small></div>
+        <div class="plan-cycle">par mois · sans engagement</div>
+        <div class="plan-divider"></div>
+        <div class="plan-feats">
+          <div class="pf"><span class="pf-icon ok">✓</span> Véhicules illimités</div>
+          <div class="pf"><span class="pf-icon ok">✓</span> Contrats illimités</div>
+          <div class="pf"><span class="pf-icon ok">✓</span> 5 utilisateurs</div>
+          <div class="pf"><span class="pf-icon ok">✓</span> Rapports & analytics</div>
+          <div class="pf"><span class="pf-icon ok">✓</span> Vitrine publique</div>
+          <div class="pf"><span class="pf-icon ok">✓</span> Support prioritaire</div>
         </div>
-        <a href="#cta" class="btn btn-blue" style="width:100%;border-radius:12px;padding:14px;">Choisir Pro</a>
+        <a href="#cta" class="btn btn-primary" style="width:100%;justify-content:center;border-radius:10px;padding:13px;">Choisir Pro</a>
       </div>
 
-      <div class="plan reveal">
-        <div class="plan-tier">Entreprise</div>
-        <div class="plan-price" style="font-size:36px;">Sur mesure</div>
-        <div class="plan-billing">Devis personnalisé</div>
-        <div class="plan-features">
-          <div class="pf"><span class="pf-check">✓</span> Multi-agences & multi-sites</div>
-          <div class="pf"><span class="pf-check">✓</span> Utilisateurs illimités</div>
-          <div class="pf"><span class="pf-check">✓</span> SLA 99,9% garanti</div>
-          <div class="pf"><span class="pf-check">✓</span> Intégrations sur mesure</div>
-          <div class="pf"><span class="pf-check">✓</span> Onboarding dédié</div>
-          <div class="pf"><span class="pf-check">✓</span> Accès API complet</div>
+      <div class="plan-card">
+        <div class="plan-name">Entreprise</div>
+        <div class="plan-price" style="font-size:36px;letter-spacing:-.02em;">Sur mesure</div>
+        <div class="plan-cycle">Devis personnalisé selon vos besoins</div>
+        <div class="plan-divider"></div>
+        <div class="plan-feats">
+          <div class="pf"><span class="pf-icon ok">✓</span> Multi-agences & multi-sites</div>
+          <div class="pf"><span class="pf-icon ok">✓</span> Utilisateurs illimités</div>
+          <div class="pf"><span class="pf-icon ok">✓</span> SLA 99,9% garanti</div>
+          <div class="pf"><span class="pf-icon ok">✓</span> Intégrations sur mesure</div>
+          <div class="pf"><span class="pf-icon ok">✓</span> Onboarding dédié</div>
+          <div class="pf"><span class="pf-icon ok">✓</span> Accès API complet</div>
         </div>
-        <a href="mailto:contact@innosft.com" class="btn btn-ghost" style="width:100%;border-radius:12px;padding:14px;">Nous contacter</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ════════ TESTIMONIALS ════════ -->
-<section id="testi">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <div class="sec-tag">💬 Témoignages</div>
-      <h2 class="sec-h2">Ils ont transformé<br/>leur agence.</h2>
-    </div>
-
-    <div class="testi-grid">
-      <div class="tcard reveal">
-        <div class="stars">★★★★★</div>
-        <div class="ttext">"Avant ASM Location, on gérait tout sur papier. Aujourd'hui nos contrats sont prêts en 30 secondes et on ne perd plus aucun paiement. Le ROI est immédiat."</div>
-        <div class="tauthor">
-          <div class="tavatar ta1">BA</div>
-          <div>
-            <div class="tname">Boubacar A.</div>
-            <div class="trole">Directeur · Boucotte Auto, Dakar</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tcard reveal">
-        <div class="stars">★★★★★</div>
-        <div class="ttext">"La gestion multi-rôles est parfaite. Mes agents voient uniquement ce dont ils ont besoin, mon comptable a ses rapports en temps réel. C'est propre."</div>
-        <div class="tauthor">
-          <div class="tavatar ta2">ZK</div>
-          <div>
-            <div class="tname">Zikora K.</div>
-            <div class="trole">Gérant · ZigAuto, Abidjan</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tcard reveal">
-        <div class="stars">★★★★★</div>
-        <div class="ttext">"Le QR code sur les contrats a tout changé. Nos clients scannent et vérifient l'authenticité en quelques secondes. On a gagné en crédibilité."</div>
-        <div class="tauthor">
-          <div class="tavatar ta3">KD</div>
-          <div>
-            <div class="tname">Kadiatou D.</div>
-            <div class="trole">Fondatrice · KaranCars, Conakry</div>
-          </div>
-        </div>
+        <a href="mailto:contact@innosft.com" class="btn btn-secondary" style="width:100%;justify-content:center;border-radius:10px;padding:13px;">Nous contacter</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ════════ CTA ════════ -->
-<section id="cta">
-  <div class="cta-ring cr1"></div>
-  <div class="cta-ring cr2"></div>
-  <div class="cta-ring cr3"></div>
-  <div class="cta-glow"></div>
+<!-- ════ TESTIMONIALS ════ -->
+<section class="testi-sec">
+  <div class="container">
+    <div class="sec-head fade-up">
+      <div class="sec-label">Témoignages</div>
+      <h2 class="sec-h2">Ils ont transformé<br/>leur <em>agence.</em></h2>
+    </div>
 
-  <div class="wrap cta-inner">
-    <h2 class="cta-h2 reveal">
+    <div class="testi-grid fade-up">
+      <div class="tcard">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">"Avant ASM Location, on gérait tout sur papier. Aujourd'hui nos contrats sont prêts en 30 secondes et on ne perd plus aucun paiement. Le ROI est immédiat."</p>
+        <div class="t-author">
+          <div class="t-av av1">BA</div>
+          <div>
+            <div class="t-name">Boubacar Amadou</div>
+            <div class="t-role">Directeur · Boucotte Auto, Dakar</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tcard">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">"La gestion multi-rôles est exactement ce qu'il nous fallait. Mes agents voient ce dont ils ont besoin, mon comptable a ses rapports en temps réel."</p>
+        <div class="t-author">
+          <div class="t-av av2">ZK</div>
+          <div>
+            <div class="t-name">Zikora Koné</div>
+            <div class="t-role">Gérant · ZigAuto, Abidjan</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tcard">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">"Le QR code sur les contrats a tout changé. Nos clients scannent et vérifient l'authenticité en quelques secondes. On a gagné en crédibilité instantanément."</p>
+        <div class="t-author">
+          <div class="t-av av3">KD</div>
+          <div>
+            <div class="t-name">Kadiatou Diallo</div>
+            <div class="t-role">Fondatrice · KaranCars, Conakry</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ CTA ════ -->
+<section class="cta-sec">
+  <div class="container">
+    <h2 class="cta-h2 fade-up">
       Votre agence mérite<br/>
-      <span style="color:var(--amber)">mieux qu'un tableur.</span>
+      <em>mieux qu'un tableur.</em>
     </h2>
-    <p class="cta-sub reveal">Rejoignez les agences qui ont modernisé leur gestion avec ASM Location.</p>
-    <div class="cta-row reveal">
-      <a href="#" class="btn btn-amber btn-xl">
-        Créer mon agence — c'est gratuit
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    <p class="cta-p fade-up">Rejoignez les agences qui ont modernisé leur gestion avec ASM Location.</p>
+    <div class="cta-row fade-up">
+      <a href="#" class="btn btn-primary btn-xl">
+        Créer mon agence gratuitement <span class="arrow">→</span>
       </a>
-      <a href="mailto:contact@innosft.com" class="btn btn-ghost btn-lg">Parler à un expert</a>
+      <a href="mailto:contact@innosft.com" class="btn btn-secondary btn-lg">Parler à un expert</a>
     </div>
-    <p class="cta-note reveal">
-      <span>✓</span> Aucune carte bancaire &nbsp;·&nbsp;
-      <span>✓</span> 14 jours d'essai complet &nbsp;·&nbsp;
-      <span>✓</span> Données hébergées en Afrique
-    </p>
+    <p class="cta-note fade-up">Aucune carte requise · 14 jours d'essai · Données hébergées en Afrique</p>
   </div>
 </section>
 
-<!-- ════════ FOOTER ════════ -->
+<!-- ════ FOOTER ════ -->
 <footer>
-  <div class="wrap">
-    <div class="footer-grid">
+  <div class="container">
+    <div class="foot-grid">
       <div>
-        <a href="/" class="brand">
-          <div class="brand-mark">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <a href="/" class="logo" style="font-size:15px;">
+          <div class="logo-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14l4 4v4a2 2 0 01-2 2h-2"/>
               <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
             </svg>
           </div>
-          <span class="brand-name">ASM Location</span>
+          ASM Location
         </a>
-        <p class="fb-about">La plateforme SaaS multi-tenant pour les agences de location de véhicules en Afrique de l'Ouest. Par Innosoft Creation.</p>
+        <p class="foot-brand-p">La plateforme SaaS pour les agences de location de véhicules en Afrique de l'Ouest. Par Innosoft Creation.</p>
       </div>
-      <div>
-        <div class="fc-head">Produit</div>
-        <a href="#features" class="fc-link">Fonctionnalités</a>
-        <a href="#pricing" class="fc-link">Tarifs</a>
-        <a href="#how" class="fc-link">Comment ça marche</a>
-        <a href="#testi" class="fc-link">Témoignages</a>
+      <div class="foot-col">
+        <h4>Produit</h4>
+        <a href="#features">Fonctionnalités</a>
+        <a href="#pricing">Tarifs</a>
+        <a href="#how">Comment ça marche</a>
+        <a href="#">Changelog</a>
       </div>
-      <div>
-        <div class="fc-head">Ressources</div>
-        <a href="#" class="fc-link">Documentation</a>
-        <a href="#" class="fc-link">API Reference</a>
-        <a href="#" class="fc-link">Statut système</a>
-        <a href="#" class="fc-link">Blog</a>
+      <div class="foot-col">
+        <h4>Ressources</h4>
+        <a href="#">Documentation</a>
+        <a href="#">API Reference</a>
+        <a href="#">Statut système</a>
+        <a href="#">Blog</a>
       </div>
-      <div>
-        <div class="fc-head">Innosoft</div>
-        <a href="#" class="fc-link">À propos</a>
-        <a href="mailto:contact@innosft.com" class="fc-link">Contact</a>
-        <a href="#" class="fc-link">Mentions légales</a>
-        <a href="#" class="fc-link">Confidentialité</a>
+      <div class="foot-col">
+        <h4>Innosoft</h4>
+        <a href="#">À propos</a>
+        <a href="mailto:contact@innosft.com">Contact</a>
+        <a href="#">Mentions légales</a>
+        <a href="#">Confidentialité</a>
       </div>
     </div>
-
     <div class="foot-bottom">
       <span>© 2025 Innosoft Creation · Tous droits réservés</span>
-      <div class="foot-links">
+      <div class="foot-socials">
         <a href="#">Twitter</a>
         <a href="#">LinkedIn</a>
         <a href="#">WhatsApp</a>
@@ -1352,52 +1447,44 @@
 </footer>
 
 <script>
-  // Navbar scroll
-  const nav = document.getElementById('nav');
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('solid', scrollY > 30);
-  }, { passive: true });
-
-  // Reveal on scroll
-  const revealObs = new IntersectionObserver((entries) => {
-    entries.forEach((e, i) => {
-      if (e.isIntersecting) {
-        // Stagger siblings
-        const siblings = [...e.target.parentElement.querySelectorAll('.reveal:not(.in)')];
-        siblings.forEach((el, idx) => {
-          setTimeout(() => el.classList.add('in'), idx * 80);
-        });
-        e.target.classList.add('in');
-        revealObs.unobserve(e.target);
-      }
+  // Fade-up reveal
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      // Stagger children if multiple
+      const els = e.target.classList.contains('fade-up')
+        ? [e.target]
+        : [...e.target.querySelectorAll('.fade-up')];
+      els.forEach((el, i) => setTimeout(() => el.classList.add('show'), i * 80));
+      e.target.classList.add('show');
+      obs.unobserve(e.target);
     });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+  }, { threshold: 0.12 });
 
-  // Animated counters
-  function animateVal(el) {
+  document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+  // Counter animation
+  function countUp(el) {
     const target = +el.dataset.count;
     const suffix = el.dataset.suffix || '';
-    const dur = 1800;
-    const start = performance.now();
-    const tick = now => {
-      const p = Math.min((now - start) / dur, 1);
-      const ease = 1 - Math.pow(1 - p, 4);
-      el.textContent = Math.floor(target * ease).toLocaleString('fr-FR') + suffix;
+    const dur = 1600;
+    const t0 = performance.now();
+    const tick = t => {
+      const p = Math.min((t - t0) / dur, 1);
+      const v = Math.floor(target * (1 - Math.pow(1 - p, 3)));
+      el.textContent = v.toLocaleString('fr-FR') + suffix;
       if (p < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
   }
-  const counterObs = new IntersectionObserver(entries => {
+
+  new IntersectionObserver(entries => {
     entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.querySelectorAll('[data-count]').forEach(animateVal);
-        counterObs.unobserve(e.target);
-      }
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('[data-count]').forEach(countUp);
     });
-  }, { threshold: 0.5 });
-  const metricsGrid = document.querySelector('.metrics-grid');
-  if (metricsGrid) counterObs.observe(metricsGrid);
+  }, { threshold: 0.5 }).observe(document.querySelector('.metrics-grid'));
 </script>
+
 </body>
 </html>
