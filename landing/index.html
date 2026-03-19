@@ -7,750 +7,1120 @@
   <meta name="description" content="Pilotez votre flotte, gérez vos contrats et encaissez vos paiements depuis une seule plateforme. La solution SaaS pensée pour les agences de location en Afrique."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Urbanist:wght@700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
 
   <style>
-    /* ════════════════════════════════════════════
-       RESET & TOKENS
-    ════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════
+       RESET & DESIGN TOKENS
+    ═══════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --ink:      #ffffff;
-      --surface:  #f1f5f9;
-      --glass:    rgba(0,0,0,.032);
-      --stroke:   rgba(0,0,0,.08);
-      --blue:     #2563eb;
-      --blue-lt:  #1d4ed8;
-      --amber:    #d97706;
-      --amber-lt: #b45309;
-      --emerald:  #059669;
-      --text:     #0f172a;
-      --muted:    #64748b;
-      --r:        18px;
-      font-size: 16px;
+      --blue:        #2563eb;
+      --blue-dark:   #1d4ed8;
+      --blue-dim:    #eff6ff;
+      --amber:       #f59e0b;
+      --amber-dark:  #d97706;
+      --amber-dim:   #fffbeb;
+      --green:       #059669;
+      --green-dim:   #ecfdf5;
+      --red-dim:     #fef2f2;
+      --text:        #111827;
+      --text-2:      #374151;
+      --muted:       #6b7280;
+      --border:      #e5e7eb;
+      --surface:     #f9fafb;
+      --white:       #ffffff;
+      --radius:      12px;
+      --radius-lg:   20px;
+      --shadow-sm:   0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+      --shadow-md:   0 4px 16px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
+      --shadow-lg:   0 12px 40px rgba(0,0,0,.1), 0 4px 12px rgba(0,0,0,.06);
     }
-    html { scroll-behavior: smooth; }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
     body {
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      background: var(--ink);
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--white);
       color: var(--text);
-      overflow-x: hidden;
       line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 3px; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
     a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
 
-    .wrap { max-width: 1200px; margin-inline: auto; padding-inline: 28px; }
+    .container {
+      max-width: 1180px;
+      margin-inline: auto;
+      padding-inline: 24px;
+    }
 
-    /* ════════════════════════════════════════════
-       NAVBAR
-    ════════════════════════════════════════════ */
-    #nav {
-      position: fixed; top: 0; inset-x: 0; z-index: 999;
-      transition: background .4s, border-color .4s;
+    /* ═══════════════════════════════════════════
+       TYPOGRAPHY HELPERS
+    ═══════════════════════════════════════════ */
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 100px;
+      background: var(--blue-dim);
+      border: 1px solid rgba(37,99,235,.15);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--blue);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
     }
-    #nav.solid {
-      background: rgba(255,255,255,.92);
-      backdrop-filter: blur(20px) saturate(160%);
-      border-bottom: 1px solid var(--stroke);
-    }
-    .nav-row {
-      display: flex; align-items: center;
-      height: 68px; gap: 40px;
-    }
-    .brand {
-      display: flex; align-items: center; gap: 11px; flex-shrink: 0;
-    }
-    .brand-mark {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--blue) 0%, #1d4ed8 100%);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 20px rgba(37,99,235,.5);
-    }
-    .brand-mark svg { display: block; }
-    .brand-name {
-      font-family: 'Urbanist', sans-serif;
-      font-size: 19px; font-weight: 800; letter-spacing: -.02em;
-      background: linear-gradient(90deg, var(--text) 40%, var(--blue));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .nav-links {
-      display: flex; gap: 28px; margin-left: auto;
-    }
-    .nav-links a {
-      font-size: 14px; font-weight: 500; color: var(--muted);
-      transition: color .2s;
-    }
-    .nav-links a:hover { color: var(--text); }
-    .nav-end { display: flex; gap: 10px; align-items: center; }
 
+    .section-title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(28px, 3.5vw, 44px);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    .section-sub {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 500px;
+      line-height: 1.75;
+    }
+
+    .section-head {
+      margin-bottom: 52px;
+    }
+
+    .section-head.centered {
+      text-align: center;
+    }
+    .section-head.centered .section-sub {
+      margin-inline: auto;
+    }
+
+    /* ═══════════════════════════════════════════
+       BUTTON SYSTEM
+    ═══════════════════════════════════════════ */
     .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 10px 22px; border-radius: 100px;
-      font-size: 14px; font-weight: 600; cursor: pointer; border: none;
-      transition: all .2s; white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      border-radius: 100px;
+      transition: all .18s ease;
+      white-space: nowrap;
+      text-decoration: none;
     }
-    .btn-ghost {
-      background: var(--glass); color: var(--text);
-      border: 1px solid var(--stroke);
+    .btn-sm  { padding: 9px 20px;  font-size: 13.5px; }
+    .btn-md  { padding: 12px 24px; font-size: 14.5px; }
+    .btn-lg  { padding: 15px 32px; font-size: 15.5px; }
+    .btn-xl  { padding: 17px 40px; font-size: 16.5px; }
+
+    .btn-primary {
+      background: var(--blue);
+      color: var(--white);
+      box-shadow: 0 2px 12px rgba(37,99,235,.3);
     }
-    .btn-ghost:hover { background: rgba(255,255,255,.08); }
-    .btn-blue {
-      background: var(--blue); color: #fff;
-      box-shadow: 0 0 24px rgba(37,99,235,.45);
-    }
-    .btn-blue:hover {
-      background: #3b82f6;
-      box-shadow: 0 0 36px rgba(37,99,235,.65);
+    .btn-primary:hover {
+      background: var(--blue-dark);
+      box-shadow: 0 4px 20px rgba(37,99,235,.4);
       transform: translateY(-1px);
     }
+
     .btn-amber {
-      background: linear-gradient(135deg, var(--amber), #d97706);
-      color: #000; font-weight: 700;
-      box-shadow: 0 0 24px rgba(245,158,11,.35);
+      background: var(--amber);
+      color: var(--white);
+      box-shadow: 0 2px 12px rgba(245,158,11,.25);
     }
     .btn-amber:hover {
-      box-shadow: 0 0 36px rgba(245,158,11,.55);
+      background: var(--amber-dark);
+      box-shadow: 0 4px 20px rgba(245,158,11,.35);
       transform: translateY(-1px);
     }
-    .btn-lg { padding: 14px 32px; font-size: 16px; }
-    .btn-xl { padding: 16px 40px; font-size: 17px; }
 
-    /* ════════════════════════════════════════════
+    .btn-outline {
+      background: var(--white);
+      color: var(--text-2);
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-outline:hover {
+      border-color: #d1d5db;
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1.5px solid var(--border);
+    }
+    .btn-ghost:hover {
+      background: var(--surface);
+      color: var(--text);
+      border-color: #d1d5db;
+    }
+
+    /* ═══════════════════════════════════════════
+       NAVBAR
+    ═══════════════════════════════════════════ */
+    #nav {
+      position: fixed;
+      top: 0;
+      inset-x: 0;
+      z-index: 1000;
+      transition: background .3s, box-shadow .3s, border-color .3s;
+      border-bottom: 1px solid transparent;
+    }
+
+    #nav.scrolled {
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-color: var(--border);
+      box-shadow: 0 1px 0 rgba(0,0,0,.05);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      height: 66px;
+      gap: 8px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      margin-right: 8px;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-icon svg { display: block; }
+
+    .brand-name {
+      font-family: 'Sora', sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+    }
+
+    .nav-links a {
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      transition: color .15s, background .15s;
+    }
+    .nav-links a:hover {
+      color: var(--text);
+      background: var(--surface);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 16px;
+    }
+
+    /* ═══════════════════════════════════════════
        HERO
-    ════════════════════════════════════════════ */
+    ═══════════════════════════════════════════ */
     #hero {
       min-height: 100vh;
-      display: flex; flex-direction: column; justify-content: center;
-      padding-top: 100px; padding-bottom: 60px;
-      position: relative; overflow: hidden;
+      display: flex;
+      align-items: center;
+      padding-top: 66px;
+      position: relative;
+      overflow: hidden;
     }
 
-    /* Animated background */
-    .hero-canvas {
-      position: absolute; inset: 0; pointer-events: none;
-    }
-    .glow {
-      position: absolute; border-radius: 50%;
-      filter: blur(100px); opacity: .16; animation: drift 10s ease-in-out infinite;
-    }
-    .glow-1 { width: 700px; height: 500px; background: #bfdbfe; top: -150px; left: -150px; }
-    .glow-2 { width: 500px; height: 500px; background: #fde68a; bottom: -100px; right: -100px; animation-delay: -5s; opacity: .4; }
-    .glow-3 { width: 400px; height: 300px; background: #ddd6fe; top: 40%; left: 45%; animation-delay: -3s; }
-    @keyframes drift {
-      0%,100% { transform: translate(0,0) scale(1); }
-      50% { transform: translate(40px,-40px) scale(1.08); }
-    }
-
-    /* Road line */
-    .road {
-      position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, transparent, var(--blue), var(--amber), var(--blue), transparent);
-      opacity: .5;
-    }
-    .road::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: inherit;
-      animation: road-scan 3s linear infinite;
-      filter: blur(8px);
-    }
-    @keyframes road-scan { from { transform: scaleX(0) translateX(0); } to { transform: scaleX(1); } }
-
-    /* Grid */
-    .hero-grid-bg {
-      position: absolute; inset: 0;
+    /* Subtle grid background */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
       background-image:
-        linear-gradient(rgba(37,99,235,.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(37,99,235,.07) 1px, transparent 1px);
-      background-size: 64px 64px;
-      mask-image: radial-gradient(ellipse 100% 90% at 50% 0%, black 20%, transparent 100%);
+        linear-gradient(rgba(37,99,235,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37,99,235,.04) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 40%, transparent 100%);
+    }
+
+    /* Soft glow */
+    .hero-glow {
+      position: absolute;
+      width: 600px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(37,99,235,.08) 0%, transparent 70%);
+      top: -100px;
+      right: -100px;
+      pointer-events: none;
+    }
+
+    .hero-glow-2 {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245,158,11,.07) 0%, transparent 70%);
+      bottom: 0;
+      left: -100px;
+      pointer-events: none;
     }
 
     .hero-inner {
-      position: relative; z-index: 1;
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 60px; align-items: center;
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      padding-top: 60px;
+      padding-bottom: 80px;
     }
 
-    /* Pill badge */
-    .pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 5px 14px 5px 8px; border-radius: 100px;
-      background: rgba(37,99,235,.1); border: 1px solid rgba(37,99,235,.28);
-      font-size: 12.5px; font-weight: 600; color: var(--blue-lt);
-      margin-bottom: 24px;
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px 5px 6px;
+      border-radius: 100px;
+      background: var(--blue-dim);
+      border: 1px solid rgba(37,99,235,.18);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--blue-dark);
+      margin-bottom: 28px;
     }
-    .pill-dot {
-      width: 22px; height: 22px; border-radius: 50%;
-      background: var(--blue); display: flex; align-items: center; justify-content: center;
-      font-size: 11px;
+
+    .hero-badge-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
     }
 
     .hero-h1 {
-      font-family: 'Urbanist', sans-serif;
-      font-size: clamp(44px, 5.5vw, 76px);
-      font-weight: 900; line-height: 1.0; letter-spacing: -.035em;
-      margin-bottom: 22px;
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(38px, 4.5vw, 62px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -.04em;
+      color: var(--text);
+      margin-bottom: 24px;
     }
-    .hi { color: var(--amber); display: inline-block; position: relative; }
-    .hi::after {
+
+    .hero-h1 .accent {
+      color: var(--blue);
+      position: relative;
+    }
+
+    .hero-h1 .accent::after {
       content: '';
-      position: absolute; left: 0; bottom: -4px; right: 0; height: 4px;
-      background: linear-gradient(90deg, var(--amber), transparent);
+      position: absolute;
+      left: 0;
+      bottom: -3px;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--blue), rgba(37,99,235,.2));
       border-radius: 2px;
     }
 
     .hero-p {
-      font-size: 17px; color: var(--muted); line-height: 1.75;
-      max-width: 480px; margin-bottom: 36px;
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 460px;
+      margin-bottom: 36px;
     }
 
-    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 48px; }
-
-    .trust-row {
-      display: flex; align-items: center; gap: 14px;
-      font-size: 13px; color: var(--muted);
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 44px;
     }
-    .trust-faces { display: flex; }
-    .face {
-      width: 30px; height: 30px; border-radius: 50%;
-      border: 2px solid var(--ink);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 700;
-      margin-left: -9px;
-    }
-    .face:first-child { margin-left: 0; }
-    .f1 { background: linear-gradient(135deg, #2563eb, #7c3aed); }
-    .f2 { background: linear-gradient(135deg, #f59e0b, #ef4444); }
-    .f3 { background: linear-gradient(135deg, #10b981, #2563eb); }
-    .f4 { background: linear-gradient(135deg, #8b5cf6, #ec4899); }
 
-    /* ── CAR SVG ── */
+    .hero-trust {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .trust-avatars {
+      display: flex;
+    }
+    .trust-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--white);
+      margin-left: -8px;
+    }
+    .trust-avatar:first-child { margin-left: 0; }
+    .av-1 { background: linear-gradient(135deg, #2563eb, #7c3aed); }
+    .av-2 { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+    .av-3 { background: linear-gradient(135deg, #10b981, #2563eb); }
+    .av-4 { background: linear-gradient(135deg, #8b5cf6, #ec4899); }
+
+    /* Hero visual */
     .hero-visual {
       position: relative;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .car-wrap {
-      position: relative; width: 100%;
-      animation: car-float 4s ease-in-out infinite;
+
+    .car-scene {
+      position: relative;
+      width: 100%;
+      animation: float 5s ease-in-out infinite;
     }
-    @keyframes car-float {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-14px); }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
     }
+
     .car-shadow {
-      position: absolute; bottom: -20px; left: 10%; right: 10%;
-      height: 30px; border-radius: 50%;
-      background: rgba(37,99,235,.25);
-      filter: blur(20px);
-      animation: shadow-pulse 4s ease-in-out infinite;
+      position: absolute;
+      bottom: -16px;
+      left: 15%;
+      right: 15%;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(37,99,235,.15);
+      filter: blur(16px);
+      animation: shadow-breath 5s ease-in-out infinite;
     }
-    @keyframes shadow-pulse {
-      0%,100% { transform: scaleX(1); opacity: .6; }
-      50% { transform: scaleX(.8); opacity: .3; }
+
+    @keyframes shadow-breath {
+      0%, 100% { transform: scaleX(1); opacity: .7; }
+      50% { transform: scaleX(.8); opacity: .35; }
     }
 
     /* Floating stat cards */
-    .float-card {
+    .stat-card {
       position: absolute;
-      background: rgba(255,255,255,.95); backdrop-filter: blur(16px);
-      border: 1px solid var(--stroke); border-radius: 14px;
-      padding: 12px 18px;
-      animation: fc-float 5s ease-in-out infinite;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      box-shadow: var(--shadow-lg);
       z-index: 2;
+      animation: float-card 6s ease-in-out infinite;
     }
-    .float-card:nth-child(2) { animation-delay: -2s; }
-    .float-card:nth-child(3) { animation-delay: -4s; }
-    @keyframes fc-float {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-    .fc-a { top: 0; left: -20px; }
-    .fc-b { bottom: 30px; right: -20px; }
-    .fc-c { top: 50%; left: 50%; transform: translate(-50%,-50%); }
-    .fc-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
-    .fc-val { font-family: 'Urbanist', sans-serif; font-size: 22px; font-weight: 900; }
-    .fc-sub { font-size: 11px; font-weight: 600; }
-    .c-blue { color: var(--blue-lt); }
-    .c-amber { color: var(--amber); }
-    .c-green { color: var(--emerald); }
+    .stat-card:nth-child(2) { animation-delay: -2s; }
+    .stat-card:nth-child(3) { animation-delay: -4s; }
 
-    /* ════════════════════════════════════════════
-       LOGOS
-    ════════════════════════════════════════════ */
+    @keyframes float-card {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+
+    .stat-card.top-left  { top: 8px; left: -24px; }
+    .stat-card.bot-right { bottom: 24px; right: -24px; }
+
+    .stat-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
+    .stat-value { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 900; line-height: 1; }
+    .stat-sub   { font-size: 11px; font-weight: 600; margin-top: 1px; }
+    .txt-blue   { color: var(--blue); }
+    .txt-amber  { color: var(--amber-dark); }
+    .txt-green  { color: var(--green); }
+
+    /* ═══════════════════════════════════════════
+       LOGOS / SOCIAL PROOF
+    ═══════════════════════════════════════════ */
     #logos {
-      padding: 40px 0;
-      border-top: 1px solid var(--stroke);
-      border-bottom: 1px solid var(--stroke);
-      background: #f8fafc;
+      padding: 36px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
     }
-    .logos-head { text-align:center; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-bottom:24px; }
-    .logos-row { display:flex; align-items:center; justify-content:center; gap:32px; flex-wrap:wrap; }
-    .logo-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 22px; border-radius: 100px;
-      border: 1px solid var(--stroke);
-      background: var(--glass);
-      font-size: 14px; font-weight: 700; color: var(--muted);
-      transition: color .2s, border-color .2s;
-    }
-    .logo-item:hover { color: var(--text); border-color: rgba(255,255,255,.18); }
-    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
 
-    /* ════════════════════════════════════════════
-       METRICS STRIP
-    ════════════════════════════════════════════ */
-    #metrics { padding: 80px 0; }
-    .metrics-grid {
-      display: grid; grid-template-columns: repeat(4,1fr);
-      gap: 1px; background: var(--stroke);
-      border: 1px solid var(--stroke); border-radius: var(--r);
-      overflow: hidden;
+    .logos-label {
+      text-align: center;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
     }
-    .metric {
-      background: #fff;
+
+    .logos-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .logo-chip {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 18px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--muted);
+      transition: color .15s, border-color .15s;
+    }
+    .logo-chip:hover { color: var(--text); border-color: #d1d5db; }
+    .logo-chip-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+
+    /* ═══════════════════════════════════════════
+       METRICS
+    ═══════════════════════════════════════════ */
+    #metrics { padding: 88px 0; }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .metric-item {
+      background: var(--white);
       padding: 40px 28px;
       text-align: center;
-      transition: background .25s;
-      position: relative; overflow: hidden;
+      transition: background .2s;
+      position: relative;
     }
-    .metric::before {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(37,99,235,.07), transparent);
-      opacity: 0; transition: opacity .3s;
-    }
-    .metric:hover { background: rgba(255,255,255,.03); }
-    .metric:hover::before { opacity: 1; }
-    .metric-icon { font-size: 28px; margin-bottom: 12px; display: block; }
-    .metric-val {
-      font-family: 'Urbanist', sans-serif;
-      font-size: 50px; font-weight: 900; line-height: 1;
-      background: linear-gradient(135deg, var(--text) 0%, var(--blue) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      margin-bottom: 6px;
-    }
-    .metric-label { font-size: 13px; color: var(--muted); }
+    .metric-item:hover { background: #fafbff; }
 
-    /* ════════════════════════════════════════════
-       BENTO FEATURES
-    ════════════════════════════════════════════ */
-    #features { padding: 100px 0; }
+    .metric-icon { font-size: 26px; margin-bottom: 14px; display: block; }
 
-    .sec-tag {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 4px 14px; border-radius: 100px;
-      border: 1px solid rgba(245,158,11,.3);
-      background: rgba(245,158,11,.08);
-      font-size: 12px; font-weight: 700; color: var(--amber);
-      letter-spacing: .08em; text-transform: uppercase;
-      margin-bottom: 14px;
+    .metric-num {
+      font-family: 'Sora', sans-serif;
+      font-size: 46px;
+      font-weight: 900;
+      line-height: 1;
+      color: var(--text);
+      background: linear-gradient(135deg, var(--text), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
     }
-    .sec-h2 {
-      font-family: 'Urbanist', sans-serif;
-      font-size: clamp(32px, 4vw, 52px);
-      font-weight: 900; letter-spacing: -.03em; line-height: 1.05;
-      margin-bottom: 14px;
-    }
-    .sec-p { font-size: 16px; color: var(--muted); max-width: 540px; line-height: 1.75; }
-    .sec-head { margin-bottom: 56px; }
 
-    /* Bento grid */
-    .bento {
+    .metric-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+    /* ═══════════════════════════════════════════
+       FEATURES — BENTO GRID
+    ═══════════════════════════════════════════ */
+    #features { padding: 96px 0; background: var(--surface); }
+
+    .bento-grid {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
-      grid-auto-rows: 80px;
-      gap: 14px;
+      grid-auto-rows: 76px;
+      gap: 12px;
     }
-    .bcard {
-      background: var(--glass);
-      border: 1px solid var(--stroke);
-      border-radius: var(--r);
-      padding: 28px;
-      overflow: hidden; position: relative;
-      transition: transform .25s, border-color .3s, box-shadow .3s;
-    }
-    .bcard:hover {
-      transform: translateY(-3px);
-      border-color: rgba(37,99,235,.35);
-      box-shadow: 0 20px 60px rgba(0,0,0,.35), 0 0 0 1px rgba(37,99,235,.08);
-    }
-    .bcard::after {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(37,99,235,.06), transparent 60%);
-      opacity: 0; transition: opacity .3s;
-    }
-    .bcard:hover::after { opacity: 1; }
 
-    /* Sizes */
-    .b-wide  { grid-column: span 7; grid-row: span 4; }
-    .b-tall  { grid-column: span 5; grid-row: span 4; }
-    .b-half  { grid-column: span 4; grid-row: span 3; }
-    .b-third { grid-column: span 4; grid-row: span 3; }
-    .b-qtr   { grid-column: span 4; grid-row: span 3; }
-    .b-full  { grid-column: span 12; grid-row: span 3; }
+    .bento-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      overflow: hidden;
+      position: relative;
+      transition: border-color .2s, box-shadow .2s, transform .2s;
+    }
+    .bento-card:hover {
+      border-color: rgba(37,99,235,.25);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    /* Span sizes */
+    .bc-wide  { grid-column: span 7; grid-row: span 4; }
+    .bc-tall  { grid-column: span 5; grid-row: span 4; }
+    .bc-half  { grid-column: span 4; grid-row: span 3; }
+    .bc-third { grid-column: span 4; grid-row: span 3; }
+    .bc-qtr   { grid-column: span 4; grid-row: span 3; }
+    .bc-full  { grid-column: span 12; grid-row: span 3; }
 
     .bc-icon {
-      width: 44px; height: 44px; border-radius: 12px;
-      background: #f1f5f9; border: 1px solid var(--stroke);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; margin-bottom: 16px; flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--blue-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 14px;
+      flex-shrink: 0;
     }
-    .bc-h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
-    .bc-p { font-size: 13px; color: var(--muted); line-height: 1.65; }
-    .bc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+
+    .bc-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 7px; }
+    .bc-desc  { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    .bc-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
     .bc-tag {
-      background: #f1f5f9; border: 1px solid var(--stroke);
-      padding: 3px 11px; border-radius: 100px;
-      font-size: 11px; font-weight: 600; color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
     }
 
-    /* Fleet visual inside bento */
-    .mini-fleet { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
-    .mf-row {
-      display: flex; align-items: center; gap: 10px;
-      background: #f8fafc; border-radius: 10px;
-      padding: 9px 14px; border: 1px solid var(--stroke);
+    /* Mini fleet list */
+    .mini-fleet { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; }
+    .fleet-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 9px;
+      background: var(--surface);
+      border: 1px solid var(--border);
     }
-    .mf-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .st-ok   { background: var(--emerald); box-shadow: 0 0 6px var(--emerald); }
-    .st-busy { background: var(--amber);   box-shadow: 0 0 6px var(--amber); }
-    .st-serv { background: var(--muted); }
-    .mf-name { flex: 1; font-size: 13px; font-weight: 500; }
-    .mf-badge {
-      font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 100px;
+    .fleet-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green  { background: var(--green); box-shadow: 0 0 5px rgba(5,150,105,.4); }
+    .dot-amber  { background: var(--amber); box-shadow: 0 0 5px rgba(245,158,11,.4); }
+    .dot-gray   { background: #9ca3af; }
+    .fleet-name { flex: 1; font-size: 12.5px; font-weight: 500; color: var(--text-2); }
+    .fleet-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 100px;
     }
-    .bd-ok   { background: rgba(16,185,129,.15); color: var(--emerald); }
-    .bd-busy { background: rgba(245,158,11,.15); color: var(--amber); }
-    .bd-serv { background: rgba(100,116,139,.15); color: var(--muted); }
+    .badge-green { background: var(--green-dim); color: var(--green); }
+    .badge-amber { background: var(--amber-dim); color: var(--amber-dark); }
+    .badge-gray  { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
 
-    /* Contract preview inside bento */
-    .contract-preview {
-      margin-top: 16px;
-      background: rgba(255,255,255,.03); border-radius: 12px;
-      border: 1px solid var(--stroke); overflow: hidden;
+    /* Contract preview */
+    .contract-box {
+      margin-top: 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      font-size: 12px;
     }
-    .cp-header {
-      background: linear-gradient(90deg, rgba(37,99,235,.2), rgba(37,99,235,.05));
-      padding: 10px 14px; display: flex; align-items: center; gap: 8px;
-      font-size: 12px; font-weight: 700; color: var(--blue-lt);
+    .contract-header {
+      background: var(--blue-dim);
+      padding: 9px 12px;
+      font-weight: 700;
+      color: var(--blue-dark);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .cp-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
-    .cp-row { display: flex; justify-content: space-between; font-size: 12px; }
-    .cp-key { color: var(--muted); }
-    .cp-val { font-weight: 600; }
-    .cp-footer {
-      padding: 10px 14px; border-top: 1px solid var(--stroke);
-      display: flex; align-items: center; justify-content: space-between;
+    .contract-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 5px; }
+    .contract-row { display: flex; justify-content: space-between; }
+    .contract-key { color: var(--muted); }
+    .contract-val { font-weight: 600; color: var(--text); }
+    .contract-footer {
+      border-top: 1px solid var(--border);
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    .qr-box {
-      width: 36px; height: 36px; border-radius: 6px;
-      background: rgba(255,255,255,.9);
-      display: grid; grid-template-columns: 1fr 1fr 1fr;
-      gap: 2px; padding: 4px;
+    .qr-mini {
+      width: 32px; height: 32px;
+      border-radius: 5px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 2px;
+      padding: 3px;
     }
-    .qr-box span { background: #111; border-radius: 1px; }
-    .cp-btn {
-      font-size: 11px; font-weight: 700;
-      background: var(--blue); color: #fff;
-      padding: 5px 12px; border-radius: 100px;
+    .qr-mini span { background: var(--text); border-radius: 1px; }
+    .qr-mini span:nth-child(even) { background: transparent; }
+    .pdf-btn {
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--blue);
+      color: var(--white);
+      padding: 5px 11px;
+      border-radius: 100px;
     }
 
-    /* Chart bars inside bento */
+    /* Mini chart */
     .mini-chart {
-      margin-top: 16px;
-      display: flex; align-items: flex-end; gap: 6px; height: 80px;
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+      height: 72px;
+      margin-top: 14px;
     }
-    .mc-bar {
-      flex: 1; border-radius: 4px 4px 0 0;
-      background: linear-gradient(to top, var(--blue), rgba(37,99,235,.3));
-      animation: mc-grow .8s cubic-bezier(.34,1.56,.64,1) both;
+    .chart-bar {
+      flex: 1;
+      border-radius: 3px 3px 0 0;
+      background: linear-gradient(to top, var(--blue-dim), rgba(37,99,235,.15));
+      border: 1px solid rgba(37,99,235,.12);
+      border-bottom: none;
     }
-    @keyframes mc-grow { from { height: 0 !important; } }
-    .mc-bar:nth-child(2) { animation-delay: .1s; }
-    .mc-bar:nth-child(3) { animation-delay: .15s; }
-    .mc-bar:nth-child(4) { animation-delay: .2s; }
-    .mc-bar:nth-child(5) { animation-delay: .25s; }
-    .mc-bar:nth-child(6) { animation-delay: .3s; }
-    .mc-bar:nth-child(7) { animation-delay: .35s; }
-    .mc-bar.hi { background: linear-gradient(to top, var(--amber), rgba(245,158,11,.3)); }
+    .chart-bar.peak {
+      background: linear-gradient(to top, rgba(245,158,11,.25), rgba(245,158,11,.08));
+      border-color: rgba(245,158,11,.2);
+    }
+    .chart-label { font-size: 10.5px; color: var(--muted); text-align: right; margin-top: 5px; }
 
-    /* Roles inside bento */
-    .roles-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+    /* Roles list */
+    .roles-list { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; }
     .role-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 12px; border-radius: 10px;
-      border: 1px solid var(--stroke);
-      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 11px;
+      border-radius: 9px;
+      background: var(--surface);
+      border: 1px solid var(--border);
     }
     .role-avatar {
-      width: 32px; height: 32px; border-radius: 50%;
+      width: 30px; height: 30px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 700; flex-shrink: 0;
+      font-size: 11px; font-weight: 800; color: var(--white); flex-shrink: 0;
     }
-    .ra-admin   { background: linear-gradient(135deg,var(--blue),#7c3aed); }
-    .ra-agent   { background: linear-gradient(135deg,var(--emerald),var(--blue)); }
-    .ra-compta  { background: linear-gradient(135deg,var(--amber),#ef4444); }
-    .role-info { flex: 1; }
-    .role-name { font-size: 12px; font-weight: 700; }
-    .role-perms { font-size: 11px; color: var(--muted); }
+    .ra-admin  { background: linear-gradient(135deg, var(--blue), #7c3aed); }
+    .ra-agent  { background: linear-gradient(135deg, var(--green), var(--blue)); }
+    .ra-compta { background: linear-gradient(135deg, var(--amber), #ef4444); }
+    .role-name  { font-size: 12px; font-weight: 700; color: var(--text); }
+    .role-perms { font-size: 10.5px; color: var(--muted); }
+    .role-flex  { flex: 1; }
     .role-badge {
-      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px;
+      font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 100px;
     }
-    .rb-full { background: rgba(37,99,235,.2); color: var(--blue-lt); }
-    .rb-ops  { background: rgba(16,185,129,.2); color: var(--emerald); }
-    .rb-read { background: rgba(245,158,11,.2); color: var(--amber-lt); }
+    .rb-full { background: rgba(37,99,235,.1); color: var(--blue); }
+    .rb-ops  { background: rgba(5,150,105,.1); color: var(--green); }
+    .rb-read { background: rgba(245,158,11,.12); color: var(--amber-dark); }
 
-    /* Speed badge bento */
-    .speed-visual {
-      margin-top: 20px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .speed-ring {
-      width: 110px; height: 110px;
+    /* Uptime ring */
+    .uptime-visual { display: flex; justify-content: center; margin-top: 16px; }
+    .uptime-ring {
+      width: 100px; height: 100px;
       border-radius: 50%;
-      border: 3px solid var(--stroke);
       position: relative;
       display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
     }
-    .speed-ring::before {
+    .uptime-ring::before {
       content: '';
       position: absolute; inset: -3px;
       border-radius: 50%;
-      background: conic-gradient(var(--emerald) 0% 95%, transparent 95%);
-      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
-      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
+      background: conic-gradient(var(--green) 0% 95%, var(--border) 95%);
+      mask: radial-gradient(farthest-side, transparent calc(100% - 4px), black calc(100% - 4px));
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), black calc(100% - 4px));
     }
-    .speed-pct { font-family:'Urbanist',sans-serif; font-size:28px; font-weight:900; color:var(--emerald); }
-    .speed-label { font-size:11px; color:var(--muted); text-align:center; margin-top:8px; }
+    .uptime-pct  { font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 900; color: var(--green); }
+    .uptime-text { font-size: 10px; color: var(--muted); text-align: center; margin-top: 4px; }
 
-    /* ════════════════════════════════════════════
-       HOW IT WORKS
-    ════════════════════════════════════════════ */
-    #how {
-      padding: 100px 0;
-      background: linear-gradient(180deg, #fff 0%, #f1f5f9 50%, #fff 100%);
-      position: relative; overflow: hidden;
+    /* Bottom full card — 4 mini features */
+    .mini-features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      align-items: start;
     }
-    #how::before {
-      content: '';
-      position: absolute; left: 50%; top: 50%;
-      transform: translate(-50%,-50%);
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(37,99,235,.08), transparent 70%);
-      pointer-events: none;
+    .mf-item {}
+    .mf-title { font-size: 14.5px; font-weight: 700; color: var(--text); margin-bottom: 5px; }
+    .mf-desc  { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+
+    /* ═══════════════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════════════ */
+    #how {
+      padding: 96px 0;
+      position: relative;
     }
 
     .steps-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 20px; position: relative; z-index: 1;
-    }
-    .steps-grid::before {
-      content: '';
-      position: absolute; top: 36px; left: calc(100%/6); right: calc(100%/6);
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--blue), var(--amber), var(--blue), transparent);
-    }
-    .step-card {
-      background: var(--glass); border: 1px solid var(--stroke);
-      border-radius: var(--r); padding: 32px;
-      text-align: center;
-      transition: transform .25s, border-color .3s;
-    }
-    .step-card:hover { transform: translateY(-4px); border-color: rgba(37,99,235,.3); }
-    .step-num {
-      width: 72px; height: 72px; border-radius: 50%;
-      background: #fff; border: 2px solid rgba(37,99,235,.3);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Urbanist',sans-serif; font-size: 28px; font-weight: 900;
-      color: var(--blue-lt); margin: 0 auto 20px;
-      position: relative; z-index: 1;
-      box-shadow: 0 0 30px rgba(37,99,235,.2);
-    }
-    .step-icon { font-size: 24px; margin-bottom: 12px; display: block; }
-    .step-h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
-    .step-p { font-size: 14px; color: var(--muted); line-height: 1.7; }
-
-    /* ════════════════════════════════════════════
-       PRICING
-    ════════════════════════════════════════════ */
-    #pricing { padding: 100px 0; }
-
-    .plans {
-      display: grid; grid-template-columns: repeat(3,1fr);
-      gap: 20px; align-items: start;
-    }
-    .plan {
-      border-radius: var(--r); padding: 36px;
-      border: 1px solid var(--stroke);
-      background: var(--glass);
-      transition: transform .25s, box-shadow .3s;
-    }
-    .plan:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,.3); }
-    .plan.featured {
-      background: linear-gradient(160deg, rgba(37,99,235,.14), rgba(37,99,235,.04));
-      border-color: rgba(37,99,235,.45);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
       position: relative;
     }
-    .feat-badge {
-      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
-      background: linear-gradient(90deg, var(--blue), #7c3aed);
-      color: #fff; font-size: 11px; font-weight: 800;
-      padding: 4px 18px; border-radius: 100px;
-      letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
-    }
-    .plan-tier { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 14px; }
-    .plan-price {
-      font-family: 'Urbanist', sans-serif;
-      font-size: 52px; font-weight: 900; line-height: 1; margin-bottom: 4px;
-    }
-    .plan-price sub { font-size: 20px; font-weight: 500; color: var(--muted); vertical-align: middle; }
-    .plan-billing { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
-    .plan-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
-    .pf {
-      display: flex; align-items: flex-start; gap: 10px; font-size: 14px;
-    }
-    .pf-check { color: var(--emerald); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
-    .pf-x { color: var(--muted); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
-    .pf.off { color: var(--muted); }
 
-    /* ════════════════════════════════════════════
-       TESTIMONIALS
-    ════════════════════════════════════════════ */
-    #testi {
-      padding: 100px 0;
-      background: #f8fafc;
+    /* Connector line */
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 34px;
+      left: calc(100% / 6);
+      right: calc(100% / 6);
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      z-index: 0;
     }
-    .testi-grid {
-      display: grid; grid-template-columns: repeat(3,1fr);
-      gap: 18px;
-    }
-    .tcard {
-      background: var(--glass); border: 1px solid var(--stroke);
-      border-radius: var(--r); padding: 28px;
-      transition: transform .25s, border-color .3s;
-    }
-    .tcard:hover { transform: translateY(-3px); border-color: rgba(245,158,11,.25); }
-    .stars { color: var(--amber); font-size: 14px; margin-bottom: 14px; letter-spacing: 2px; }
-    .ttext { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 20px; font-style: italic; }
-    .tauthor { display: flex; align-items: center; gap: 12px; }
-    .tavatar {
-      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 14px;
-    }
-    .ta1 { background: linear-gradient(135deg, var(--blue), #7c3aed); }
-    .ta2 { background: linear-gradient(135deg, var(--amber), #ef4444); }
-    .ta3 { background: linear-gradient(135deg, var(--emerald), var(--blue)); }
-    .tname { font-size: 14px; font-weight: 700; }
-    .trole { font-size: 12px; color: var(--muted); }
 
-    /* ════════════════════════════════════════════
-       CTA FINALE
-    ════════════════════════════════════════════ */
-    #cta {
-      padding: 130px 0;
+    .step-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
       text-align: center;
-      position: relative; overflow: hidden;
+      transition: border-color .2s, box-shadow .2s, transform .2s;
+      position: relative;
+      z-index: 1;
     }
-    .cta-ring {
-      position: absolute; border-radius: 50%;
-      border: 1px solid; opacity: .1;
-      top: 50%; left: 50%; transform: translate(-50%,-50%);
+    .step-card:hover {
+      border-color: rgba(37,99,235,.2);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
     }
-    .cr1 { width: 400px; height: 400px; border-color: var(--blue); }
-    .cr2 { width: 650px; height: 650px; border-color: var(--amber); animation: spin-slow 30s linear infinite; }
-    .cr3 { width: 900px; height: 900px; border-color: var(--blue); animation: spin-slow 50s linear infinite reverse; }
-    @keyframes spin-slow { to { transform: translate(-50%,-50%) rotate(360deg); } }
 
-    .cta-glow {
-      position: absolute; width: 600px; height: 300px;
-      top: 50%; left: 50%; transform: translate(-50%,-50%);
-      background: radial-gradient(ellipse, rgba(37,99,235,.15), transparent 70%);
+    .step-number {
+      width: 68px; height: 68px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Sora', sans-serif;
+      font-size: 26px; font-weight: 900;
+      color: var(--blue);
+      margin: 0 auto 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-icon { font-size: 20px; margin-bottom: 10px; display: block; }
+    .step-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+    .step-desc  { font-size: 13.5px; color: var(--muted); line-height: 1.7; }
+
+    /* ═══════════════════════════════════════════
+       PRICING
+    ═══════════════════════════════════════════ */
+    #pricing { padding: 96px 0; background: var(--surface); }
+
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .plan-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      transition: transform .2s, box-shadow .2s;
+      position: relative;
+    }
+    .plan-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .plan-card.featured {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 1px rgba(37,99,235,.15), var(--shadow-md);
+    }
+
+    .plan-popular {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--blue);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 16px;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+
+    .plan-tier {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .plan-price {
+      font-family: 'Sora', sans-serif;
+      font-size: 48px;
+      font-weight: 900;
+      line-height: 1;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+    .plan-price sub { font-size: 18px; font-weight: 500; color: var(--muted); vertical-align: middle; }
+
+    .plan-billing { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+
+    .plan-divider { height: 1px; background: var(--border); margin-bottom: 20px; }
+
+    .plan-features { display: flex; flex-direction: column; gap: 9px; margin-bottom: 24px; }
+    .plan-feat {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      font-size: 13.5px;
+    }
+    .feat-check { color: var(--green); font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+    .feat-x     { color: var(--muted);  font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+    .plan-feat.disabled { color: var(--muted); }
+
+    .plan-cta {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      border-radius: var(--radius);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* ═══════════════════════════════════════════
+       TESTIMONIALS
+    ═══════════════════════════════════════════ */
+    #testimonials { padding: 96px 0; }
+
+    .testi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .testi-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      transition: border-color .2s, box-shadow .2s, transform .2s;
+    }
+    .testi-card:hover {
+      border-color: rgba(245,158,11,.3);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .testi-stars { color: var(--amber); font-size: 14px; letter-spacing: 2px; margin-bottom: 16px; }
+    .testi-quote { font-size: 14px; color: var(--text-2); line-height: 1.8; margin-bottom: 20px; font-style: italic; }
+    .testi-author { display: flex; align-items: center; gap: 12px; }
+    .testi-avatar {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800; color: var(--white);
+    }
+    .ta-1 { background: linear-gradient(135deg, var(--blue), #7c3aed); }
+    .ta-2 { background: linear-gradient(135deg, var(--amber), #ef4444); }
+    .ta-3 { background: linear-gradient(135deg, var(--green), var(--blue)); }
+    .testi-name { font-size: 13.5px; font-weight: 700; color: var(--text); }
+    .testi-role { font-size: 12px; color: var(--muted); }
+
+    /* ═══════════════════════════════════════════
+       CTA FINALE
+    ═══════════════════════════════════════════ */
+    #cta {
+      padding: 120px 0;
+      text-align: center;
+      background: var(--surface);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       pointer-events: none;
     }
+    .cta-c1 { width: 320px; height: 320px; border-color: rgba(37,99,235,.1); }
+    .cta-c2 { width: 560px; height: 560px; border-color: rgba(37,99,235,.07); animation: spin-slow 40s linear infinite; }
+    .cta-c3 { width: 800px; height: 800px; border-color: rgba(245,158,11,.05); animation: spin-slow 60s linear infinite reverse; }
+    @keyframes spin-slow { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
     .cta-inner { position: relative; z-index: 1; }
-    .cta-h2 {
-      font-family: 'Urbanist', sans-serif;
-      font-size: clamp(40px, 5vw, 68px);
-      font-weight: 900; letter-spacing: -.035em; line-height: 1.05;
+
+    .cta-title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(32px, 4.5vw, 56px);
+      font-weight: 900;
+      letter-spacing: -.035em;
+      line-height: 1.07;
       margin-bottom: 16px;
     }
-    .cta-sub { font-size: 17px; color: var(--muted); margin-bottom: 40px; }
-    .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .cta-note { margin-top: 20px; font-size: 13px; color: var(--muted); }
-    .cta-note span { color: var(--emerald); }
 
-    /* ════════════════════════════════════════════
+    .cta-sub {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 480px;
+      margin-inline: auto;
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+
+    .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .cta-note { margin-top: 20px; font-size: 12.5px; color: var(--muted); }
+    .cta-note .green { color: var(--green); font-weight: 600; }
+
+    /* ═══════════════════════════════════════════
        FOOTER
-    ════════════════════════════════════════════ */
+    ═══════════════════════════════════════════ */
     footer {
-      border-top: 1px solid var(--stroke);
-      padding: 60px 0 36px;
-      background: #f8fafc;
+      border-top: 1px solid var(--border);
+      padding: 64px 0 36px;
+      background: var(--white);
     }
-    .footer-grid {
-      display: grid; grid-template-columns: 2.2fr 1fr 1fr 1fr;
-      gap: 48px; margin-bottom: 48px;
-    }
-    .fb-about { font-size: 13px; color: var(--muted); margin-top: 12px; line-height: 1.75; max-width: 250px; }
-    .fc-head { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 16px; color: var(--text); }
-    .fc-link {
-      display: block; font-size: 13px; color: var(--muted);
-      margin-bottom: 10px; transition: color .2s;
-    }
-    .fc-link:hover { color: var(--text); }
-    .foot-bottom {
-      border-top: 1px solid var(--stroke); padding-top: 24px;
-      display: flex; align-items: center; justify-content: space-between;
-      font-size: 12px; color: var(--muted);
-    }
-    .foot-links { display: flex; gap: 20px; }
-    .foot-links a { color: var(--muted); transition: color .2s; }
-    .foot-links a:hover { color: var(--text); }
 
-    /* ════════════════════════════════════════════
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+
+    .footer-about {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 240px;
+      margin-top: 12px;
+    }
+
+    .footer-col-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    .footer-link {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 9px;
+      transition: color .15s;
+    }
+    .footer-link:hover { color: var(--text); }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .footer-socials { display: flex; gap: 16px; }
+    .footer-socials a { color: var(--muted); transition: color .15s; }
+    .footer-socials a:hover { color: var(--text); }
+
+    /* ═══════════════════════════════════════════
+       SCROLL REVEAL
+    ═══════════════════════════════════════════ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ═══════════════════════════════════════════
        RESPONSIVE
-    ════════════════════════════════════════════ */
+    ═══════════════════════════════════════════ */
     @media (max-width: 1024px) {
       .hero-inner { grid-template-columns: 1fr; }
       .hero-visual { display: none; }
-      .bento { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
-      .b-wide,.b-tall,.b-half,.b-third,.b-qtr,.b-full { grid-column: span 1; grid-row: span 1; }
-      .plans { grid-template-columns: 1fr; }
+      .bento-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
+      .bc-wide, .bc-tall, .bc-half, .bc-third, .bc-qtr, .bc-full { grid-column: span 1; grid-row: span 1; }
+      .bc-full .mini-features-grid { grid-template-columns: 1fr 1fr; }
+      .plans-grid { grid-template-columns: 1fr; max-width: 460px; }
       .steps-grid { grid-template-columns: 1fr; }
       .steps-grid::before { display: none; }
       .testi-grid { grid-template-columns: 1fr; }
       .metrics-grid { grid-template-columns: 1fr 1fr; }
       .footer-grid { grid-template-columns: 1fr 1fr; }
     }
+
     @media (max-width: 640px) {
       .nav-links { display: none; }
-      .bento { grid-template-columns: 1fr; }
+      .bento-grid { grid-template-columns: 1fr; }
+      .bc-full .mini-features-grid { grid-template-columns: 1fr 1fr; }
       .metrics-grid { grid-template-columns: 1fr 1fr; }
       .footer-grid { grid-template-columns: 1fr; }
-      .foot-bottom { flex-direction: column; gap: 12px; text-align: center; }
+      .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
     }
-
-    /* ── Reveal animation ── */
-    .reveal {
-      opacity: 0; transform: translateY(28px);
-      transition: opacity .6s ease, transform .6s ease;
-    }
-    .reveal.in { opacity: 1; transform: translateY(0); }
   </style>
 </head>
 <body>
 
 <!-- ════════ NAVBAR ════════ -->
 <nav id="nav">
-  <div class="wrap nav-row">
+  <div class="container nav-inner">
     <a href="/" class="brand">
-      <div class="brand-mark">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="brand-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14l4 4v4a2 2 0 01-2 2h-2"/>
-          <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+          <circle cx="7" cy="17" r="2"/>
+          <circle cx="17" cy="17" r="2"/>
         </svg>
       </div>
       <span class="brand-name">ASM Location</span>
@@ -760,37 +1130,33 @@
       <a href="#features">Fonctionnalités</a>
       <a href="#how">Démarrage</a>
       <a href="#pricing">Tarifs</a>
-      <a href="#testi">Avis</a>
+      <a href="#testimonials">Avis</a>
     </nav>
 
-    <div class="nav-end">
-      <a href="#" class="btn btn-ghost">Connexion</a>
-      <a href="#cta" class="btn btn-amber">Essai gratuit</a>
+    <div class="nav-actions">
+      <a href="#" class="btn btn-ghost btn-sm">Connexion</a>
+      <a href="#cta" class="btn btn-primary btn-sm">Essai gratuit</a>
     </div>
   </div>
 </nav>
 
 <!-- ════════ HERO ════════ -->
 <section id="hero">
-  <div class="hero-canvas">
-    <div class="glow glow-1"></div>
-    <div class="glow glow-2"></div>
-    <div class="glow glow-3"></div>
-    <div class="hero-grid-bg"></div>
-  </div>
-  <div class="road"></div>
+  <div class="hero-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow-2"></div>
 
-  <div class="wrap hero-inner">
-    <!-- Left -->
+  <div class="container hero-inner">
+    <!-- Left column -->
     <div>
-      <div class="pill">
-        <span class="pill-dot">🚗</span>
+      <div class="hero-badge">
+        <span class="hero-badge-dot">🚗</span>
         Plateforme SaaS · Location de véhicules
       </div>
 
       <h1 class="hero-h1">
         Votre agence,<br/>
-        <span class="hi">pilotée</span><br/>
+        <span class="accent">pilotée</span><br/>
         à pleine vitesse.
       </h1>
 
@@ -803,126 +1169,107 @@
       <div class="hero-actions">
         <a href="#cta" class="btn btn-amber btn-xl">
           Démarrer gratuitement
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
-        <a href="#features" class="btn btn-ghost btn-lg">Voir la démo</a>
+        <a href="#features" class="btn btn-outline btn-lg">Voir la démo</a>
       </div>
 
-      <div class="trust-row">
-        <div class="trust-faces">
-          <span class="face f1">BA</span>
-          <span class="face f2">ZA</span>
-          <span class="face f3">KD</span>
-          <span class="face f4">+</span>
+      <div class="hero-trust">
+        <div class="trust-avatars">
+          <span class="trust-avatar av-1">BA</span>
+          <span class="trust-avatar av-2">ZA</span>
+          <span class="trust-avatar av-3">KD</span>
+          <span class="trust-avatar av-4">+</span>
         </div>
         <span>Adopté par <strong style="color:var(--text)">+50 agences</strong> en Afrique de l'Ouest</span>
       </div>
     </div>
 
-    <!-- Right — Car visual -->
+    <!-- Right column — Car visual -->
     <div class="hero-visual">
-      <div class="car-wrap">
-        <!-- Floating cards -->
-        <div class="float-card fc-a">
-          <div class="fc-label">Flotte disponible</div>
-          <div class="fc-val c-green">18 <span style="font-size:14px">/ 24</span></div>
-          <div class="fc-sub c-green">↑ 96% disponibilité</div>
+      <div class="car-scene">
+        <!-- Stat card top-left -->
+        <div class="stat-card top-left">
+          <div class="stat-label">Flotte disponible</div>
+          <div class="stat-value txt-green">18 <span style="font-size:13px;font-weight:500;color:var(--muted)">/ 24</span></div>
+          <div class="stat-sub txt-green">↑ 96% disponibilité</div>
         </div>
 
-        <div class="float-card fc-b">
-          <div class="fc-label">Revenus ce mois</div>
-          <div class="fc-val c-amber">4,2M<span style="font-size:14px"> F</span></div>
-          <div class="fc-sub c-amber">↑ +23% vs mois dernier</div>
+        <!-- Stat card bottom-right -->
+        <div class="stat-card bot-right">
+          <div class="stat-label">Revenus ce mois</div>
+          <div class="stat-value txt-amber">4,2M<span style="font-size:12px;font-weight:500;color:var(--muted)"> F</span></div>
+          <div class="stat-sub txt-amber">↑ +23% vs mois dernier</div>
         </div>
 
         <!-- Car SVG -->
-        <svg viewBox="0 0 500 240" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;filter:drop-shadow(0 20px 60px rgba(37,99,235,.3))">
-          <!-- Car body -->
-          <rect x="40" y="140" width="420" height="70" rx="12" fill="#0d1a2e"/>
-          <rect x="40" y="140" width="420" height="70" rx="12" fill="url(#bodyGrad)"/>
-          <!-- Cabin -->
-          <path d="M130 140 L160 85 Q200 60 250 55 Q300 50 340 65 L380 100 L390 140Z" fill="#0d1a2e"/>
-          <path d="M130 140 L160 85 Q200 60 250 55 Q300 50 340 65 L380 100 L390 140Z" fill="url(#cabinGrad)"/>
-          <!-- Windows -->
-          <path d="M155 130 L178 88 Q210 70 250 65 Q285 62 315 72 L345 100 L355 130Z" fill="url(#windowGrad)" rx="4"/>
-          <!-- Door line -->
-          <line x1="250" y1="140" x2="250" y2="208" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
-          <!-- Door handles -->
-          <rect x="195" y="170" width="30" height="5" rx="2.5" fill="rgba(255,255,255,.2)"/>
-          <rect x="275" y="170" width="30" height="5" rx="2.5" fill="rgba(255,255,255,.2)"/>
-          <!-- Front lights -->
-          <ellipse cx="450" cy="162" rx="14" ry="8" fill="url(#lightGrad)" opacity=".9"/>
-          <path d="M464 158 L490 148 L490 176 L464 166Z" fill="url(#beamGrad)" opacity=".3"/>
-          <!-- Rear lights -->
-          <rect x="50" y="155" width="18" height="12" rx="4" fill="#ef4444" opacity=".8"/>
+        <svg viewBox="0 0 500 240" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;filter:drop-shadow(0 16px 48px rgba(37,99,235,.2))">
+          <rect x="40" y="140" width="420" height="70" rx="12" fill="#1e3a8a"/>
+          <rect x="40" y="140" width="420" height="70" rx="12" fill="url(#bg1)"/>
+          <path d="M130 140 L160 85 Q200 60 250 55 Q300 50 340 65 L380 100 L390 140Z" fill="#1e40af"/>
+          <path d="M130 140 L160 85 Q200 60 250 55 Q300 50 340 65 L380 100 L390 140Z" fill="url(#bg2)"/>
+          <path d="M155 130 L178 88 Q210 70 250 65 Q285 62 315 72 L345 100 L355 130Z" fill="url(#win)" rx="4"/>
+          <line x1="250" y1="140" x2="250" y2="208" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+          <rect x="195" y="170" width="30" height="4" rx="2" fill="rgba(255,255,255,.15)"/>
+          <rect x="275" y="170" width="30" height="4" rx="2" fill="rgba(255,255,255,.15)"/>
+          <ellipse cx="450" cy="162" rx="14" ry="8" fill="url(#headlight)" opacity=".9"/>
+          <path d="M464 158 L492 146 L492 178 L464 166Z" fill="url(#beam)" opacity=".25"/>
+          <rect x="50" y="156" width="16" height="10" rx="3" fill="#ef4444" opacity=".75"/>
           <!-- Wheels -->
-          <circle cx="150" cy="210" r="32" fill="#111827"/>
-          <circle cx="150" cy="210" r="24" fill="#1e293b"/>
-          <circle cx="150" cy="210" r="14" fill="#0f172a"/>
-          <circle cx="150" cy="210" r="6" fill="url(#rimGrad)"/>
-          <!-- Wheel spokes -->
-          <line x1="150" y1="186" x2="150" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-          <line x1="174" y1="210" x2="150" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-          <line x1="150" y1="234" x2="150" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-          <line x1="126" y1="210" x2="150" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-
-          <circle cx="360" cy="210" r="32" fill="#111827"/>
-          <circle cx="360" cy="210" r="24" fill="#1e293b"/>
-          <circle cx="360" cy="210" r="14" fill="#0f172a"/>
-          <circle cx="360" cy="210" r="6" fill="url(#rimGrad2)"/>
-          <line x1="360" y1="186" x2="360" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-          <line x1="384" y1="210" x2="360" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-          <line x1="360" y1="234" x2="360" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-          <line x1="336" y1="210" x2="360" y2="210" stroke="rgba(96,165,250,.6)" stroke-width="2"/>
-
-          <!-- Ground reflection -->
-          <ellipse cx="250" cy="242" rx="200" ry="6" fill="url(#groundGrad)" opacity=".4"/>
-
-          <!-- Speed lines -->
-          <line x1="0" y1="140" x2="80" y2="140" stroke="url(#speedGrad)" stroke-width="2" opacity=".6"/>
-          <line x1="0" y1="150" x2="60" y2="150" stroke="url(#speedGrad)" stroke-width="1.5" opacity=".4"/>
-          <line x1="0" y1="160" x2="40" y2="160" stroke="url(#speedGrad)" stroke-width="1" opacity=".3"/>
-
+          <circle cx="150" cy="210" r="30" fill="#111827"/>
+          <circle cx="150" cy="210" r="22" fill="#1e293b"/>
+          <circle cx="150" cy="210" r="12" fill="#0f172a"/>
+          <circle cx="150" cy="210" r="5" fill="url(#rim)"/>
+          <line x1="150" y1="188" x2="150" y2="210" stroke="rgba(96,165,250,.5)" stroke-width="1.5"/>
+          <line x1="172" y1="210" x2="150" y2="210" stroke="rgba(96,165,250,.5)" stroke-width="1.5"/>
+          <line x1="150" y1="232" x2="150" y2="210" stroke="rgba(96,165,250,.5)" stroke-width="1.5"/>
+          <line x1="128" y1="210" x2="150" y2="210" stroke="rgba(96,165,250,.5)" stroke-width="1.5"/>
+          <circle cx="360" cy="210" r="30" fill="#111827"/>
+          <circle cx="360" cy="210" r="22" fill="#1e293b"/>
+          <circle cx="360" cy="210" r="12" fill="#0f172a"/>
+          <circle cx="360" cy="210" r="5" fill="url(#rim2)"/>
+          <line x1="360" y1="188" x2="360" y2="210" stroke="rgba(96,165,250,.5)" stroke-width="1.5"/>
+          <line x1="382" y1="210" x2="360" y2="210" stroke="rgba(96,165,250,.5)" stroke-width="1.5"/>
+          <line x1="360" y1="232" x2="360" y2="210" stroke="rgba(96,165,250,.5)" stroke-width="1.5"/>
+          <line x1="338" y1="210" x2="360" y2="210" stroke="rgba(96,165,250,.5)" stroke-width="1.5"/>
+          <ellipse cx="250" cy="242" rx="190" ry="5" fill="url(#ground)" opacity=".35"/>
           <defs>
-            <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#1e40af" stop-opacity=".8"/>
-              <stop offset="100%" stop-color="#1e3a8a" stop-opacity=".6"/>
+            <linearGradient id="bg1" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#2563eb" stop-opacity=".7"/>
+              <stop offset="100%" stop-color="#1e40af" stop-opacity=".5"/>
             </linearGradient>
-            <linearGradient id="cabinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#1d4ed8" stop-opacity=".9"/>
-              <stop offset="100%" stop-color="#1e40af" stop-opacity=".7"/>
+            <linearGradient id="bg2" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#3b82f6" stop-opacity=".8"/>
+              <stop offset="100%" stop-color="#2563eb" stop-opacity=".6"/>
             </linearGradient>
-            <linearGradient id="windowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#bfdbfe" stop-opacity=".3"/>
-              <stop offset="100%" stop-color="#93c5fd" stop-opacity=".1"/>
+            <linearGradient id="win" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#bfdbfe" stop-opacity=".25"/>
+              <stop offset="100%" stop-color="#93c5fd" stop-opacity=".08"/>
             </linearGradient>
-            <linearGradient id="lightGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id="headlight" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stop-color="#fcd34d"/>
-              <stop offset="100%" stop-color="#fef3c7"/>
+              <stop offset="100%" stop-color="#fef9c3"/>
             </linearGradient>
-            <linearGradient id="beamGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id="beam" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stop-color="#fcd34d"/>
               <stop offset="100%" stop-color="transparent"/>
             </linearGradient>
-            <radialGradient id="rimGrad">
-              <stop offset="0%" stop-color="#60a5fa"/>
+            <radialGradient id="rim">
+              <stop offset="0%" stop-color="#93c5fd"/>
               <stop offset="100%" stop-color="#2563eb"/>
             </radialGradient>
-            <radialGradient id="rimGrad2">
-              <stop offset="0%" stop-color="#60a5fa"/>
+            <radialGradient id="rim2">
+              <stop offset="0%" stop-color="#93c5fd"/>
               <stop offset="100%" stop-color="#2563eb"/>
             </radialGradient>
-            <linearGradient id="groundGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id="ground" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stop-color="transparent"/>
-              <stop offset="50%" stop-color="#2563eb"/>
+              <stop offset="50%" stop-color="#93c5fd"/>
               <stop offset="100%" stop-color="transparent"/>
-            </linearGradient>
-            <linearGradient id="speedGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="transparent"/>
-              <stop offset="100%" stop-color="#60a5fa"/>
             </linearGradient>
           </defs>
         </svg>
+
         <div class="car-shadow"></div>
       </div>
     </div>
@@ -931,40 +1278,40 @@
 
 <!-- ════════ LOGOS ════════ -->
 <section id="logos">
-  <div class="wrap">
-    <p class="logos-head">Ils font confiance à ASM Location</p>
+  <div class="container">
+    <p class="logos-label">Ils font confiance à ASM Location</p>
     <div class="logos-row">
-      <div class="logo-item"><span class="logo-dot"></span>Boucotte Auto</div>
-      <div class="logo-item"><span class="logo-dot"></span>ZigAuto</div>
-      <div class="logo-item"><span class="logo-dot"></span>KaranCars</div>
-      <div class="logo-item"><span class="logo-dot"></span>Dakar Wheels</div>
-      <div class="logo-item"><span class="logo-dot"></span>SenRental</div>
+      <div class="logo-chip"><span class="logo-chip-dot"></span>Boucotte Auto</div>
+      <div class="logo-chip"><span class="logo-chip-dot"></span>ZigAuto</div>
+      <div class="logo-chip"><span class="logo-chip-dot"></span>KaranCars</div>
+      <div class="logo-chip"><span class="logo-chip-dot"></span>Dakar Wheels</div>
+      <div class="logo-chip"><span class="logo-chip-dot"></span>SenRental</div>
     </div>
   </div>
 </section>
 
 <!-- ════════ METRICS ════════ -->
 <section id="metrics">
-  <div class="wrap">
+  <div class="container">
     <div class="metrics-grid reveal">
-      <div class="metric">
+      <div class="metric-item">
         <span class="metric-icon">🏢</span>
-        <div class="metric-val" data-count="50" data-suffix="+">0+</div>
+        <div class="metric-num" data-count="50" data-suffix="+">0+</div>
         <div class="metric-label">Agences actives</div>
       </div>
-      <div class="metric">
+      <div class="metric-item">
         <span class="metric-icon">📄</span>
-        <div class="metric-val" data-count="5000" data-suffix="+">0+</div>
+        <div class="metric-num" data-count="5000" data-suffix="+">0+</div>
         <div class="metric-label">Contrats générés</div>
       </div>
-      <div class="metric">
+      <div class="metric-item">
         <span class="metric-icon">⚡</span>
-        <div class="metric-val" data-count="99" data-suffix=".9%">0%</div>
+        <div class="metric-num" data-count="99" data-suffix=".9%">0%</div>
         <div class="metric-label">Uptime garanti</div>
       </div>
-      <div class="metric">
+      <div class="metric-item">
         <span class="metric-icon">🌍</span>
-        <div class="metric-val" data-count="6" data-suffix=" pays">0</div>
+        <div class="metric-num" data-count="6" data-suffix=" pays">0</div>
         <div class="metric-label">Pays couverts</div>
       </div>
     </div>
@@ -973,22 +1320,22 @@
 
 <!-- ════════ FEATURES BENTO ════════ -->
 <section id="features">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <div class="sec-tag">🔧 Fonctionnalités</div>
-      <h2 class="sec-h2">Tout ce qu'une agence<br/>moderne exige.</h2>
-      <p class="sec-p">Du premier appel client à la restitution des clés — chaque étape automatisée, tracée, sécurisée.</p>
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-badge">Fonctionnalités</div>
+      <h2 class="section-title">Tout ce qu'une agence<br/>moderne exige.</h2>
+      <p class="section-sub">Du premier appel client à la restitution des clés — chaque étape automatisée, tracée, sécurisée.</p>
     </div>
 
-    <div class="bento">
+    <div class="bento-grid">
 
-      <!-- Fleet management — wide -->
-      <div class="bcard b-wide reveal">
-        <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:4px;">
+      <!-- Fleet management — large -->
+      <div class="bento-card bc-wide reveal">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
           <div class="bc-icon">🚗</div>
-          <div>
-            <div class="bc-h3">Gestion de flotte en temps réel</div>
-            <div class="bc-p">Visualisez l'état de chaque véhicule instantanément. Bloquez un véhicule pour un client en 1 clic, planifiez les maintenances, suivez le kilométrage.</div>
+          <div style="flex:1;">
+            <div class="bc-title">Gestion de flotte en temps réel</div>
+            <div class="bc-desc">Visualisez l'état de chaque véhicule instantanément. Bloquez un véhicule en 1 clic, planifiez les maintenances, suivez le kilométrage.</div>
             <div class="bc-tags">
               <span class="bc-tag">Disponibilité live</span>
               <span class="bc-tag">Photos & docs</span>
@@ -997,76 +1344,76 @@
           </div>
         </div>
         <div class="mini-fleet">
-          <div class="mf-row">
-            <div class="mf-status st-ok"></div>
-            <span class="mf-name">Toyota Hilux · DK-4521-A</span>
-            <span class="mf-badge bd-ok">Disponible</span>
+          <div class="fleet-row">
+            <div class="fleet-dot dot-green"></div>
+            <span class="fleet-name">Toyota Hilux · DK-4521-A</span>
+            <span class="fleet-badge badge-green">Disponible</span>
           </div>
-          <div class="mf-row">
-            <div class="mf-status st-busy"></div>
-            <span class="mf-name">Peugeot 3008 · DK-9810-B</span>
-            <span class="mf-badge bd-busy">En location</span>
+          <div class="fleet-row">
+            <div class="fleet-dot dot-amber"></div>
+            <span class="fleet-name">Peugeot 3008 · DK-9810-B</span>
+            <span class="fleet-badge badge-amber">En location</span>
           </div>
-          <div class="mf-row">
-            <div class="mf-status st-serv"></div>
-            <span class="mf-name">Hyundai Tucson · DK-6677-D</span>
-            <span class="mf-badge bd-serv">Maintenance</span>
+          <div class="fleet-row">
+            <div class="fleet-dot dot-gray"></div>
+            <span class="fleet-name">Hyundai Tucson · DK-6677-D</span>
+            <span class="fleet-badge badge-gray">Maintenance</span>
           </div>
         </div>
       </div>
 
       <!-- Contracts — tall -->
-      <div class="bcard b-tall reveal">
+      <div class="bento-card bc-tall reveal">
         <div class="bc-icon">📄</div>
-        <div class="bc-h3">Contrats PDF en 1 clic</div>
-        <div class="bc-p">Générez des contrats professionnels automatiquement. QR code d'authentification, archivage numérique, zéro impression.</div>
-        <div class="contract-preview" style="background:#f8fafc;border-color:#e2e8f0;">
-          <div class="cp-header" style="background:linear-gradient(90deg,rgba(37,99,235,.1),rgba(37,99,235,.02));">
+        <div class="bc-title">Contrats PDF en 1 clic</div>
+        <div class="bc-desc">Générez des contrats professionnels automatiquement. QR code d'authentification, archivage numérique, zéro impression.</div>
+        <div class="contract-box">
+          <div class="contract-header">
             📋 &nbsp;CONTRAT #2024-0187
           </div>
-          <div class="cp-body">
-            <div class="cp-row"><span class="cp-key">Client</span><span class="cp-val">Ibrahima Diallo</span></div>
-            <div class="cp-row"><span class="cp-key">Véhicule</span><span class="cp-val">Toyota Hilux</span></div>
-            <div class="cp-row"><span class="cp-key">Durée</span><span class="cp-val">5 jours</span></div>
-            <div class="cp-row"><span class="cp-key">Montant</span><span class="cp-val" style="color:var(--amber)">175 000 F</span></div>
+          <div class="contract-body">
+            <div class="contract-row"><span class="contract-key">Client</span><span class="contract-val">Ibrahima Diallo</span></div>
+            <div class="contract-row"><span class="contract-key">Véhicule</span><span class="contract-val">Toyota Hilux</span></div>
+            <div class="contract-row"><span class="contract-key">Durée</span><span class="contract-val">5 jours</span></div>
+            <div class="contract-row"><span class="contract-key">Montant</span><span class="contract-val" style="color:var(--amber-dark)">175 000 F</span></div>
           </div>
-          <div class="cp-footer">
-            <div class="qr-box">
-              <span></span><span style="background:transparent"></span><span></span>
-              <span style="background:transparent"></span><span></span><span style="background:transparent"></span>
-              <span></span><span style="background:transparent"></span><span></span>
+          <div class="contract-footer">
+            <div class="qr-mini">
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span>
             </div>
-            <div class="cp-btn">⬇ Télécharger PDF</div>
+            <div class="pdf-btn">⬇ Télécharger PDF</div>
           </div>
         </div>
       </div>
 
       <!-- Revenue chart -->
-      <div class="bcard b-half reveal">
+      <div class="bento-card bc-half reveal">
         <div class="bc-icon">📊</div>
-        <div class="bc-h3">Revenus & analytics</div>
-        <div class="bc-p">Suivez vos performances en temps réel.</div>
+        <div class="bc-title">Revenus & analytics</div>
+        <div class="bc-desc">Suivez vos performances en temps réel.</div>
         <div class="mini-chart">
-          <div class="mc-bar" style="height:45%"></div>
-          <div class="mc-bar" style="height:65%"></div>
-          <div class="mc-bar" style="height:55%"></div>
-          <div class="mc-bar hi" style="height:100%"></div>
-          <div class="mc-bar" style="height:70%"></div>
-          <div class="mc-bar" style="height:85%"></div>
-          <div class="mc-bar" style="height:90%"></div>
+          <div class="chart-bar" style="height:45%"></div>
+          <div class="chart-bar" style="height:65%"></div>
+          <div class="chart-bar" style="height:55%"></div>
+          <div class="chart-bar peak" style="height:100%"></div>
+          <div class="chart-bar" style="height:70%"></div>
+          <div class="chart-bar" style="height:85%"></div>
+          <div class="chart-bar" style="height:90%"></div>
         </div>
-        <div style="font-size:11px;color:var(--muted);text-align:right;margin-top:6px;">Revenus — 7 derniers jours</div>
+        <div class="chart-label">Revenus — 7 derniers jours</div>
       </div>
 
       <!-- Roles -->
-      <div class="bcard b-third reveal">
+      <div class="bento-card bc-third reveal">
         <div class="bc-icon">🔐</div>
-        <div class="bc-h3">Multi-rôles & sécurité</div>
-        <div class="bc-p">Contrôle d'accès granulaire.</div>
+        <div class="bc-title">Multi-rôles & sécurité</div>
+        <div class="bc-desc">Contrôle d'accès granulaire.</div>
         <div class="roles-list">
           <div class="role-row">
             <div class="role-avatar ra-admin">AD</div>
-            <div class="role-info">
+            <div class="role-flex">
               <div class="role-name">Administrateur</div>
               <div class="role-perms">Accès complet</div>
             </div>
@@ -1074,7 +1421,7 @@
           </div>
           <div class="role-row">
             <div class="role-avatar ra-agent">AG</div>
-            <div class="role-info">
+            <div class="role-flex">
               <div class="role-name">Agent</div>
               <div class="role-perms">Réservations & clients</div>
             </div>
@@ -1082,7 +1429,7 @@
           </div>
           <div class="role-row">
             <div class="role-avatar ra-compta">CO</div>
-            <div class="role-info">
+            <div class="role-flex">
               <div class="role-name">Comptable</div>
               <div class="role-perms">Paiements & rapports</div>
             </div>
@@ -1092,41 +1439,43 @@
       </div>
 
       <!-- Uptime -->
-      <div class="bcard b-qtr reveal">
+      <div class="bento-card bc-qtr reveal">
         <div class="bc-icon">🟢</div>
-        <div class="bc-h3">Fiabilité maximale</div>
-        <div class="bc-p">Infrastructure dédiée à l'Afrique.</div>
-        <div class="speed-visual">
+        <div class="bc-title">Fiabilité maximale</div>
+        <div class="bc-desc">Infrastructure dédiée à l'Afrique.</div>
+        <div class="uptime-visual">
           <div>
-            <div class="speed-ring">
-              <div class="speed-pct">99%</div>
+            <div class="uptime-ring">
+              <div class="uptime-pct">99%</div>
             </div>
-            <div class="speed-label">Uptime plateforme</div>
+            <div class="uptime-text">Uptime plateforme</div>
           </div>
         </div>
       </div>
 
       <!-- Bottom full row -->
-      <div class="bcard b-full reveal" style="display:grid;grid-template-columns:repeat(4,1fr);gap:28px;align-items:center;">
-        <div>
-          <div class="bc-icon">👥</div>
-          <div class="bc-h3">CRM Clients</div>
-          <div class="bc-p">Centralisez historique, documents et notes pour chaque client.</div>
-        </div>
-        <div>
-          <div class="bc-icon">📅</div>
-          <div class="bc-h3">Calendrier</div>
-          <div class="bc-p">Vue planning interactive, détection des conflits en temps réel.</div>
-        </div>
-        <div>
-          <div class="bc-icon">💳</div>
-          <div class="bc-h3">Paiements</div>
-          <div class="bc-p">Acomptes, soldes, reçus numériques et journal comptable.</div>
-        </div>
-        <div>
-          <div class="bc-icon">🌐</div>
-          <div class="bc-h3">Vitrine publique</div>
-          <div class="bc-p">Page de réservation en ligne pour vos clients, prête à l'emploi.</div>
+      <div class="bento-card bc-full reveal">
+        <div class="mini-features-grid">
+          <div class="mf-item">
+            <div class="bc-icon">👥</div>
+            <div class="mf-title">CRM Clients</div>
+            <div class="mf-desc">Centralisez historique, documents et notes pour chaque client.</div>
+          </div>
+          <div class="mf-item">
+            <div class="bc-icon">📅</div>
+            <div class="mf-title">Calendrier</div>
+            <div class="mf-desc">Vue planning interactive, détection des conflits en temps réel.</div>
+          </div>
+          <div class="mf-item">
+            <div class="bc-icon">💳</div>
+            <div class="mf-title">Paiements</div>
+            <div class="mf-desc">Acomptes, soldes, reçus numériques et journal comptable.</div>
+          </div>
+          <div class="mf-item">
+            <div class="bc-icon">🌐</div>
+            <div class="mf-title">Vitrine publique</div>
+            <div class="mf-desc">Page de réservation en ligne pour vos clients, prête à l'emploi.</div>
+          </div>
         </div>
       </div>
 
@@ -1136,31 +1485,31 @@
 
 <!-- ════════ HOW IT WORKS ════════ -->
 <section id="how">
-  <div class="wrap">
-    <div class="sec-head reveal" style="text-align:center;max-width:600px;margin-inline:auto;">
-      <div class="sec-tag">🚀 Démarrage</div>
-      <h2 class="sec-h2">Opérationnel en<br/>moins de 30 minutes.</h2>
-      <p class="sec-p" style="margin-inline:auto;">Pas d'installation, pas de configuration complexe. Votre agence est en ligne en trois étapes.</p>
+  <div class="container">
+    <div class="section-head centered reveal">
+      <div class="section-badge">Démarrage</div>
+      <h2 class="section-title">Opérationnel en<br/>moins de 30 minutes.</h2>
+      <p class="section-sub">Pas d'installation, pas de configuration complexe. Votre agence est en ligne en trois étapes.</p>
     </div>
 
     <div class="steps-grid">
       <div class="step-card reveal">
-        <div class="step-num">01</div>
+        <div class="step-number">01</div>
         <span class="step-icon">🏢</span>
-        <div class="step-h3">Créez votre espace</div>
-        <div class="step-p">Renseignez le nom de votre agence, choisissez votre sous-domaine, importez votre logo. Votre tableau de bord est actif immédiatement.</div>
+        <div class="step-title">Créez votre espace</div>
+        <div class="step-desc">Renseignez le nom de votre agence, choisissez votre sous-domaine, importez votre logo. Votre tableau de bord est actif immédiatement.</div>
       </div>
       <div class="step-card reveal">
-        <div class="step-num">02</div>
+        <div class="step-number">02</div>
         <span class="step-icon">🚗</span>
-        <div class="step-h3">Ajoutez votre flotte</div>
-        <div class="step-p">Importez vos véhicules avec photos, immatriculations, catégories et tarifs par zone. La disponibilité se met à jour automatiquement.</div>
+        <div class="step-title">Ajoutez votre flotte</div>
+        <div class="step-desc">Importez vos véhicules avec photos, immatriculations, catégories et tarifs. La disponibilité se met à jour automatiquement.</div>
       </div>
       <div class="step-card reveal">
-        <div class="step-num">03</div>
+        <div class="step-number">03</div>
         <span class="step-icon">💰</span>
-        <div class="step-h3">Louez & encaissez</div>
-        <div class="step-p">Créez des réservations, générez vos contrats PDF en 1 clic et suivez vos encaissements. Votre agence tourne, vous gardez le contrôle.</div>
+        <div class="step-title">Louez & encaissez</div>
+        <div class="step-desc">Créez des réservations, générez vos contrats PDF en 1 clic et suivez vos encaissements. Votre agence tourne, vous gardez le contrôle.</div>
       </div>
     </div>
   </div>
@@ -1168,104 +1517,112 @@
 
 <!-- ════════ PRICING ════════ -->
 <section id="pricing">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <div class="sec-tag">💎 Tarifs</div>
-      <h2 class="sec-h2">Simple, transparent,<br/>sans surprise.</h2>
-      <p class="sec-p">Commencez gratuitement. Évoluez quand vous le souhaitez. Aucun frais caché.</p>
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-badge">Tarifs</div>
+      <h2 class="section-title">Simple, transparent,<br/>sans surprise.</h2>
+      <p class="section-sub">Commencez gratuitement. Évoluez quand vous le souhaitez. Aucun frais caché.</p>
     </div>
 
-    <div class="plans">
-      <div class="plan reveal">
+    <div class="plans-grid">
+
+      <!-- Starter -->
+      <div class="plan-card reveal">
         <div class="plan-tier">Starter</div>
         <div class="plan-price">Gratuit</div>
         <div class="plan-billing">14 jours · toutes fonctionnalités</div>
+        <div class="plan-divider"></div>
         <div class="plan-features">
-          <div class="pf"><span class="pf-check">✓</span> Jusqu'à 10 véhicules</div>
-          <div class="pf"><span class="pf-check">✓</span> 50 contrats / mois</div>
-          <div class="pf"><span class="pf-check">✓</span> 1 utilisateur</div>
-          <div class="pf"><span class="pf-check">✓</span> Tableau de bord</div>
-          <div class="pf off"><span class="pf-x">✗</span> Rapports avancés</div>
-          <div class="pf off"><span class="pf-x">✗</span> Vitrine publique</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> Jusqu'à 10 véhicules</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> 50 contrats / mois</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> 1 utilisateur</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> Tableau de bord</div>
+          <div class="plan-feat disabled"><span class="feat-x">✗</span> Rapports avancés</div>
+          <div class="plan-feat disabled"><span class="feat-x">✗</span> Vitrine publique</div>
         </div>
-        <a href="#cta" class="btn btn-ghost" style="width:100%;border-radius:12px;padding:14px;">Commencer l'essai</a>
+        <a href="#cta" class="btn btn-outline plan-cta">Commencer l'essai</a>
       </div>
 
-      <div class="plan featured reveal">
-        <div class="feat-badge">⭐ Le plus populaire</div>
+      <!-- Pro -->
+      <div class="plan-card featured reveal">
+        <div class="plan-popular">⭐ Le plus populaire</div>
         <div class="plan-tier">Pro</div>
         <div class="plan-price">49 000<sub> F</sub></div>
         <div class="plan-billing">par mois · facturé mensuellement</div>
+        <div class="plan-divider"></div>
         <div class="plan-features">
-          <div class="pf"><span class="pf-check">✓</span> Véhicules illimités</div>
-          <div class="pf"><span class="pf-check">✓</span> Contrats illimités</div>
-          <div class="pf"><span class="pf-check">✓</span> 5 utilisateurs</div>
-          <div class="pf"><span class="pf-check">✓</span> Rapports & analytics</div>
-          <div class="pf"><span class="pf-check">✓</span> Vitrine publique</div>
-          <div class="pf"><span class="pf-check">✓</span> Support prioritaire</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> Véhicules illimités</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> Contrats illimités</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> 5 utilisateurs</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> Rapports & analytics</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> Vitrine publique</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> Support prioritaire</div>
         </div>
-        <a href="#cta" class="btn btn-blue" style="width:100%;border-radius:12px;padding:14px;">Choisir Pro</a>
+        <a href="#cta" class="btn btn-primary plan-cta">Choisir Pro</a>
       </div>
 
-      <div class="plan reveal">
+      <!-- Entreprise -->
+      <div class="plan-card reveal">
         <div class="plan-tier">Entreprise</div>
-        <div class="plan-price" style="font-size:36px;">Sur mesure</div>
+        <div class="plan-price" style="font-size:34px;">Sur mesure</div>
         <div class="plan-billing">Devis personnalisé</div>
+        <div class="plan-divider"></div>
         <div class="plan-features">
-          <div class="pf"><span class="pf-check">✓</span> Multi-agences & multi-sites</div>
-          <div class="pf"><span class="pf-check">✓</span> Utilisateurs illimités</div>
-          <div class="pf"><span class="pf-check">✓</span> SLA 99,9% garanti</div>
-          <div class="pf"><span class="pf-check">✓</span> Intégrations sur mesure</div>
-          <div class="pf"><span class="pf-check">✓</span> Onboarding dédié</div>
-          <div class="pf"><span class="pf-check">✓</span> Accès API complet</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> Multi-agences & multi-sites</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> Utilisateurs illimités</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> SLA 99,9% garanti</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> Intégrations sur mesure</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> Onboarding dédié</div>
+          <div class="plan-feat"><span class="feat-check">✓</span> Accès API complet</div>
         </div>
-        <a href="mailto:contact@innosft.com" class="btn btn-ghost" style="width:100%;border-radius:12px;padding:14px;">Nous contacter</a>
+        <a href="mailto:contact@innosft.com" class="btn btn-outline plan-cta">Nous contacter</a>
       </div>
+
     </div>
   </div>
 </section>
 
 <!-- ════════ TESTIMONIALS ════════ -->
-<section id="testi">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <div class="sec-tag">💬 Témoignages</div>
-      <h2 class="sec-h2">Ils ont transformé<br/>leur agence.</h2>
+<section id="testimonials">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-badge">Témoignages</div>
+      <h2 class="section-title">Ils ont transformé<br/>leur agence.</h2>
     </div>
 
     <div class="testi-grid">
-      <div class="tcard reveal">
-        <div class="stars">★★★★★</div>
-        <div class="ttext">"Avant ASM Location, on gérait tout sur papier. Aujourd'hui nos contrats sont prêts en 30 secondes et on ne perd plus aucun paiement. Le ROI est immédiat."</div>
-        <div class="tauthor">
-          <div class="tavatar ta1">BA</div>
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">"Avant ASM Location, on gérait tout sur papier. Aujourd'hui nos contrats sont prêts en 30 secondes et on ne perd plus aucun paiement. Le ROI est immédiat."</div>
+        <div class="testi-author">
+          <div class="testi-avatar ta-1">BA</div>
           <div>
-            <div class="tname">Boubacar A.</div>
-            <div class="trole">Directeur · Boucotte Auto, Dakar</div>
+            <div class="testi-name">Boubacar A.</div>
+            <div class="testi-role">Directeur · Boucotte Auto, Dakar</div>
           </div>
         </div>
       </div>
 
-      <div class="tcard reveal">
-        <div class="stars">★★★★★</div>
-        <div class="ttext">"La gestion multi-rôles est parfaite. Mes agents voient uniquement ce dont ils ont besoin, mon comptable a ses rapports en temps réel. C'est propre."</div>
-        <div class="tauthor">
-          <div class="tavatar ta2">ZK</div>
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">"La gestion multi-rôles est parfaite. Mes agents voient uniquement ce dont ils ont besoin, mon comptable a ses rapports en temps réel. C'est propre."</div>
+        <div class="testi-author">
+          <div class="testi-avatar ta-2">ZK</div>
           <div>
-            <div class="tname">Zikora K.</div>
-            <div class="trole">Gérant · ZigAuto, Abidjan</div>
+            <div class="testi-name">Zikora K.</div>
+            <div class="testi-role">Gérant · ZigAuto, Abidjan</div>
           </div>
         </div>
       </div>
 
-      <div class="tcard reveal">
-        <div class="stars">★★★★★</div>
-        <div class="ttext">"Le QR code sur les contrats a tout changé. Nos clients scannent et vérifient l'authenticité en quelques secondes. On a gagné en crédibilité."</div>
-        <div class="tauthor">
-          <div class="tavatar ta3">KD</div>
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">"Le QR code sur les contrats a tout changé. Nos clients scannent et vérifient l'authenticité en quelques secondes. On a gagné en crédibilité."</div>
+        <div class="testi-author">
+          <div class="testi-avatar ta-3">KD</div>
           <div>
-            <div class="tname">Kadiatou D.</div>
-            <div class="trole">Fondatrice · KaranCars, Conakry</div>
+            <div class="testi-name">Kadiatou D.</div>
+            <div class="testi-role">Fondatrice · KaranCars, Conakry</div>
           </div>
         </div>
       </div>
@@ -1275,74 +1632,74 @@
 
 <!-- ════════ CTA ════════ -->
 <section id="cta">
-  <div class="cta-ring cr1"></div>
-  <div class="cta-ring cr2"></div>
-  <div class="cta-ring cr3"></div>
-  <div class="cta-glow"></div>
+  <div class="cta-bg-circle cta-c1"></div>
+  <div class="cta-bg-circle cta-c2"></div>
+  <div class="cta-bg-circle cta-c3"></div>
 
-  <div class="wrap cta-inner">
-    <h2 class="cta-h2 reveal">
+  <div class="container cta-inner">
+    <h2 class="cta-title reveal">
       Votre agence mérite<br/>
-      <span style="color:var(--amber)">mieux qu'un tableur.</span>
+      <span style="color:var(--blue)">mieux qu'un tableur.</span>
     </h2>
     <p class="cta-sub reveal">Rejoignez les agences qui ont modernisé leur gestion avec ASM Location.</p>
-    <div class="cta-row reveal">
-      <a href="#" class="btn btn-amber btn-xl">
+    <div class="cta-actions reveal">
+      <a href="#" class="btn btn-primary btn-xl">
         Créer mon agence — c'est gratuit
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
-      <a href="mailto:contact@innosft.com" class="btn btn-ghost btn-lg">Parler à un expert</a>
+      <a href="mailto:contact@innosft.com" class="btn btn-outline btn-lg">Parler à un expert</a>
     </div>
     <p class="cta-note reveal">
-      <span>✓</span> Aucune carte bancaire &nbsp;·&nbsp;
-      <span>✓</span> 14 jours d'essai complet &nbsp;·&nbsp;
-      <span>✓</span> Données hébergées en Afrique
+      <span class="green">✓</span> Aucune carte bancaire &nbsp;·&nbsp;
+      <span class="green">✓</span> 14 jours d'essai complet &nbsp;·&nbsp;
+      <span class="green">✓</span> Données hébergées en Afrique
     </p>
   </div>
 </section>
 
 <!-- ════════ FOOTER ════════ -->
 <footer>
-  <div class="wrap">
+  <div class="container">
     <div class="footer-grid">
       <div>
         <a href="/" class="brand">
-          <div class="brand-mark">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="brand-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14l4 4v4a2 2 0 01-2 2h-2"/>
-              <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+              <circle cx="7" cy="17" r="2"/>
+              <circle cx="17" cy="17" r="2"/>
             </svg>
           </div>
           <span class="brand-name">ASM Location</span>
         </a>
-        <p class="fb-about">La plateforme SaaS multi-tenant pour les agences de location de véhicules en Afrique de l'Ouest. Par Innosoft Creation.</p>
+        <p class="footer-about">La plateforme SaaS multi-tenant pour les agences de location de véhicules en Afrique de l'Ouest. Par Innosoft Creation.</p>
       </div>
       <div>
-        <div class="fc-head">Produit</div>
-        <a href="#features" class="fc-link">Fonctionnalités</a>
-        <a href="#pricing" class="fc-link">Tarifs</a>
-        <a href="#how" class="fc-link">Comment ça marche</a>
-        <a href="#testi" class="fc-link">Témoignages</a>
+        <div class="footer-col-title">Produit</div>
+        <a href="#features" class="footer-link">Fonctionnalités</a>
+        <a href="#pricing" class="footer-link">Tarifs</a>
+        <a href="#how" class="footer-link">Comment ça marche</a>
+        <a href="#testimonials" class="footer-link">Témoignages</a>
       </div>
       <div>
-        <div class="fc-head">Ressources</div>
-        <a href="#" class="fc-link">Documentation</a>
-        <a href="#" class="fc-link">API Reference</a>
-        <a href="#" class="fc-link">Statut système</a>
-        <a href="#" class="fc-link">Blog</a>
+        <div class="footer-col-title">Ressources</div>
+        <a href="#" class="footer-link">Documentation</a>
+        <a href="#" class="footer-link">API Reference</a>
+        <a href="#" class="footer-link">Statut système</a>
+        <a href="#" class="footer-link">Blog</a>
       </div>
       <div>
-        <div class="fc-head">Innosoft</div>
-        <a href="#" class="fc-link">À propos</a>
-        <a href="mailto:contact@innosft.com" class="fc-link">Contact</a>
-        <a href="#" class="fc-link">Mentions légales</a>
-        <a href="#" class="fc-link">Confidentialité</a>
+        <div class="footer-col-title">Innosoft</div>
+        <a href="#" class="footer-link">À propos</a>
+        <a href="mailto:contact@innosft.com" class="footer-link">Contact</a>
+        <a href="#" class="footer-link">Mentions légales</a>
+        <a href="#" class="footer-link">Confidentialité</a>
       </div>
     </div>
 
-    <div class="foot-bottom">
+    <div class="footer-bottom">
       <span>© 2025 Innosoft Creation · Tous droits réservés</span>
-      <div class="foot-links">
+      <div class="footer-socials">
         <a href="#">Twitter</a>
         <a href="#">LinkedIn</a>
         <a href="#">WhatsApp</a>
@@ -1352,52 +1709,52 @@
 </footer>
 
 <script>
-  // Navbar scroll
+  // Navbar on scroll
   const nav = document.getElementById('nav');
   window.addEventListener('scroll', () => {
-    nav.classList.toggle('solid', scrollY > 30);
+    nav.classList.toggle('scrolled', scrollY > 20);
   }, { passive: true });
 
-  // Reveal on scroll
-  const revealObs = new IntersectionObserver((entries) => {
-    entries.forEach((e, i) => {
-      if (e.isIntersecting) {
-        // Stagger siblings
-        const siblings = [...e.target.parentElement.querySelectorAll('.reveal:not(.in)')];
-        siblings.forEach((el, idx) => {
-          setTimeout(() => el.classList.add('in'), idx * 80);
-        });
-        e.target.classList.add('in');
-        revealObs.unobserve(e.target);
-      }
+  // Scroll reveal with stagger
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const siblings = [...entry.target.parentElement.querySelectorAll('.reveal:not(.visible)')];
+      siblings.forEach((el, i) => {
+        setTimeout(() => el.classList.add('visible'), i * 75);
+      });
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
     });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
   // Animated counters
-  function animateVal(el) {
+  function animateCounter(el) {
     const target = +el.dataset.count;
     const suffix = el.dataset.suffix || '';
-    const dur = 1800;
+    const duration = 1600;
     const start = performance.now();
-    const tick = now => {
-      const p = Math.min((now - start) / dur, 1);
-      const ease = 1 - Math.pow(1 - p, 4);
-      el.textContent = Math.floor(target * ease).toLocaleString('fr-FR') + suffix;
-      if (p < 1) requestAnimationFrame(tick);
+    const step = (now) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.floor(target * eased).toLocaleString('fr-FR') + suffix;
+      if (progress < 1) requestAnimationFrame(step);
     };
-    requestAnimationFrame(tick);
+    requestAnimationFrame(step);
   }
-  const counterObs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.querySelectorAll('[data-count]').forEach(animateVal);
-        counterObs.unobserve(e.target);
-      }
+
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.querySelectorAll('[data-count]').forEach(animateCounter);
+      counterObserver.unobserve(entry.target);
     });
-  }, { threshold: 0.5 });
+  }, { threshold: 0.4 });
+
   const metricsGrid = document.querySelector('.metrics-grid');
-  if (metricsGrid) counterObs.observe(metricsGrid);
+  if (metricsGrid) counterObserver.observe(metricsGrid);
 </script>
 </body>
 </html>
