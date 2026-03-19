@@ -1539,20 +1539,23 @@ footer {
     const grid = document.getElementById('agences-grid');
     try {
       const res = await fetch('/api/public/agences');
-      if (!res.ok) throw new Error('Erreur réseau');
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        throw new Error(`HTTP ${res.status} — ${body.slice(0, 120)}`);
+      }
       const json = await res.json();
       const agences = json.data || json;
 
-      if (!agences.length) {
+      if (!Array.isArray(agences) || !agences.length) {
         grid.innerHTML = `<div class="agences-empty">🏢 Aucune agence disponible pour le moment.<p>Soyez la première agence à rejoindre la plateforme !</p></div>`;
         return;
       }
 
       grid.innerHTML = agences.map(renderAgenceCard).join('');
-      // Déclencher le reveal sur les nouvelles cartes
       grid.querySelectorAll('.reveal').forEach(el => ro.observe(el));
-    } catch {
-      grid.innerHTML = `<div class="agences-empty">⚠️ Impossible de charger les agences.<p>Veuillez réessayer plus tard.</p></div>`;
+    } catch (err) {
+      console.error('[agences] fetch error:', err);
+      grid.innerHTML = `<div class="agences-empty">⚠️ Impossible de charger les agences.<p style="font-family:monospace;font-size:11px;color:#ef4444">${err.message}</p></div>`;
     }
   }
 
