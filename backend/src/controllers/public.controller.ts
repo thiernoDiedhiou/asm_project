@@ -254,7 +254,7 @@ export class PublicController {
       sendNotifNouvelleReservation(
         {
           numeroReservation: reservation.numeroReservation,
-          nomEntreprise: tenant?.nomEntreprise || 'SenLocaDesk',
+          nomEntreprise: tenant?.nomEntreprise || 'InnoSoft Location',
           couleurPrimaire: tenant?.couleurPrimaire || '#1B5E20',
           couleurSecondaire: tenant?.couleurSecondaire || '#F9A825',
           client: { prenom, nom, telephone, email: email || undefined },

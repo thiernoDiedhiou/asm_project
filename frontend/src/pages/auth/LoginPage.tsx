@@ -56,7 +56,7 @@ export function LoginPage() {
             <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-asm-vert mb-4">
               <Car className="h-8 w-8 text-asm-or" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">{nomEntreprise || 'SenLocaDesk'}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{nomEntreprise || 'InnoSoft Location'}</h1>
             <p className="text-gray-500 text-sm mt-1">
               Système de gestion de location de véhicules
             </p>

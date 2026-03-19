@@ -29,7 +29,7 @@ interface Settings {
 }
 
 const DEFAULTS: Settings = {
-  nomEntreprise: 'ASM Multi-Services',
+  nomEntreprise: 'InnoSoft Location',
   slogan: 'Location de Véhicules',
   telephone: '+221 33 820 00 00',
   email: 'contact@asm-location.sn',

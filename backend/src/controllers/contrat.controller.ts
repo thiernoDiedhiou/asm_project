@@ -97,7 +97,7 @@ export class ContratController {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader(
           'Content-Disposition',
-          `attachment; filename="contrat-${req.params.id}.pdf"`
+          `inline; filename="contrat-${req.params.id}.pdf"`
         );
         fs.createReadStream(filePath).pipe(res);
       } else {

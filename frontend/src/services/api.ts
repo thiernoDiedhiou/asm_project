@@ -9,7 +9,7 @@ const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Base URL pour les fichiers statiques (uploads: logos, photos véhicules, PDFs)
 // Dev: http://localhost:5000 | Prod: vide = chemin relatif servi par nginx
-export const API_FILE_BASE: string = import.meta.env.VITE_API_FILE_BASE || 'http://localhost:5000';
+export const API_FILE_BASE: string = import.meta.env.VITE_API_FILE_BASE ?? 'http://localhost:5000';
 
 // Instance Axios principale
 const api: AxiosInstance = axios.create({

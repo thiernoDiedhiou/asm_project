@@ -42,14 +42,31 @@ import { JournalPage } from './pages/journal/JournalPage';
 import { TenantsPage } from './pages/superadmin/TenantsPage';
 import { TenantDetailPage } from './pages/superadmin/TenantDetailPage';
 
+// URL du tableau de bord Super Admin (définie dans .env / .env.production)
+const SUPERADMIN_URL = import.meta.env.VITE_SUPERADMIN_URL || '/tenants';
+
+// Origin extrait de SUPERADMIN_URL (ex: "https://admin.location.innosft.com")
+function getSuperAdminOrigin(): string | null {
+  try {
+    return new URL(SUPERADMIN_URL).origin;
+  } catch {
+    return null; // URL relative → pas de redirection inter-domaine
+  }
+}
+
 // Protection des routes — redirige vers /login si non authentifié, et bloque SUPER_ADMIN
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, accessToken, user } = useAuthStore();
   if (!isAuthenticated || !accessToken) {
     return <Navigate to="/login" replace />;
   }
-  // Le SUPER_ADMIN n'a pas de tenant — il ne doit pas accéder aux routes tenant-scoped
+  // Le SUPER_ADMIN n'a pas de tenant — rediriger vers admin.location.innosft.com/tenants
   if (user?.role === 'SUPER_ADMIN') {
+    const adminOrigin = getSuperAdminOrigin();
+    if (adminOrigin && window.location.origin !== adminOrigin) {
+      window.location.replace(SUPERADMIN_URL);
+      return null;
+    }
     return <Navigate to="/tenants" replace />;
   }
   return <>{children}</>;

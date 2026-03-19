@@ -54,7 +54,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   function fetchTenant(auth: boolean, role: string | undefined) {
     // Super Admin : pas de tenant — titre fixe SenLocaDesk
     if (auth && role === 'SUPER_ADMIN') {
-      document.title = 'SenLocaDesk — Gestion de la Plateforme';
+      document.title = 'InnoSoft Location — Gestion de la Plateforme';
       return;
     }
 
