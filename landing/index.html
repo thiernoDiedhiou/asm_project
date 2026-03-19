@@ -177,12 +177,13 @@ img { display: block; max-width: 100%; }
 #hero {
   min-height: 100vh; display: flex; align-items: center;
   padding-top: 64px; position: relative; overflow: hidden;
+  background: linear-gradient(160deg, #0f172a 0%, #1e3a8a 55%, #1e1b4b 100%);
 }
 
 /* Dot grid pattern */
 .hero-dots {
   position: absolute; inset: 0; pointer-events: none;
-  background-image: radial-gradient(circle, rgba(37,99,235,.1) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1px);
   background-size: 26px 26px;
   mask-image: radial-gradient(ellipse 80% 90% at 50% 10%, black 20%, transparent 100%);
 }
@@ -192,8 +193,8 @@ img { display: block; max-width: 100%; }
   position: absolute; border-radius: 50%; pointer-events: none;
   filter: blur(80px);
 }
-.halo-1 { width: 560px; height: 480px; background: rgba(37,99,235,.07);  top: -120px;  right: -80px; }
-.halo-2 { width: 380px; height: 340px; background: rgba(245,158,11,.07); bottom: -60px; left: -60px; }
+.halo-1 { width: 560px; height: 480px; background: rgba(37,99,235,.25);  top: -120px;  right: -80px; }
+.halo-2 { width: 380px; height: 340px; background: rgba(245,158,11,.12); bottom: -60px; left: -60px; }
 
 .hero-inner {
   position: relative; z-index: 1;
@@ -206,8 +207,8 @@ img { display: block; max-width: 100%; }
 .hero-pill {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 5px 14px 5px 6px; border-radius: 100px;
-  background: var(--blue-xl); border: 1px solid rgba(37,99,235,.18);
-  font-size: 12.5px; font-weight: 600; color: var(--blue-dk);
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.85);
   margin-bottom: 28px;
 }
 .hero-pill-ico {
@@ -226,7 +227,7 @@ img { display: block; max-width: 100%; }
   font-family: 'Sora', sans-serif;
   font-size: clamp(40px, 5vw, 66px);
   font-weight: 900; line-height: 1.04; letter-spacing: -.04em;
-  color: var(--ink); margin-bottom: 22px;
+  color: #fff; margin-bottom: 22px;
 }
 .hero-h1 .hi {
   background: linear-gradient(135deg, var(--blue) 0%, #7c3aed 100%);
@@ -234,7 +235,7 @@ img { display: block; max-width: 100%; }
 }
 
 .hero-p {
-  font-size: 17px; color: var(--muted); line-height: 1.8;
+  font-size: 17px; color: rgba(255,255,255,.62); line-height: 1.8;
   max-width: 440px; margin-bottom: 36px;
 }
 
@@ -243,7 +244,7 @@ img { display: block; max-width: 100%; }
 .hero-trust { display: flex; align-items: center; gap: 12px; }
 .trust-pile { display: flex; }
 .tpx {
-  width: 28px; height: 28px; border-radius: 50%; border: 2px solid #fff;
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,.25);
   display: flex; align-items: center; justify-content: center;
   font-size: 10px; font-weight: 700; color: #fff;
   margin-left: -8px;
@@ -253,8 +254,8 @@ img { display: block; max-width: 100%; }
 .tp2 { background: linear-gradient(135deg,#f59e0b,#ef4444); }
 .tp3 { background: linear-gradient(135deg,#059669,#2563eb); }
 .tp4 { background: linear-gradient(135deg,#8b5cf6,#ec4899); }
-.trust-text { font-size: 13px; color: var(--muted); }
-.trust-text strong { color: var(--ink); }
+.trust-text { font-size: 13px; color: rgba(255,255,255,.55); }
+.trust-text strong { color: #fff; }
 
 /* Right — car visual */
 .hero-visual { position: relative; display: flex; align-items: center; justify-content: center; }
@@ -785,7 +786,7 @@ footer {
           Démarrer gratuitement
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
-        <a href="#features" class="btn btn-stroke btn-lg">Voir la démo</a>
+        <a href="#features" class="btn btn-stroke-white btn-lg">Voir la démo</a>
       </div>
 
       <div class="hero-trust">
