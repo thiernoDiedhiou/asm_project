@@ -46,9 +46,11 @@ const platformDomain = process.env.PLATFORM_DOMAIN || 'innosft.com';
 function isAllowedOrigin(origin: string | undefined): boolean {
   if (!origin) return true; // same-origin ou Postman
   if (origin.includes('localhost') || origin.includes('127.0.0.1')) return true;
-  // Autorise exactement *.{platformDomain} (ex: boucotteauto.innosft.com)
-  const pattern = new RegExp(`^https?://[a-z0-9-]+\\.${platformDomain.replace(/\./g, '\\.')}(:\\d+)?$`);
-  return pattern.test(origin);
+  const escaped = platformDomain.replace(/\./g, '\\.');
+  // Autorise le domaine racine (ex: location.innosft.com) et tous ses sous-domaines
+  const rootPattern = new RegExp(`^https?://${escaped}(:\\d+)?$`);
+  const subPattern  = new RegExp(`^https?://[a-z0-9-]+\\.${escaped}(:\\d+)?$`);
+  return rootPattern.test(origin) || subPattern.test(origin);
 }
 
 // ---- Configuration Socket.io ----
