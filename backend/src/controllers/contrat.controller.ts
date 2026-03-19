@@ -104,6 +104,7 @@ export class ContratController {
         sendSuccess(res, { pdfUrl }, 'PDF généré');
       }
     } catch (error) {
+      console.error('[PDF] Erreur génération contrat:', error);
       sendError(res, error instanceof Error ? error.message : 'Erreur génération PDF', 500);
     }
   }
