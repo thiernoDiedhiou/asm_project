@@ -15,16 +15,16 @@
     ════════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --ink:      #05080f;
-      --surface:  #080d18;
-      --glass:    rgba(255,255,255,.042);
-      --stroke:   rgba(255,255,255,.075);
+      --ink:      #ffffff;
+      --surface:  #f1f5f9;
+      --glass:    rgba(0,0,0,.032);
+      --stroke:   rgba(0,0,0,.08);
       --blue:     #2563eb;
-      --blue-lt:  #60a5fa;
-      --amber:    #f59e0b;
-      --amber-lt: #fcd34d;
-      --emerald:  #10b981;
-      --text:     #e2e8f0;
+      --blue-lt:  #1d4ed8;
+      --amber:    #d97706;
+      --amber-lt: #b45309;
+      --emerald:  #059669;
+      --text:     #0f172a;
       --muted:    #64748b;
       --r:        18px;
       font-size: 16px;
@@ -51,7 +51,7 @@
       transition: background .4s, border-color .4s;
     }
     #nav.solid {
-      background: rgba(5,8,15,.88);
+      background: rgba(255,255,255,.92);
       backdrop-filter: blur(20px) saturate(160%);
       border-bottom: 1px solid var(--stroke);
     }
@@ -72,7 +72,7 @@
     .brand-name {
       font-family: 'Urbanist', sans-serif;
       font-size: 19px; font-weight: 800; letter-spacing: -.02em;
-      background: linear-gradient(90deg, #fff 40%, var(--blue-lt));
+      background: linear-gradient(90deg, var(--text) 40%, var(--blue));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .nav-links {
@@ -135,9 +135,9 @@
       position: absolute; border-radius: 50%;
       filter: blur(100px); opacity: .16; animation: drift 10s ease-in-out infinite;
     }
-    .glow-1 { width: 700px; height: 500px; background: var(--blue); top: -150px; left: -150px; }
-    .glow-2 { width: 500px; height: 500px; background: var(--amber); bottom: -100px; right: -100px; animation-delay: -5s; opacity: .1; }
-    .glow-3 { width: 400px; height: 300px; background: #7c3aed; top: 40%; left: 45%; animation-delay: -3s; }
+    .glow-1 { width: 700px; height: 500px; background: #bfdbfe; top: -150px; left: -150px; }
+    .glow-2 { width: 500px; height: 500px; background: #fde68a; bottom: -100px; right: -100px; animation-delay: -5s; opacity: .4; }
+    .glow-3 { width: 400px; height: 300px; background: #ddd6fe; top: 40%; left: 45%; animation-delay: -3s; }
     @keyframes drift {
       0%,100% { transform: translate(0,0) scale(1); }
       50% { transform: translate(40px,-40px) scale(1.08); }
@@ -162,8 +162,8 @@
     .hero-grid-bg {
       position: absolute; inset: 0;
       background-image:
-        linear-gradient(rgba(37,99,235,.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(37,99,235,.05) 1px, transparent 1px);
+        linear-gradient(rgba(37,99,235,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37,99,235,.07) 1px, transparent 1px);
       background-size: 64px 64px;
       mask-image: radial-gradient(ellipse 100% 90% at 50% 0%, black 20%, transparent 100%);
     }
@@ -255,7 +255,7 @@
     /* Floating stat cards */
     .float-card {
       position: absolute;
-      background: rgba(8,13,24,.85); backdrop-filter: blur(16px);
+      background: rgba(255,255,255,.95); backdrop-filter: blur(16px);
       border: 1px solid var(--stroke); border-radius: 14px;
       padding: 12px 18px;
       animation: fc-float 5s ease-in-out infinite;
@@ -284,7 +284,7 @@
       padding: 40px 0;
       border-top: 1px solid var(--stroke);
       border-bottom: 1px solid var(--stroke);
-      background: rgba(255,255,255,.012);
+      background: #f8fafc;
     }
     .logos-head { text-align:center; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-bottom:24px; }
     .logos-row { display:flex; align-items:center; justify-content:center; gap:32px; flex-wrap:wrap; }
@@ -310,7 +310,7 @@
       overflow: hidden;
     }
     .metric {
-      background: var(--surface);
+      background: #fff;
       padding: 40px 28px;
       text-align: center;
       transition: background .25s;
@@ -327,7 +327,7 @@
     .metric-val {
       font-family: 'Urbanist', sans-serif;
       font-size: 50px; font-weight: 900; line-height: 1;
-      background: linear-gradient(135deg, #fff 0%, var(--blue-lt) 100%);
+      background: linear-gradient(135deg, var(--text) 0%, var(--blue) 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       margin-bottom: 6px;
     }
@@ -393,7 +393,7 @@
 
     .bc-icon {
       width: 44px; height: 44px; border-radius: 12px;
-      background: rgba(255,255,255,.06); border: 1px solid var(--stroke);
+      background: #f1f5f9; border: 1px solid var(--stroke);
       display: flex; align-items: center; justify-content: center;
       font-size: 20px; margin-bottom: 16px; flex-shrink: 0;
     }
@@ -401,7 +401,7 @@
     .bc-p { font-size: 13px; color: var(--muted); line-height: 1.65; }
     .bc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
     .bc-tag {
-      background: rgba(255,255,255,.05); border: 1px solid var(--stroke);
+      background: #f1f5f9; border: 1px solid var(--stroke);
       padding: 3px 11px; border-radius: 100px;
       font-size: 11px; font-weight: 600; color: var(--muted);
     }
@@ -410,7 +410,7 @@
     .mini-fleet { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
     .mf-row {
       display: flex; align-items: center; gap: 10px;
-      background: rgba(255,255,255,.04); border-radius: 10px;
+      background: #f8fafc; border-radius: 10px;
       padding: 9px 14px; border: 1px solid var(--stroke);
     }
     .mf-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -482,7 +482,7 @@
       display: flex; align-items: center; gap: 10px;
       padding: 8px 12px; border-radius: 10px;
       border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.03);
+      background: #f8fafc;
     }
     .role-avatar {
       width: 32px; height: 32px; border-radius: 50%;
@@ -530,7 +530,7 @@
     ════════════════════════════════════════════ */
     #how {
       padding: 100px 0;
-      background: linear-gradient(180deg, var(--ink) 0%, var(--surface) 50%, var(--ink) 100%);
+      background: linear-gradient(180deg, #fff 0%, #f1f5f9 50%, #fff 100%);
       position: relative; overflow: hidden;
     }
     #how::before {
@@ -561,7 +561,7 @@
     .step-card:hover { transform: translateY(-4px); border-color: rgba(37,99,235,.3); }
     .step-num {
       width: 72px; height: 72px; border-radius: 50%;
-      background: var(--surface); border: 2px solid rgba(37,99,235,.3);
+      background: #fff; border: 2px solid rgba(37,99,235,.3);
       display: flex; align-items: center; justify-content: center;
       font-family: 'Urbanist',sans-serif; font-size: 28px; font-weight: 900;
       color: var(--blue-lt); margin: 0 auto 20px;
@@ -620,7 +620,7 @@
     ════════════════════════════════════════════ */
     #testi {
       padding: 100px 0;
-      background: var(--surface);
+      background: #f8fafc;
     }
     .testi-grid {
       display: grid; grid-template-columns: repeat(3,1fr);
@@ -688,7 +688,7 @@
     footer {
       border-top: 1px solid var(--stroke);
       padding: 60px 0 36px;
-      background: var(--ink);
+      background: #f8fafc;
     }
     .footer-grid {
       display: grid; grid-template-columns: 2.2fr 1fr 1fr 1fr;
@@ -1020,8 +1020,8 @@
         <div class="bc-icon">📄</div>
         <div class="bc-h3">Contrats PDF en 1 clic</div>
         <div class="bc-p">Générez des contrats professionnels automatiquement. QR code d'authentification, archivage numérique, zéro impression.</div>
-        <div class="contract-preview">
-          <div class="cp-header">
+        <div class="contract-preview" style="background:#f8fafc;border-color:#e2e8f0;">
+          <div class="cp-header" style="background:linear-gradient(90deg,rgba(37,99,235,.1),rgba(37,99,235,.02));">
             📋 &nbsp;CONTRAT #2024-0187
           </div>
           <div class="cp-body">
