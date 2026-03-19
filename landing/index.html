@@ -1470,6 +1470,7 @@ footer {
 
   // ── Chargement dynamique des agences ──────────────────────
   const PLATFORM_DOMAIN = 'location.innosft.com';
+  const API_BASE = 'https://admin.location.innosft.com';
 
   function initials(name) {
     return name.split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
@@ -1538,7 +1539,7 @@ footer {
   async function loadAgences() {
     const grid = document.getElementById('agences-grid');
     try {
-      const res = await fetch('/api/public/agences');
+      const res = await fetch(`${API_BASE}/api/public/agences`);
       if (!res.ok) {
         const body = await res.text().catch(() => '');
         throw new Error(`HTTP ${res.status} — ${body.slice(0, 120)}`);
