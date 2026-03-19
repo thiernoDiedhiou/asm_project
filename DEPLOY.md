@@ -239,12 +239,12 @@ pm2 logs asm-backend --lines 100
 ## 12. Mise à jour du code (déploiements futurs)
 
 ```bash
-cd /var/www/asm-location
+cd /home/tfksservice/Location/asm_project
 
 # Récupérer les nouvelles modifications
-git pull origin main
+git pull origin tenant
 
-# Backend
+# Backend — OBLIGATOIRE : dist/ est gitignore, il faut rebuilder sur le serveur
 cd backend
 npm install
 npm run build
@@ -256,6 +256,10 @@ cd ../frontend
 npm install
 npm run build
 # Nginx sert automatiquement le nouveau dist/
+
+# Nginx — si nginx.conf a changé
+cp /home/tfksservice/Location/asm_project/nginx.conf /etc/nginx/sites-available/asm-location
+sudo nginx -t && sudo nginx -s reload
 ```
 
 ---
