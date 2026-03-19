@@ -38,6 +38,9 @@ import prisma from './utils/prisma';
 const app = express();
 const httpServer = createServer(app);
 
+// Derrière nginx — faire confiance au premier proxy pour X-Forwarded-For
+app.set('trust proxy', 1);
+
 // ---- Fonction CORS dynamique — autorise tous les sous-domaines *.innosft.com + localhost ----
 const platformDomain = process.env.PLATFORM_DOMAIN || 'innosft.com';
 function isAllowedOrigin(origin: string | undefined): boolean {
