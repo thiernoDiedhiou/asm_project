@@ -811,8 +811,10 @@ export class PdfService {
 
     let browser;
     try {
+      const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
       browser = await puppeteer.launch({
-        headless: true,
+        headless: 'new',
+        executablePath,
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
