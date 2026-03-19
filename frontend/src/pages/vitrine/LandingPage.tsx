@@ -76,8 +76,8 @@ function FloatingCarVisual({ disponibles }: { disponibles: number }) {
           <line x1="250" y1="140" x2="250" y2="208" stroke="rgba(255,255,255,.08)" strokeWidth="1"/>
 
           {/* Poignées */}
-          <rect x="195" y="170" width="28" height="4" rx="2" fill="rgba(255,255,255,.12)"/>
-          <rect x="277" y="170" width="28" height="4" rx="2" fill="rgba(255,255,255,.12)"/>
+          <rect x="195" y="170" width="28" height="4" rx="2" fill="rgba(0,0,0,.55)"/>
+          <rect x="277" y="170" width="28" height="4" rx="2" fill="rgba(0,0,0,.55)"/>
 
           {/* Phare avant */}
           <ellipse cx="450" cy="162" rx="13" ry="8" fill="url(#cl)" opacity=".9"/>
