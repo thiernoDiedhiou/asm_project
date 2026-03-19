@@ -22,7 +22,7 @@ const CAR_ANIM_CSS = `
   @keyframes vitrine-fc    { 0%,100%{transform:translateY(0)}   50%{transform:translateY(-7px)} }
 `;
 
-function FloatingCarVisual({ disponibles, photoUrl }: { disponibles: number; photoUrl?: string }) {
+function FloatingCarVisual({ disponibles }: { disponibles: number }) {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: CAR_ANIM_CSS }} />
@@ -59,29 +59,161 @@ function FloatingCarVisual({ disponibles, photoUrl }: { disponibles: number; pho
           <div style={{ fontSize: '10.5px', fontWeight: 600, marginTop: '2px', color: '#d97706' }}>↑ Rapide & simple</div>
         </div>
 
-        {/* ── Photo de véhicule ── */}
-        <div style={{ position: 'relative', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.35)' }}>
-          {photoUrl ? (
-            <img
-              src={photoUrl}
-              alt="Véhicule disponible"
-              style={{ width: '100%', height: '260px', objectFit: 'cover', display: 'block' }}
-            />
-          ) : (
-            <div style={{
-              width: '100%', height: '260px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
-              border: '1px solid rgba(255,255,255,0.2)',
-            }}>
-              <Car style={{ width: 80, height: 80, color: 'rgba(255,255,255,0.4)' }} />
-            </div>
-          )}
-          {/* Dégradé en bas pour lisibilité des cards */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px',
-            background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
-          }}/>
-        </div>
+        {/* ── Car SVG — silhouette réaliste de berline ── */}
+        <svg viewBox="0 0 540 215" fill="none" xmlns="http://www.w3.org/2000/svg"
+          style={{ width: '100%', filter: 'drop-shadow(0 14px 40px rgba(0,0,0,.30))' }}>
+
+          {/* ── Carrosserie principale avec découpes jantes ── */}
+          <path d="
+            M 62 174
+            C 50 164 46 150 50 136
+            C 54 124 66 114 80 106
+            L 108 94
+            C 132 84 160 76 190 70
+            L 212 56
+            C 236 44 262 38 292 38
+            L 330 38
+            C 360 38 388 46 412 60
+            L 450 86
+            C 466 100 474 118 474 138
+            C 474 156 466 170 454 178
+            L 435 182
+            A 35 22 0 0 0 365 182
+            L 183 182
+            A 35 22 0 0 0 113 182
+            L 88 182
+            C 76 180 66 178 62 174
+            Z
+          " fill="url(#vcBody)"/>
+
+          {/* ── Bandeau chromé bas de caisse ── */}
+          <rect x="113" y="180" width="252" height="5" rx="2.5" fill="#cbd5e1"/>
+
+          {/* ── Vitres (serre) ── */}
+          <path d="
+            M 204 120
+            L 224 63
+            C 246 47 270 40 296 40
+            L 330 40
+            C 358 40 380 52 398 68
+            L 430 106
+            L 430 120
+            Z
+          " fill="url(#vcGlass)"/>
+
+          {/* ── Reflet vitre avant ── */}
+          <path d="M 218 118 L 236 64 C 246 50 256 44 262 42 L 248 44 C 232 50 220 68 210 90 Z"
+            fill="rgba(255,255,255,0.07)"/>
+
+          {/* ── Montant A (pare-brise) ── */}
+          <line x1="262" y1="40" x2="204" y2="120" stroke="rgba(255,255,255,0.18)" strokeWidth="2.5"/>
+
+          {/* ── Montant B (entre vitres) ── */}
+          <rect x="316" y="40" width="11" height="80" rx="2" fill="rgba(0,0,0,0.6)"/>
+
+          {/* ── Ligne de ceinture (waistline) ── */}
+          <path d="M 112 120 Q 272 114 430 120"
+            stroke="rgba(255,255,255,0.40)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+
+          {/* ── Reflet de carrosserie (highlight) ── */}
+          <path d="M 116 144 Q 274 134 442 144"
+            stroke="rgba(255,255,255,0.24)" strokeWidth="4" fill="none" strokeLinecap="round"/>
+
+          {/* ── Ligne de porte ── */}
+          <path d="M 116 158 Q 274 154 432 155"
+            stroke="rgba(255,255,255,0.10)" strokeWidth="1" fill="none"/>
+
+          {/* ── Poignées de porte ── */}
+          <rect x="224" y="153" width="34" height="6" rx="3" fill="rgba(255,255,255,0.32)"/>
+          <rect x="350" y="151" width="34" height="6" rx="3" fill="rgba(255,255,255,0.32)"/>
+
+          {/* ── Rétroviseur ── */}
+          <path d="M 203 118 L 188 115 L 186 126 L 201 128 Z" fill="#e8edf3"/>
+          <rect x="188" y="115" width="1.5" height="13" rx="0.75" fill="#cbd5e1"/>
+
+          {/* ── Phare avant (full LED) ── */}
+          {/* Boîtier */}
+          <path d="M 53 148 L 84 136 L 86 164 L 56 169 Z" fill="#f0f4f8" rx="3"/>
+          {/* Fond noir du phare */}
+          <path d="M 57 150 L 82 140 L 83 162 L 59 166 Z" fill="#1e293b"/>
+          {/* Oeil LED */}
+          <ellipse cx="70" cy="153" rx="9" ry="7" fill="#0f172a"/>
+          <ellipse cx="70" cy="153" rx="6" ry="4.5" fill="url(#vcHeadlight)"/>
+          {/* DRL (barre lumineuse) */}
+          <rect x="57" y="136" width="27" height="4" rx="2" fill="white" opacity="0.95"/>
+          {/* Séparation DRL */}
+          <rect x="70" y="136" width="1.5" height="4" fill="#f0f4f8" opacity="0.6"/>
+
+          {/* ── Calandre avant ── */}
+          <path d="M 50 168 Q 56 160 74 160 L 75 170 Q 59 172 52 175 Z" fill="#1e293b" opacity="0.85"/>
+          <line x1="56" y1="163" x2="57" y2="172" stroke="#334155" strokeWidth="1"/>
+          <line x1="62" y1="161" x2="63" y2="171" stroke="#334155" strokeWidth="1"/>
+          <line x1="68" y1="160" x2="69" y2="170" stroke="#334155" strokeWidth="1"/>
+
+          {/* ── Feux arrière ── */}
+          <path d="M 456 144 L 476 154 L 474 174 L 454 168 Z" fill="#0f172a"/>
+          <path d="M 458 147 L 473 155 L 471 171 L 456 166 Z" fill="url(#vcTaillight)"/>
+          {/* Barre de feux LED */}
+          <rect x="454" y="140" width="20" height="4" rx="2" fill="#fca5a5" opacity="0.80"/>
+
+          {/* ── Coffre / hayon ligne ── */}
+          <path d="M 454 178 C 462 162 468 144 472 138" stroke="rgba(255,255,255,0.12)" strokeWidth="1" fill="none"/>
+
+          {/* ── Roue arrière ── */}
+          <circle cx="400" cy="199" r="34" fill="#111827"/>
+          <circle cx="400" cy="199" r="27" fill="#1e293b"/>
+          {/* Jante 5 branches */}
+          <line x1="400" y1="199" x2="400" y2="172" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
+          <line x1="400" y1="199" x2="426" y2="191" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
+          <line x1="400" y1="199" x2="416" y2="222" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
+          <line x1="400" y1="199" x2="384" y2="222" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
+          <line x1="400" y1="199" x2="374" y2="191" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
+          {/* Anneau jante */}
+          <circle cx="400" cy="199" r="18" fill="none" stroke="#475569" strokeWidth="1.5"/>
+          {/* Centre */}
+          <circle cx="400" cy="199" r="9" fill="#0f172a"/>
+          <circle cx="400" cy="199" r="5" fill="url(#vcHub)"/>
+
+          {/* ── Roue avant ── */}
+          <circle cx="148" cy="199" r="34" fill="#111827"/>
+          <circle cx="148" cy="199" r="27" fill="#1e293b"/>
+          {/* Jante 5 branches */}
+          <line x1="148" y1="199" x2="148" y2="172" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
+          <line x1="148" y1="199" x2="174" y2="191" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
+          <line x1="148" y1="199" x2="164" y2="222" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
+          <line x1="148" y1="199" x2="132" y2="222" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
+          <line x1="148" y1="199" x2="122" y2="191" stroke="#64748b" strokeWidth="4.5" strokeLinecap="round"/>
+          {/* Anneau jante */}
+          <circle cx="148" cy="199" r="18" fill="none" stroke="#475569" strokeWidth="1.5"/>
+          {/* Centre */}
+          <circle cx="148" cy="199" r="9" fill="#0f172a"/>
+          <circle cx="148" cy="199" r="5" fill="url(#vcHub)"/>
+
+          <defs>
+            <linearGradient id="vcBody" x1="30%" y1="0%" x2="70%" y2="100%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="1"/>
+              <stop offset="60%" stopColor="#f1f5f9" stopOpacity="0.97"/>
+              <stop offset="100%" stopColor="#e2e8f0" stopOpacity="0.94"/>
+            </linearGradient>
+            <linearGradient id="vcGlass" x1="15%" y1="0%" x2="85%" y2="100%">
+              <stop offset="0%" stopColor="#0f172a" stopOpacity="0.92"/>
+              <stop offset="100%" stopColor="#1e293b" stopOpacity="0.85"/>
+            </linearGradient>
+            <radialGradient id="vcHeadlight" cx="40%" cy="40%">
+              <stop offset="0%" stopColor="#bfdbfe" stopOpacity="0.9"/>
+              <stop offset="60%" stopColor="#fcd34d" stopOpacity="0.7"/>
+              <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.5"/>
+            </radialGradient>
+            <linearGradient id="vcTaillight" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#ef4444" stopOpacity="0.9"/>
+              <stop offset="100%" stopColor="#b91c1c" stopOpacity="0.7"/>
+            </linearGradient>
+            <radialGradient id="vcHub" cx="35%" cy="35%">
+              <stop offset="0%" stopColor="#94a3b8"/>
+              <stop offset="100%" stopColor="#334155"/>
+            </radialGradient>
+          </defs>
+        </svg>
 
         {/* ── Ombre au sol ── */}
         <div style={{
@@ -282,10 +414,7 @@ export function LandingPage() {
 
             {/* ── Right: floating car ── */}
             <div className="hidden lg:flex items-center justify-center px-6 py-4">
-              <FloatingCarVisual
-                disponibles={totalDisponibles}
-                photoUrl={vehicules[0]?.photos?.[0]}
-              />
+              <FloatingCarVisual disponibles={totalDisponibles} />
             </div>
 
           </div>
