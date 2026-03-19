@@ -99,8 +99,8 @@ function FloatingCarVisual({ disponibles }: { disponibles: number }) {
               <stop offset="100%" stopColor="#f1f5f9" stopOpacity="0.95"/>
             </linearGradient>
             <linearGradient id="vcw" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.22"/>
-              <stop offset="100%" stopColor="#ffffff" stopOpacity="0.06"/>
+              <stop offset="0%" stopColor="#0f172a" stopOpacity="0.92"/>
+              <stop offset="100%" stopColor="#1e293b" stopOpacity="0.85"/>
             </linearGradient>
             <linearGradient id="vcl" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#fcd34d"/>
