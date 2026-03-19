@@ -61,7 +61,7 @@ function FloatingCarVisual({ disponibles }: { disponibles: number }) {
 
         {/* ── Car SVG ── */}
         <svg viewBox="0 0 500 240" fill="none" xmlns="http://www.w3.org/2000/svg"
-          style={{ width: '100%', filter: 'drop-shadow(0 14px 44px rgba(0,0,0,.22))' }}>
+          style={{ width: '100%', filter: 'drop-shadow(0 14px 44px rgba(0,0,0,.35))' }}>
           <rect x="40" y="140" width="420" height="70" rx="12" fill="url(#vcb1)"/>
           <path d="M130 140 L160 85 Q200 60 250 55 Q300 50 340 65 L380 100 L390 140Z" fill="url(#vcb2)"/>
           <path d="M155 130 L178 88 Q210 70 250 65 Q285 62 315 72 L345 100 L355 130Z" fill="url(#vcw)"/>
@@ -91,12 +91,12 @@ function FloatingCarVisual({ disponibles }: { disponibles: number }) {
           <line x1="338" y1="210" x2="360" y2="210" stroke="rgba(255,255,255,.28)" strokeWidth="1.5"/>
           <defs>
             <linearGradient id="vcb1" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style={{ stopColor: 'var(--color-primary)', stopOpacity: 0.85 }}/>
-              <stop offset="100%" style={{ stopColor: 'var(--color-primary)', stopOpacity: 0.6 }}/>
+              <stop offset="0%" stopColor="#1e293b" stopOpacity="0.95"/>
+              <stop offset="100%" stopColor="#0f172a" stopOpacity="0.9"/>
             </linearGradient>
             <linearGradient id="vcb2" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style={{ stopColor: 'var(--color-primary)', stopOpacity: 0.9 }}/>
-              <stop offset="100%" style={{ stopColor: 'var(--color-primary)', stopOpacity: 0.7 }}/>
+              <stop offset="0%" stopColor="#334155" stopOpacity="0.95"/>
+              <stop offset="100%" stopColor="#1e293b" stopOpacity="0.9"/>
             </linearGradient>
             <linearGradient id="vcw" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#ffffff" stopOpacity="0.22"/>
@@ -111,12 +111,12 @@ function FloatingCarVisual({ disponibles }: { disponibles: number }) {
               <stop offset="100%" stopColor="transparent"/>
             </linearGradient>
             <radialGradient id="vcr">
-              <stop offset="0%" stopColor="rgba(255,255,255,.8)"/>
-              <stop offset="100%" style={{ stopColor: 'var(--color-primary)' }}/>
+              <stop offset="0%" stopColor="#94a3b8"/>
+              <stop offset="100%" stopColor="#475569"/>
             </radialGradient>
             <radialGradient id="vcr2">
-              <stop offset="0%" stopColor="rgba(255,255,255,.8)"/>
-              <stop offset="100%" style={{ stopColor: 'var(--color-primary)' }}/>
+              <stop offset="0%" stopColor="#94a3b8"/>
+              <stop offset="100%" stopColor="#475569"/>
             </radialGradient>
           </defs>
         </svg>
