@@ -91,12 +91,12 @@ function FloatingCarVisual({ disponibles }: { disponibles: number }) {
           <line x1="338" y1="210" x2="360" y2="210" stroke="rgba(255,255,255,.28)" strokeWidth="1.5"/>
           <defs>
             <linearGradient id="vcb1" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#1e293b" stopOpacity="0.95"/>
-              <stop offset="100%" stopColor="#0f172a" stopOpacity="0.9"/>
+              <stop offset="0%" style={{ stopColor: 'var(--color-secondary)', stopOpacity: 0.9 }}/>
+              <stop offset="100%" style={{ stopColor: 'var(--color-secondary)', stopOpacity: 0.7 }}/>
             </linearGradient>
             <linearGradient id="vcb2" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#334155" stopOpacity="0.95"/>
-              <stop offset="100%" stopColor="#1e293b" stopOpacity="0.9"/>
+              <stop offset="0%" style={{ stopColor: 'var(--color-secondary)', stopOpacity: 0.95 }}/>
+              <stop offset="100%" style={{ stopColor: 'var(--color-secondary)', stopOpacity: 0.75 }}/>
             </linearGradient>
             <linearGradient id="vcw" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#ffffff" stopOpacity="0.22"/>
@@ -111,12 +111,12 @@ function FloatingCarVisual({ disponibles }: { disponibles: number }) {
               <stop offset="100%" stopColor="transparent"/>
             </linearGradient>
             <radialGradient id="vcr">
-              <stop offset="0%" stopColor="#94a3b8"/>
-              <stop offset="100%" stopColor="#475569"/>
+              <stop offset="0%" stopColor="rgba(255,255,255,.8)"/>
+              <stop offset="100%" style={{ stopColor: 'var(--color-secondary)' }}/>
             </radialGradient>
             <radialGradient id="vcr2">
-              <stop offset="0%" stopColor="#94a3b8"/>
-              <stop offset="100%" stopColor="#475569"/>
+              <stop offset="0%" stopColor="rgba(255,255,255,.8)"/>
+              <stop offset="100%" style={{ stopColor: 'var(--color-secondary)' }}/>
             </radialGradient>
           </defs>
         </svg>
