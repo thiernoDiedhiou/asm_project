@@ -91,12 +91,12 @@ function FloatingCarVisual({ disponibles }: { disponibles: number }) {
           <line x1="338" y1="210" x2="360" y2="210" stroke="rgba(255,255,255,.28)" strokeWidth="1.5"/>
           <defs>
             <linearGradient id="vcb1" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style={{ stopColor: 'var(--color-secondary)', stopOpacity: 0.9 }}/>
-              <stop offset="100%" style={{ stopColor: 'var(--color-secondary)', stopOpacity: 0.7 }}/>
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95"/>
+              <stop offset="100%" stopColor="#e2e8f0" stopOpacity="0.9"/>
             </linearGradient>
             <linearGradient id="vcb2" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style={{ stopColor: 'var(--color-secondary)', stopOpacity: 0.95 }}/>
-              <stop offset="100%" style={{ stopColor: 'var(--color-secondary)', stopOpacity: 0.75 }}/>
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="1"/>
+              <stop offset="100%" stopColor="#f1f5f9" stopOpacity="0.95"/>
             </linearGradient>
             <linearGradient id="vcw" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#ffffff" stopOpacity="0.22"/>
@@ -111,12 +111,12 @@ function FloatingCarVisual({ disponibles }: { disponibles: number }) {
               <stop offset="100%" stopColor="transparent"/>
             </linearGradient>
             <radialGradient id="vcr">
-              <stop offset="0%" stopColor="rgba(255,255,255,.8)"/>
-              <stop offset="100%" style={{ stopColor: 'var(--color-secondary)' }}/>
+              <stop offset="0%" stopColor="#ffffff"/>
+              <stop offset="100%" stopColor="#cbd5e1"/>
             </radialGradient>
             <radialGradient id="vcr2">
-              <stop offset="0%" stopColor="rgba(255,255,255,.8)"/>
-              <stop offset="100%" style={{ stopColor: 'var(--color-secondary)' }}/>
+              <stop offset="0%" stopColor="#ffffff"/>
+              <stop offset="100%" stopColor="#cbd5e1"/>
             </radialGradient>
           </defs>
         </svg>
