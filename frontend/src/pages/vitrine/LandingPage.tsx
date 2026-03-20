@@ -12,10 +12,6 @@ import {
   CheckCircle2,
   Tag,
   CalendarClock,
-  Phone,
-  Mail,
-  MapPin,
-  ExternalLink,
 } from 'lucide-react';
 import { publicApi } from '../../services/api';
 
@@ -511,75 +507,6 @@ export function LandingPage() {
                 <p className="text-sm font-medium text-gray-700">{text}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== PLATEFORME SAAS ===== */}
-      <section className="py-16 bg-white border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <span className="inline-flex items-center gap-1.5 bg-asm-vert/10 text-asm-vert text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wider mb-3">
-              <Car className="h-3.5 w-3.5" />
-              Plateforme SaaS
-            </span>
-            <h2 className="text-2xl font-bold text-gray-900">InnoSoft Location</h2>
-            <p className="text-gray-500 text-sm mt-1 max-w-md mx-auto">
-              Plateforme SaaS de gestion de location de véhicules — simple, moderne et accessible.
-            </p>
-            <a
-              href="https://location.innosft.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 mt-3 text-asm-vert text-sm font-semibold hover:underline"
-            >
-              location.innosft.com <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-
-            {/* Carte Nous Contacter */}
-            <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6">
-              <h3 className="text-xs font-bold text-asm-or uppercase tracking-widest mb-4">Nous Contacter</h3>
-              <ul className="space-y-3 text-sm text-gray-600">
-                <li className="flex items-start gap-2.5">
-                  <MapPin className="h-4 w-4 text-asm-or mt-0.5 shrink-0" />
-                  <span>Cité Verte, VCN<br />Thiès, Sénégal</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Phone className="h-4 w-4 text-asm-or shrink-0" />
-                  <span>
-                    <a href="tel:+221769365811" className="hover:text-asm-vert transition-colors">+221 76 936 58 11</a>
-                    {' / '}
-                    <a href="tel:+221776484558" className="hover:text-asm-vert transition-colors">+221 77 648 45 58</a>
-                  </span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Mail className="h-4 w-4 text-asm-or shrink-0" />
-                  <a href="mailto:innosoftcreation@gmail.com" className="hover:text-asm-vert transition-colors">
-                    innosoftcreation@gmail.com
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Carte Développé par */}
-            <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6">
-              <h3 className="text-xs font-bold text-asm-or uppercase tracking-widest mb-4">Développé par</h3>
-              <p className="text-sm text-gray-600 leading-relaxed mb-4">
-                Cette plateforme est conçue et maintenue par <span className="font-semibold text-gray-800">InnoSoft</span>, agence spécialisée dans le développement de solutions numériques sur mesure.
-              </p>
-              <a
-                href="https://innosft.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-asm-vert text-sm font-semibold hover:underline"
-              >
-                innosft.com <ExternalLink className="h-3.5 w-3.5" />
-              </a>
-            </div>
-
           </div>
         </div>
       </section>
