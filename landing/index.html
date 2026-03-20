@@ -702,34 +702,9 @@ footer {
 ═══════════════════════════════════════════ */
 #logos, #agences {
   padding: 112px 0;
-  background: var(--ink);
+  background: #f1f5f9;
   position: relative; overflow: hidden;
 }
-/* Grille de fond subtile */
-#logos::before, #agences::before {
-  content: '';
-  position: absolute; inset: 0; pointer-events: none;
-  background-image:
-    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
-  background-size: 48px 48px;
-}
-/* Halo bleu centré */
-#logos::after, #agences::after {
-  content: '';
-  position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
-  width: 700px; height: 400px; pointer-events: none;
-  background: radial-gradient(ellipse, rgba(37,99,235,.18) 0%, transparent 70%);
-}
-
-/* En-tête de section adapté fond sombre */
-#logos .sec-eyebrow {
-  background: rgba(37,99,235,.25); color: #93c5fd;
-  border-color: rgba(96,165,250,.2);
-}
-#logos .sec-eyebrow-dot { background: #60a5fa; }
-#logos .sec-h2 { color: #fff; }
-#logos .sec-p  { color: #94a3b8; }
 
 /* Grille */
 .agences-grid {
@@ -741,15 +716,17 @@ footer {
 /* ── Carte ── */
 .agence-card {
   background: #fff;
+  border: 1px solid var(--line);
   border-radius: 18px;
   overflow: hidden;
   display: flex; flex-direction: column;
-  box-shadow: 0 8px 32px rgba(0,0,0,.35);
-  transition: box-shadow .25s, transform .22s;
+  box-shadow: 0 2px 12px rgba(15,23,42,.07);
+  transition: box-shadow .25s, transform .22s, border-color .22s;
 }
 .agence-card:hover {
-  box-shadow: 0 20px 56px rgba(0,0,0,.45);
-  transform: translateY(-5px);
+  border-color: rgba(37,99,235,.22);
+  box-shadow: 0 12px 36px rgba(37,99,235,.12), 0 4px 12px rgba(15,23,42,.07);
+  transform: translateY(-4px);
 }
 
 /* Bannière colorée avec logo centré */
@@ -1541,7 +1518,7 @@ footer {
   }
 
   function renderAgenceCard(a) {
-    const color = a.couleurPrimaire || '#2563eb';
+    const color = '#2563eb';
     const vitrineUrl = `https://${a.slug}.${PLATFORM_DOMAIN}`;
 
     // Corrige les URLs relatives des logos
