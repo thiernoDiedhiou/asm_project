@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShieldCheck, ShieldX, Car, User, Calendar, MapPin, Loader2, FileText } from 'lucide-react';
 import { publicApi } from '../../services/api';
-import { useTenant } from '../../contexts/TenantContext';
 
 interface ContratVerifie {
   id: string;
@@ -11,6 +10,7 @@ interface ContratVerifie {
   statut: string;
   dateSignature: string;
   createdAt: string;
+  tenant: { nomEntreprise: string };
   reservation: {
     dateDebut: string;
     dateFin: string;
@@ -43,7 +43,6 @@ function formatDate(dateStr: string) {
 
 export function ContratVerificationPage() {
   const { numero } = useParams<{ numero: string }>();
-  const { nomEntreprise } = useTenant();
   const [contrat, setContrat] = useState<ContratVerifie | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -83,7 +82,7 @@ export function ContratVerificationPage() {
             Le numéro <span className="font-mono font-semibold text-gray-800">{numero}</span> ne correspond à aucun contrat enregistré dans notre système.
           </p>
           <p className="text-xs text-gray-400">
-            Vérifiez que vous avez bien scanné le QR code du document officiel {nomEntreprise}.
+            Vérifiez que vous avez bien scanné le QR code du document officiel.
           </p>
           <Link to="/" className="inline-block mt-2 text-asm-vert hover:underline text-sm">
             ← Retour à l'accueil
@@ -107,7 +106,7 @@ export function ContratVerificationPage() {
           </div>
           <h1 className="text-xl font-bold text-gray-900">Contrat authentique</h1>
           <p className="text-sm text-gray-500">
-            Ce document a été émis par <span className="font-semibold text-asm-vert">{nomEntreprise}</span> et son authenticité est confirmée.
+            Ce document a été émis par <span className="font-semibold text-asm-vert">{contrat.tenant.nomEntreprise}</span> et son authenticité est confirmée.
           </p>
           <div className="flex items-center justify-center gap-3 pt-1">
             <span className="font-mono text-lg font-bold text-gray-900 tracking-wide">
@@ -171,13 +170,13 @@ export function ContratVerificationPage() {
         <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-700">
           <FileText className="h-4 w-4 flex-shrink-0 mt-0.5" />
           <p>
-            Cette page de vérification est fournie par {nomEntreprise} pour confirmer l'authenticité des documents de location. Les informations financières ne sont pas affichées pour des raisons de confidentialité.
+            Cette page de vérification est fournie par {contrat.tenant.nomEntreprise} pour confirmer l'authenticité des documents de location. Les informations financières ne sont pas affichées pour des raisons de confidentialité.
           </p>
         </div>
 
         <div className="text-center">
           <Link to="/" className="text-sm text-asm-vert hover:underline">
-            ← Retour à l'accueil {nomEntreprise}
+            ← Retour à l'accueil {contrat.tenant.nomEntreprise}
           </Link>
         </div>
 

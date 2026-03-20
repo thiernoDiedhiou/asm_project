@@ -305,6 +305,9 @@ export class PublicController {
           statut: true,
           dateSignature: true,
           createdAt: true,
+          tenant: {
+            select: { nomEntreprise: true },
+          },
           reservation: {
             select: {
               dateDebut: true,
