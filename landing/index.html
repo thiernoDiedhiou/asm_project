@@ -855,6 +855,7 @@ footer {
       <a href="#pricing">Tarifs</a>
       <a href="#testi">Avis</a>
       <a href="#logos">Agences</a>
+      <a href="#logos" style="color:var(--amber);font-weight:600">Louer un véhicule</a>
     </nav>
 
     <div class="nav-end">
@@ -895,6 +896,14 @@ footer {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
         <a href="#features" class="btn btn-stroke-white btn-lg">Voir la démo</a>
+      </div>
+
+      <div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1)">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Vous êtes un particulier ?</p>
+        <a href="#logos" class="btn btn-stroke-white btn-lg">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Trouver une agence près de vous
+        </a>
       </div>
 
       <div class="hero-trust">
@@ -989,8 +998,8 @@ footer {
   <div class="wrap">
     <div class="sec-head reveal">
       <div class="sec-eyebrow"><span class="sec-eyebrow-dot"></span>Nos agences partenaires</div>
-      <p class="logos-kicker">Ils font confiance à InnoSoft Location</p>
-      <p class="sec-p">Toutes ces agences utilisent InnoSoft Location. Consultez leurs informations et accédez directement à leur catalogue de véhicules disponibles.</p>
+      <h2 class="sec-h2">Trouvez une agence,<br/>réservez votre véhicule.</h2>
+      <p class="sec-p">Ces agences utilisent InnoSoft Location. Consultez leurs coordonnées et accédez directement à leurs véhicules disponibles à la location.</p>
     </div>
     <div class="agences-grid" id="agences-grid">
       <!-- Skeletons affichés pendant le chargement -->
@@ -1338,16 +1347,31 @@ footer {
 
   <div class="wrap cta-inner">
     <h2 class="cta-h2 reveal">
-      Votre agence mérite<br/>
-      <span>mieux qu'un tableur.</span>
+      Location de véhicules,<br/>
+      <span>simple et rapide.</span>
     </h2>
-    <p class="cta-sub reveal">Rejoignez les agences qui ont modernisé leur gestion avec InnoSoft Location.</p>
-    <div class="cta-btns reveal">
-      <a href="contact.html" class="btn btn-amber btn-xl">
-        Créer mon agence — c'est gratuit
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-      <a href="mailto:contact@innosft.com" class="btn btn-stroke-white btn-lg">Parler à un expert</a>
+    <p class="cta-sub reveal">Vous êtes une agence ou un particulier — InnoSoft Location a la solution pour vous.</p>
+
+    <div class="cta-btns reveal" style="flex-wrap:wrap;gap:16px;justify-content:center">
+      <!-- B2C -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+        <span style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5)">Je veux louer</span>
+        <a href="#logos" class="btn btn-amber btn-xl">
+          Trouver une agence
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </a>
+      </div>
+
+      <div style="width:1px;background:rgba(255,255,255,.15);align-self:stretch"></div>
+
+      <!-- B2B -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+        <span style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5)">J'ai une agence</span>
+        <a href="contact.html" class="btn btn-stroke-white btn-xl">
+          Créer mon espace — gratuit
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
     </div>
     <div class="cta-trust reveal">
       <div class="cta-trust-item">
