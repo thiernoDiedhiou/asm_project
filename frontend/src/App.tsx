@@ -5,6 +5,7 @@ import { useAuthStore } from './store/authStore';
 import { authApi } from './services/api';
 import { AppLayout } from './components/layout/AppLayout';
 import { VitrineLayout } from './layouts/VitrineLayout';
+import { ContratVerifLayout } from './layouts/ContratVerifLayout';
 
 // Vitrine publique
 import { LandingPage } from './pages/vitrine/LandingPage';
@@ -124,6 +125,10 @@ export function App() {
           <Route path="/flotte" element={<FlottePage />} />
           <Route path="/reserver" element={<DemandeReservationPage />} />
           <Route path="/tarifs" element={<FlottePage />} />
+        </Route>
+
+        {/* ===== Vérification de contrat (navbar minimale) ===== */}
+        <Route element={<ContratVerifLayout />}>
           <Route path="/contrats/verifier/:numero" element={<ContratVerificationPage />} />
         </Route>
 
