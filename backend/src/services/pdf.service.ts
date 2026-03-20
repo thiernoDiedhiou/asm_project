@@ -782,6 +782,7 @@ export class PdfService {
       couleurPrimaire: s.couleurPrimaire ?? '#1B5E20',
       couleurSecondaire: s.couleurSecondaire ?? '#F9A825',
       logo: s.logo ? this.logoToBase64(s.logo) : null,
+      slug: s.slug,
     };
     let browser;
     try {
