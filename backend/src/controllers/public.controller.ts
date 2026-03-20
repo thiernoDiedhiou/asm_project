@@ -306,7 +306,15 @@ export class PublicController {
           dateSignature: true,
           createdAt: true,
           tenant: {
-            select: { nomEntreprise: true },
+            select: {
+              nomEntreprise: true,
+              slogan: true,
+              logo: true,
+              couleurPrimaire: true,
+              parametre: {
+                select: { telephone: true, email: true, adresse: true, ville: true },
+              },
+            },
           },
           reservation: {
             select: {

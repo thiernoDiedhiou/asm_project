@@ -124,8 +124,10 @@ export function App() {
           <Route path="/flotte" element={<FlottePage />} />
           <Route path="/reserver" element={<DemandeReservationPage />} />
           <Route path="/tarifs" element={<FlottePage />} />
-          <Route path="/contrats/verifier/:numero" element={<ContratVerificationPage />} />
         </Route>
+
+        {/* ===== Vérification contrat — layout autonome avec infos du tenant du contrat ===== */}
+        <Route path="/contrats/verifier/:numero" element={<ContratVerificationPage />} />
 
         {/* ===== Auth ===== */}
         <Route path="/login" element={<LoginPage />} />
