@@ -10,18 +10,7 @@ interface ContratVerifie {
   statut: string;
   dateSignature: string;
   createdAt: string;
-  tenant: {
-    nomEntreprise: string;
-    slogan: string | null;
-    logo: string | null;
-    couleurPrimaire: string | null;
-    parametre: {
-      telephone: string | null;
-      email: string | null;
-      adresse: string | null;
-      ville: string | null;
-    } | null;
-  };
+  tenant: { nomEntreprise: string };
   reservation: {
     dateDebut: string;
     dateFin: string;
@@ -103,7 +92,6 @@ export function ContratVerificationPage() {
     );
   }
 
-  const t = contrat.tenant;
   const r = contrat.reservation;
   const statutColor = STATUT_COLORS[contrat.statut] || 'text-gray-700 bg-gray-50 border-gray-200';
 
@@ -118,7 +106,7 @@ export function ContratVerificationPage() {
           </div>
           <h1 className="text-xl font-bold text-gray-900">Contrat authentique</h1>
           <p className="text-sm text-gray-500">
-            Ce document a été émis par <span className="font-semibold text-asm-vert">{t.nomEntreprise}</span> et son authenticité est confirmée.
+            Ce document a été émis par <span className="font-semibold text-asm-vert">{contrat.tenant.nomEntreprise}</span> et son authenticité est confirmée.
           </p>
           <div className="flex items-center justify-center gap-3 pt-1">
             <span className="font-mono text-lg font-bold text-gray-900 tracking-wide">
@@ -182,13 +170,13 @@ export function ContratVerificationPage() {
         <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-700">
           <FileText className="h-4 w-4 flex-shrink-0 mt-0.5" />
           <p>
-            Cette page de vérification est fournie par <strong>{t.nomEntreprise}</strong> pour confirmer l'authenticité des documents de location. Les informations financières ne sont pas affichées pour des raisons de confidentialité.
+            Cette page de vérification est fournie par {contrat.tenant.nomEntreprise} pour confirmer l'authenticité des documents de location. Les informations financières ne sont pas affichées pour des raisons de confidentialité.
           </p>
         </div>
 
         <div className="text-center">
           <Link to="/" className="text-sm text-asm-vert hover:underline">
-            ← Retour à l'accueil {t.nomEntreprise}
+            ← Retour à l'accueil {contrat.tenant.nomEntreprise}
           </Link>
         </div>
 

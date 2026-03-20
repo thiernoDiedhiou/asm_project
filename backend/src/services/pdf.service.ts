@@ -19,7 +19,6 @@ interface EntrepriseInfo {
   couleurPrimaire: string;
   couleurSecondaire: string;
   logo: string | null;
-  slug: string;
 }
 
 interface ContratData {
@@ -93,14 +92,7 @@ export class PdfService {
    */
   private async generateContratHtml(data: ContratData, entreprise: EntrepriseInfo): Promise<string> {
     // Génération du QR code de vérification
-    // En production : URL propre au tenant → https://{slug}.{APP_DOMAIN}/contrats/verifier/{numero}
-    // En dev        : FRONTEND_URL ou localhost:3000
-    const appDomain = process.env.APP_DOMAIN; // ex: "location.innosft.com"
-    const isProduction = process.env.NODE_ENV === 'production';
-    const baseUrl = isProduction && appDomain
-      ? `https://${entreprise.slug}.${appDomain}`
-      : (process.env.FRONTEND_URL || 'http://localhost:3000');
-    const verificationUrl = `${baseUrl}/contrats/verifier/${data.numeroContrat}`;
+    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/contrats/verifier/${data.numeroContrat}`;
     const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
       width: 100,
       margin: 1,
@@ -782,7 +774,6 @@ export class PdfService {
       couleurPrimaire: s.couleurPrimaire ?? '#1B5E20',
       couleurSecondaire: s.couleurSecondaire ?? '#F9A825',
       logo: s.logo ? this.logoToBase64(s.logo) : null,
-      slug: s.slug,
     };
     let browser;
     try {
@@ -846,7 +837,6 @@ export class PdfService {
         couleurPrimaire: s.couleurPrimaire ?? '#1B5E20',
         couleurSecondaire: s.couleurSecondaire ?? '#F9A825',
         logo: s.logo ? this.logoToBase64(s.logo) : null,
-        slug: s.slug,
       };
       const page = await browser.newPage();
       const html = await this.generateContratHtml(data, entreprise);
