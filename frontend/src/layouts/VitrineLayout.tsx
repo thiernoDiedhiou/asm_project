@@ -16,7 +16,6 @@ interface Settings {
   nomEntreprise: string;
   slogan: string;
   telephone: string;
-  telephone2?: string;
   email: string;
   adresse: string;
   ville: string;
@@ -31,12 +30,11 @@ interface Settings {
 
 const DEFAULTS: Settings = {
   nomEntreprise: 'InnoSoft Location',
-  slogan: 'Plateforme SaaS de gestion de location de véhicules — simple, moderne et accessible.',
-  telephone: '+221 76 936 58 11',
-  telephone2: '+221 77 648 45 58',
-  email: 'innosoftcreation@gmail.com',
-  adresse: 'Cité Verte, VCN',
-  ville: 'Thiès, Sénégal',
+  slogan: 'Location de Véhicules',
+  telephone: '+221 33 820 00 00',
+  email: 'contact@asm-location.sn',
+  adresse: 'Grand Yoff — Zone de Captage',
+  ville: 'Dakar, Sénégal',
   heuresLunVen: '08h00 – 18h00',
   heuresSamedi: '09h00 – 15h00',
   noteTransfert: 'Transfert aéroport disponible 24h/24 sur réservation',
@@ -248,17 +246,10 @@ export function VitrineLayout() {
                 </div>
                 <span className="font-bold text-lg">{settings.nomEntreprise}</span>
               </div>
-              <p className="text-white/70 text-sm leading-relaxed mb-3">
-                {settings.slogan}
+              <p className="text-white/70 text-sm leading-relaxed">
+                Votre partenaire de confiance pour la location de véhicules{settings.ville ? ` à ${settings.ville}` : ''}.
+                Flotte récente, tarifs transparents, service disponible 24h/24.
               </p>
-              <a
-                href="https://location.innosft.com/"
-                className="text-asm-or text-xs hover:text-yellow-300 transition-colors"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                location.innosft.com
-              </a>
             </div>
 
             {/* Colonne 2 — Contact */}
@@ -269,21 +260,11 @@ export function VitrineLayout() {
                   <MapPin className="h-4 w-4 text-asm-or mt-0.5 flex-shrink-0" />
                   <span>{settings.adresse}<br />{settings.ville}</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <Phone className="h-4 w-4 text-asm-or flex-shrink-0 mt-0.5" />
-                  <span>
-                    <a href={telHref} className="hover:text-white transition-colors block">
-                      {settings.telephone}
-                    </a>
-                    {settings.telephone2 && (
-                      <a
-                        href={`tel:${settings.telephone2.replace(/\s/g, '')}`}
-                        className="hover:text-white transition-colors block"
-                      >
-                        {settings.telephone2}
-                      </a>
-                    )}
-                  </span>
+                <li className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-asm-or flex-shrink-0" />
+                  <a href={telHref} className="hover:text-white transition-colors">
+                    {settings.telephone}
+                  </a>
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-asm-or flex-shrink-0" />
@@ -314,20 +295,8 @@ export function VitrineLayout() {
           </div>
 
           {/* Bas de footer */}
-          <div className="border-t border-white/20 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/50">
+          <div className="border-t border-white/20 mt-8 pt-6 text-center text-xs text-white/50">
             <span>© {new Date().getFullYear()} {settings.nomEntreprise}. Tous droits réservés.</span>
-            <span className="text-center">
-              Développé par{' '}
-              <a
-                href="https://innosft.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-asm-or hover:text-yellow-300 transition-colors font-medium"
-              >
-                InnoSoft
-              </a>
-              {' '}— solutions numériques sur mesure
-            </span>
           </div>
         </div>
       </footer>
