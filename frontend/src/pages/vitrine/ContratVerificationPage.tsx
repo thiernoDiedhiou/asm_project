@@ -10,7 +10,7 @@ interface ContratVerifie {
   statut: string;
   dateSignature: string;
   createdAt: string;
-  tenant: { nomEntreprise: string };
+  tenant: { nomEntreprise: string; slug: string; domaine?: string | null };
   reservation: {
     dateDebut: string;
     dateFin: string;
@@ -94,6 +94,9 @@ export function ContratVerificationPage() {
 
   const r = contrat.reservation;
   const statutColor = STATUT_COLORS[contrat.statut] || 'text-gray-700 bg-gray-50 border-gray-200';
+  const vitrineUrl = contrat.tenant.domaine
+    ? `https://${contrat.tenant.domaine}/`
+    : `https://${contrat.tenant.slug}.location.innosft.com/`;
 
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-start px-4 py-12">
@@ -170,14 +173,14 @@ export function ContratVerificationPage() {
         <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-700">
           <FileText className="h-4 w-4 flex-shrink-0 mt-0.5" />
           <p>
-            Cette page de vérification est fournie par {contrat.tenant.nomEntreprise} pour confirmer l'authenticité des documents de location. Les informations financières ne sont pas affichées pour des raisons de confidentialité.
+            Cette page de vérification est fournie par <span className="font-semibold">InnoSoft Location</span> pour confirmer l'authenticité des documents émis par {contrat.tenant.nomEntreprise}. Les informations financières ne sont pas affichées pour des raisons de confidentialité.
           </p>
         </div>
 
         <div className="text-center">
-          <Link to="/" className="text-sm text-asm-vert hover:underline">
+          <a href={vitrineUrl} className="text-sm text-asm-vert hover:underline">
             ← Retour à l'accueil {contrat.tenant.nomEntreprise}
-          </Link>
+          </a>
         </div>
 
       </div>
