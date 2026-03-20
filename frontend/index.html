@@ -4,11 +4,255 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="InnoSoft Location - Gestion de location de véhicules à Dakar, Sénégal" />
-    <title>InnoSoft Location - Location de Véhicules</title>
+    <meta name="description" content="InnoSoft Location — Plateforme SaaS de gestion de location de véhicules, simple, moderne et accessible." />
+    <meta name="keywords" content="location véhicules, SaaS, gestion, Sénégal, InnoSoft" />
+    <title>InnoSoft Location — Plateforme SaaS de Location de Véhicules</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f8fafc;
+        color: #1e293b;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Quand React monte, #root prend tout et #static-shell est caché */
+      #root:not(:empty) ~ #static-shell,
+      #root:not(:empty) + * { display: none !important; }
+      #root:not(:empty) { min-height: 100vh; }
+
+      #static-shell {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      /* ── NAVBAR ── */
+      .nav {
+        background: #fff;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0 1.5rem;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      }
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+      .nav-icon {
+        width: 36px; height: 36px;
+        background: #1a6e24;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+      }
+      .nav-icon svg { color: #f5a623; }
+      .nav-name { font-weight: 700; font-size: 1rem; color: #1a6e24; display: block; line-height: 1.2; }
+      .nav-slogan { font-size: .75rem; color: #64748b; display: block; }
+
+      /* ── HERO ── */
+      .hero {
+        background: linear-gradient(135deg, #1a6e24 0%, #145a1d 50%, #0f4516 100%);
+        color: #fff;
+        padding: 5rem 1.5rem 4rem;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .hero-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(245,166,35,.15);
+        border: 1px solid rgba(245,166,35,.35);
+        color: #f5a623;
+        font-size: .75rem; font-weight: 600;
+        padding: 4px 12px; border-radius: 999px;
+        margin-bottom: 1.5rem;
+        letter-spacing: .04em; text-transform: uppercase;
+      }
+      .hero h1 { font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 800; margin-bottom: 1rem; }
+      .hero p {
+        font-size: 1.05rem; color: rgba(255,255,255,.80);
+        max-width: 520px; margin: 0 auto 2rem; line-height: 1.65;
+      }
+      .hero-url {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(255,255,255,.1);
+        border: 1px solid rgba(255,255,255,.2);
+        color: #fff; text-decoration: none;
+        padding: 8px 20px; border-radius: 8px;
+        font-size: .875rem; font-weight: 600;
+        transition: background .2s;
+      }
+      .hero-url:hover { background: rgba(255,255,255,.18); }
+
+      /* ── MAIN CONTENT ── */
+      .content { flex: 1; padding: 3rem 1.5rem; }
+      .container { max-width: 900px; margin: 0 auto; }
+
+      /* ── CARDS GRID ── */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 1.75rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,.05);
+      }
+      .card-title {
+        font-size: .7rem; font-weight: 700; color: #f5a623;
+        text-transform: uppercase; letter-spacing: .08em;
+        margin-bottom: 1rem;
+      }
+      .info-row {
+        display: flex; align-items: flex-start; gap: 10px;
+        font-size: .875rem; color: #475569;
+        margin-bottom: .75rem; line-height: 1.5;
+      }
+      .info-row:last-child { margin-bottom: 0; }
+      .info-icon {
+        width: 16px; height: 16px;
+        color: #f5a623; flex-shrink: 0; margin-top: 1px;
+      }
+      .info-row a { color: #1a6e24; text-decoration: none; }
+      .info-row a:hover { text-decoration: underline; }
+
+      .dev-desc {
+        font-size: .875rem; color: #475569; line-height: 1.6; margin-bottom: 1rem;
+      }
+      .dev-link {
+        display: inline-flex; align-items: center; gap: 5px;
+        color: #1a6e24; font-size: .875rem; font-weight: 600;
+        text-decoration: none;
+      }
+      .dev-link:hover { text-decoration: underline; }
+
+      /* ── FOOTER ── */
+      footer {
+        background: #1a6e24;
+        color: rgba(255,255,255,.6);
+        text-align: center;
+        font-size: .75rem;
+        padding: 1.25rem;
+        flex-shrink: 0;
+      }
+      footer a { color: #f5a623; text-decoration: none; }
+      footer a:hover { text-decoration: underline; }
+
+      @media (max-width: 480px) {
+        .hero { padding: 3rem 1rem 2.5rem; }
+        .content { padding: 2rem 1rem; }
+      }
+    </style>
   </head>
   <body>
+
+    <!-- React monte ici -->
     <div id="root"></div>
+
+    <!-- Page statique — visible tant que React n'est pas chargé ou si JS désactivé -->
+    <div id="static-shell">
+
+      <!-- Navbar -->
+      <nav class="nav">
+        <a href="https://location.innosft.com/" class="nav-brand">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+          </span>
+          <span>
+            <span class="nav-name">InnoSoft Location</span>
+            <span class="nav-slogan">Location de Véhicules</span>
+          </span>
+        </a>
+      </nav>
+
+      <!-- Hero -->
+      <section class="hero">
+        <div class="hero-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          Plateforme SaaS
+        </div>
+        <h1>InnoSoft Location</h1>
+        <p>Plateforme SaaS de gestion de location de véhicules — simple, moderne et accessible.</p>
+        <a href="https://location.innosft.com/" class="hero-url">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          location.innosft.com
+        </a>
+      </section>
+
+      <!-- Cartes info -->
+      <section class="content">
+        <div class="container">
+          <div class="grid">
+
+            <!-- Contact -->
+            <div class="card">
+              <div class="card-title">Nous Contacter</div>
+
+              <div class="info-row">
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span>Cité Verte, VCN<br>Thiès, Sénégal</span>
+              </div>
+
+              <div class="info-row">
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.44 2 2 0 0 1 3.59 1.25h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6.13 6.13l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <span>
+                  <a href="tel:+221769365811">+221 76 936 58 11</a> /
+                  <a href="tel:+221776484558">+221 77 648 45 58</a>
+                </span>
+              </div>
+
+              <div class="info-row">
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                </svg>
+                <a href="mailto:innosoftcreation@gmail.com">innosoftcreation@gmail.com</a>
+              </div>
+            </div>
+
+            <!-- Développé par -->
+            <div class="card">
+              <div class="card-title">Développé par</div>
+              <p class="dev-desc">
+                Cette plateforme est conçue et maintenue par <strong>InnoSoft</strong>, agence spécialisée dans le développement de solutions numériques sur mesure.
+              </p>
+              <a href="https://innosft.com/" target="_blank" rel="noopener noreferrer" class="dev-link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                innosft.com
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer>
+        © <script>document.write(new Date().getFullYear())</script> <a href="https://innosft.com/" target="_blank" rel="noopener noreferrer">InnoSoft</a> — Tous droits réservés.
+      </footer>
+
+    </div>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
