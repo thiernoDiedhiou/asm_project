@@ -39,6 +39,10 @@ export async function resolveTenant(req: Request, res: Response, next: NextFunct
           actif: true,
         },
       });
+      // Fallback production : si domaine/slug inconnu (ex: sous-domaine admin), prendre le premier tenant actif
+      if (!tenant) {
+        tenant = await prisma.tenant.findFirst({ where: { actif: true }, orderBy: { createdAt: 'asc' } });
+      }
     }
 
     if (!tenant) {
