@@ -55,7 +55,10 @@ export function ContratVerificationPage() {
         if (res.data?.data) setContrat(res.data.data);
         else setNotFound(true);
       })
-      .catch(() => setNotFound(true))
+      .catch((err) => {
+        console.error('[ContratVerification] Erreur API:', err?.response?.status, err?.response?.data);
+        setNotFound(true);
+      })
       .finally(() => setLoading(false));
   }, [numero]);
 

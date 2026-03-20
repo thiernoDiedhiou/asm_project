@@ -149,6 +149,8 @@ app.use('/api/tenants', tenantRoutes);
 // Routes plateforme — sans résolution tenant (appelées depuis la landing page)
 app.get('/api/public/agences', publicController.getAgencesPubliques.bind(publicController));
 app.post('/api/public/contact', publicController.sendContactForm.bind(publicController));
+// Vérification d'authenticité d'un contrat via QR code — cross-tenant, aucun contexte tenant requis
+app.get('/api/public/contrats/verifier/:numero', publicController.verifierContrat.bind(publicController));
 
 // Toutes les autres routes API sont scoped au tenant résolu depuis le sous-domaine/domaine
 app.use('/api/auth', resolveTenant, authRoutes);
