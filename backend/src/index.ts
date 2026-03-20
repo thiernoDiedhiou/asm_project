@@ -102,21 +102,26 @@ const globalLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Rate limiting strict pour l'authentification (5 tentatives/15min)
+// Rate limiting strict pour l'authentification (5 tentatives/15min par email)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
+  keyGenerator: (req) => {
+    // Clé basée sur l'email pour ne bloquer que le compte ciblé, pas toute l'IP
+    const email = req.body?.email?.toLowerCase?.() ?? '';
+    return email || req.ip;
+  },
   message: {
     success: false,
     message: 'Trop de tentatives de connexion, réessayez dans 15 minutes',
   },
 });
 
+// Parser JSON — doit être avant les rate limiters pour que req.body soit disponible
+app.use(express.json({ limit: '10mb' }));
+
 app.use('/api/', globalLimiter);
 app.use('/api/auth/login', authLimiter);
-
-// Parser JSON
-app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Sanitisation anti-XSS
