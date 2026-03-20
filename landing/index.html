@@ -700,56 +700,94 @@ footer {
 /* ═══════════════════════════════════════════
    AGENCES
 ═══════════════════════════════════════════ */
-#agences { padding: 104px 0; background: var(--wash); }
+#logos, #agences {
+  padding: 110px 0;
+  background: linear-gradient(180deg, #eef2ff 0%, var(--wash) 60%);
+  position: relative; overflow: hidden;
+}
+#logos::before, #agences::before {
+  content: '';
+  position: absolute;
+  top: -180px; left: 50%; transform: translateX(-50%);
+  width: 900px; height: 600px;
+  background: radial-gradient(ellipse, rgba(37,99,235,.07) 0%, transparent 70%);
+  pointer-events: none;
+}
 
 .agences-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 24px;
 }
 
 .agence-card {
-  background: #fff; border: 1px solid var(--line);
-  border-radius: var(--r-xl); overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: visible;
   display: flex; flex-direction: column;
-  transition: border-color .22s, box-shadow .22s, transform .22s;
+  transition: border-color .25s, box-shadow .3s, transform .25s;
+  position: relative;
 }
 .agence-card:hover {
-  border-color: rgba(37,99,235,.22);
-  box-shadow: var(--s2);
-  transform: translateY(-2px);
+  border-color: rgba(37,99,235,.28);
+  box-shadow: 0 20px 56px rgba(37,99,235,.1), 0 4px 16px rgba(0,0,0,.07);
+  transform: translateY(-5px);
 }
 
-/* Bandeau coloré en haut */
+/* Bandeau coloré en haut — version haute avec pattern */
 .agence-banner {
-  height: 6px;
-  background: var(--blue);
+  height: 76px;
+  border-radius: 19px 19px 0 0;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.agence-banner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.18) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+.agence-banner::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 28px;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,.08));
 }
 
-.agence-body { padding: 22px; flex: 1; display: flex; flex-direction: column; gap: 14px; }
-
-/* Logo / Initiales */
-.agence-head { display: flex; align-items: center; gap: 13px; }
+/* Logo flottant qui déborde sur le banner */
+.agence-logo-wrap {
+  margin: -30px 0 0 20px;
+  width: fit-content;
+  position: relative; z-index: 2;
+}
 .agence-logo {
-  width: 48px; height: 48px; border-radius: 12px;
-  background: var(--blue-xl); border: 1px solid var(--line);
+  width: 60px; height: 60px;
+  border-radius: 15px;
+  background: var(--blue-xl);
+  border: 3px solid #fff;
+  box-shadow: 0 6px 20px rgba(0,0,0,.14);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; overflow: hidden;
 }
 .agence-logo img  { width: 100%; height: 100%; object-fit: cover; }
 .agence-logo span {
   font-family: 'Sora', sans-serif;
-  font-size: 17px; font-weight: 800; color: var(--blue);
+  font-size: 20px; font-weight: 800; color: var(--blue);
 }
-.agence-name  { font-size: 15.5px; font-weight: 700; color: var(--ink); line-height: 1.3; }
-.agence-activ { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.agence-body { padding: 12px 20px 18px; flex: 1; display: flex; flex-direction: column; gap: 13px; }
+
+.agence-name  { font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.agence-activ { font-size: 12px; color: var(--muted); margin-top: 3px; }
 
 /* Infos contact */
 .agence-infos { display: flex; flex-direction: column; gap: 7px; }
 .agence-info  {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 13px; color: var(--ink-3);
+  display: flex; align-items: center; gap: 9px;
+  font-size: 12.5px; color: var(--ink-3);
+  line-height: 1.4;
 }
 .agence-info svg { color: var(--muted); flex-shrink: 0; }
 
@@ -758,31 +796,45 @@ footer {
   display: inline-flex; align-items: center; gap: 5px;
   font-size: 11.5px; font-weight: 600;
   background: var(--blue-xl); color: var(--blue);
-  padding: 3px 10px; border-radius: 100px;
+  padding: 4px 12px; border-radius: 100px;
   align-self: flex-start;
+  border: 1px solid rgba(37,99,235,.12);
 }
 
-/* Footer carte */
+/* Footer carte — bouton pleine largeur */
 .agence-footer {
-  padding: 14px 22px;
+  padding: 14px 16px 16px;
   border-top: 1px solid var(--line);
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; flex-direction: column; gap: 10px;
   flex-shrink: 0;
 }
-.agence-heures { font-size: 11.5px; color: var(--muted); }
+.agence-heures {
+  font-size: 11.5px; color: var(--muted);
+  display: flex; align-items: center; gap: 5px;
+  padding: 0 4px;
+}
+.agence-cta {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 11px 18px;
+  border-radius: 11px;
+  font-size: 13.5px; font-weight: 600; color: #fff;
+  text-decoration: none;
+  transition: opacity .2s, transform .15s;
+}
+.agence-cta:hover { opacity: .86; transform: translateY(-1px); }
 
 /* Skeleton loader */
-.agence-skeleton { animation: shimmer 1.4s ease-in-out infinite; }
+.agence-skeleton { animation: shimmer 1.4s ease-in-out infinite; overflow: hidden; border-radius: 20px; }
 .agence-skeleton .sk { background: var(--line); border-radius: 6px; }
 @keyframes shimmer {
   0%, 100% { opacity: 1; }
-  50% { opacity: .45; }
+  50% { opacity: .4; }
 }
 
 /* Empty / Error state */
 .agences-empty {
   grid-column: 1 / -1; text-align: center;
-  padding: 60px 24px; color: var(--muted);
+  padding: 72px 24px; color: var(--muted);
   font-size: 15px;
 }
 .agences-empty p { margin-top: 8px; font-size: 13px; color: var(--soft); }
@@ -791,7 +843,7 @@ footer {
    RESPONSIVE
 ═══════════════════════════════════════════ */
 @media (max-width: 1024px) {
-  .agences-grid { grid-template-columns: 1fr 1fr; }
+  .agences-grid { grid-template-columns: 1fr 1fr; gap: 18px; }
   .hero-inner {
     grid-template-columns: 1fr;
     gap: 0;
@@ -1003,67 +1055,64 @@ footer {
     </div>
     <div class="agences-grid" id="agences-grid">
       <!-- Skeletons affichés pendant le chargement -->
-      <div class="agence-card agence-skeleton">
+      <div class="agence-card agence-skeleton" style="overflow:hidden">
         <div class="agence-banner" style="background:var(--line)"></div>
+        <div style="margin:-30px 0 0 20px;width:60px;height:60px;border-radius:15px;background:var(--line);border:3px solid #fff;box-shadow:0 6px 20px rgba(0,0,0,.08)"></div>
         <div class="agence-body">
-          <div class="agence-head">
-            <div class="agence-logo"><span class="sk" style="width:48px;height:48px;border-radius:10px"></span></div>
-            <div style="flex:1">
-              <div class="sk" style="height:14px;width:70%;margin-bottom:6px"></div>
-              <div class="sk" style="height:11px;width:45%"></div>
-            </div>
+          <div>
+            <div class="sk" style="height:15px;width:68%;margin-bottom:7px"></div>
+            <div class="sk" style="height:11px;width:44%"></div>
           </div>
+          <div class="sk" style="height:22px;width:90px;border-radius:100px"></div>
           <div class="agence-infos">
             <div class="sk" style="height:12px;width:80%"></div>
             <div class="sk" style="height:12px;width:60%"></div>
             <div class="sk" style="height:12px;width:50%"></div>
           </div>
         </div>
-        <div class="agence-footer" style="border-top:1px solid var(--line)">
-          <div class="sk" style="height:11px;width:40%"></div>
-          <div class="sk" style="height:30px;width:100px;border-radius:100px"></div>
+        <div class="agence-footer">
+          <div class="sk" style="height:11px;width:42%"></div>
+          <div class="sk" style="height:40px;border-radius:11px"></div>
         </div>
       </div>
-      <div class="agence-card agence-skeleton" style="animation-delay:.15s">
+      <div class="agence-card agence-skeleton" style="overflow:hidden;animation-delay:.15s">
         <div class="agence-banner" style="background:var(--line)"></div>
+        <div style="margin:-30px 0 0 20px;width:60px;height:60px;border-radius:15px;background:var(--line);border:3px solid #fff;box-shadow:0 6px 20px rgba(0,0,0,.08)"></div>
         <div class="agence-body">
-          <div class="agence-head">
-            <div class="agence-logo"><span class="sk" style="width:48px;height:48px;border-radius:10px"></span></div>
-            <div style="flex:1">
-              <div class="sk" style="height:14px;width:65%;margin-bottom:6px"></div>
-              <div class="sk" style="height:11px;width:40%"></div>
-            </div>
+          <div>
+            <div class="sk" style="height:15px;width:58%;margin-bottom:7px"></div>
+            <div class="sk" style="height:11px;width:38%"></div>
           </div>
+          <div class="sk" style="height:22px;width:80px;border-radius:100px"></div>
           <div class="agence-infos">
             <div class="sk" style="height:12px;width:75%"></div>
             <div class="sk" style="height:12px;width:55%"></div>
             <div class="sk" style="height:12px;width:45%"></div>
           </div>
         </div>
-        <div class="agence-footer" style="border-top:1px solid var(--line)">
-          <div class="sk" style="height:11px;width:35%"></div>
-          <div class="sk" style="height:30px;width:100px;border-radius:100px"></div>
+        <div class="agence-footer">
+          <div class="sk" style="height:11px;width:36%"></div>
+          <div class="sk" style="height:40px;border-radius:11px"></div>
         </div>
       </div>
-      <div class="agence-card agence-skeleton" style="animation-delay:.3s">
+      <div class="agence-card agence-skeleton" style="overflow:hidden;animation-delay:.3s">
         <div class="agence-banner" style="background:var(--line)"></div>
+        <div style="margin:-30px 0 0 20px;width:60px;height:60px;border-radius:15px;background:var(--line);border:3px solid #fff;box-shadow:0 6px 20px rgba(0,0,0,.08)"></div>
         <div class="agence-body">
-          <div class="agence-head">
-            <div class="agence-logo"><span class="sk" style="width:48px;height:48px;border-radius:10px"></span></div>
-            <div style="flex:1">
-              <div class="sk" style="height:14px;width:75%;margin-bottom:6px"></div>
-              <div class="sk" style="height:11px;width:50%"></div>
-            </div>
+          <div>
+            <div class="sk" style="height:15px;width:72%;margin-bottom:7px"></div>
+            <div class="sk" style="height:11px;width:48%"></div>
           </div>
+          <div class="sk" style="height:22px;width:100px;border-radius:100px"></div>
           <div class="agence-infos">
             <div class="sk" style="height:12px;width:85%"></div>
-            <div class="sk" style="height:12px;width:60%"></div>
-            <div class="sk" style="height:12px;width:40%"></div>
+            <div class="sk" style="height:12px;width:62%"></div>
+            <div class="sk" style="height:12px;width:42%"></div>
           </div>
         </div>
-        <div class="agence-footer" style="border-top:1px solid var(--line)">
-          <div class="sk" style="height:11px;width:38%"></div>
-          <div class="sk" style="height:30px;width:100px;border-radius:100px"></div>
+        <div class="agence-footer">
+          <div class="sk" style="height:11px;width:40%"></div>
+          <div class="sk" style="height:40px;border-radius:11px"></div>
         </div>
       </div>
     </div>
@@ -1511,23 +1560,32 @@ footer {
         </div>` : '';
 
     const heuresHtml = a.heures
-      ? `<span class="agence-heures">🕐 ${a.heures}</span>`
+      ? `<div class="agence-heures">
+           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+           ${a.heures}
+         </div>`
       : '';
+
+    const villeHtml = a.ville
+      ? `<div class="agence-ville">
+           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+           ${a.ville}
+         </div>` : '';
 
     return `
       <div class="agence-card reveal">
-        <div class="agence-banner" style="background:${color}"></div>
-        <div class="agence-body">
-          <div class="agence-head">
-            <div class="agence-logo" style="background:${color}18;border-color:${color}22">
-              ${logoHtml}
-            </div>
-            <div>
-              <div class="agence-name">${a.nomEntreprise}</div>
-              <div class="agence-activ">${a.activite || a.slogan || 'Location de véhicules'}</div>
-            </div>
+        <div class="agence-banner" style="background:linear-gradient(135deg,${color},${color}bb)"></div>
+        <div class="agence-logo-wrap">
+          <div class="agence-logo" style="background:${color}18;border-color:${color}22">
+            ${logoHtml}
           </div>
-          ${a.ville ? `<div class="agence-ville">📍 ${a.ville}</div>` : ''}
+        </div>
+        <div class="agence-body">
+          <div>
+            <div class="agence-name">${a.nomEntreprise}</div>
+            <div class="agence-activ">${a.activite || a.slogan || 'Location de véhicules'}</div>
+          </div>
+          ${villeHtml}
           <div class="agence-infos">
             ${adresseHtml}
             ${telHtml}
@@ -1537,9 +1595,9 @@ footer {
         <div class="agence-footer">
           ${heuresHtml}
           <a href="${vitrineUrl}" target="_blank" rel="noopener"
-             class="btn btn-blue btn-sm" style="background:${color};box-shadow:0 2px 10px ${color}44">
+             class="agence-cta" style="background:${color};box-shadow:0 4px 14px ${color}44">
             Voir la flotte
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
         </div>
       </div>`;
