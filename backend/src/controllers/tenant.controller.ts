@@ -96,6 +96,15 @@ export class TenantController {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
     }
   }
+
+  async deleteTenant(req: Request, res: Response): Promise<void> {
+    try {
+      await tenantService.deleteTenant(req.params.id);
+      sendSuccess(res, null, 'Tenant et toutes ses données supprimés définitivement');
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
+    }
+  }
 }
 
 export const tenantController = new TenantController();

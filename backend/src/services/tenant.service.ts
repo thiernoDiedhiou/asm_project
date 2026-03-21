@@ -286,4 +286,11 @@ export const tenantService = {
     ]);
     return { entries, total };
   },
+
+  async deleteTenant(id: string) {
+    const tenant = await prisma.tenant.findUnique({ where: { id } });
+    if (!tenant) throw new Error('Tenant introuvable');
+    // La suppression en cascade est gérée par Prisma (onDelete: Cascade sur toutes les relations)
+    await prisma.tenant.delete({ where: { id } });
+  },
 };

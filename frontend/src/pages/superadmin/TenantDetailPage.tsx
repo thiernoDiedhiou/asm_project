@@ -84,6 +84,12 @@ export function TenantDetailPage() {
   const [paiementError, setPaiementError] = useState('');
   const [confirmDeletePaiement, setConfirmDeletePaiement] = useState<PaiementAbonnement | null>(null);
 
+  // Suppression tenant
+  const [confirmDeleteTenant, setConfirmDeleteTenant] = useState(false);
+  const [deleteConfirmSlug, setDeleteConfirmSlug] = useState('');
+  const [deletingTenant, setDeletingTenant] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
   const { data, isLoading } = useQuery(['tenant-detail', id!], () => api.get(`/tenants/${id}/detail`));
   const { data: abData, isLoading: loadingAb, refetch: refetchAb } = useQuery(
     ['abonnements', id!],
@@ -152,6 +158,18 @@ export function TenantDetailPage() {
     } catch { /* ignore */ }
   }
 
+  async function handleDeleteTenant() {
+    if (!tenant || deleteConfirmSlug !== tenant.slug) return;
+    setDeletingTenant(true); setDeleteError('');
+    try {
+      await api.delete(`/tenants/${tenant.id}`);
+      navigate('/tenants');
+    } catch (err: unknown) {
+      setDeleteError((err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Erreur lors de la suppression');
+      setDeletingTenant(false);
+    }
+  }
+
   const isExpiringSoon = tenant?.dateExpiration
     ? (() => { const diff = new Date(tenant.dateExpiration!).getTime() - Date.now(); return diff > 0 && diff < 30 * 24 * 60 * 60 * 1000; })()
     : false;
@@ -191,6 +209,12 @@ export function TenantDetailPage() {
         </button>
         <button onClick={() => setConfirmImpersonate(true)} className="flex items-center gap-2 text-sm font-semibold text-white px-4 py-2 rounded-lg transition-colors" style={{ backgroundColor: tenant.couleurPrimaire }}>
           <LogIn className="h-4 w-4" /> Accéder au dashboard
+        </button>
+        <button
+          onClick={() => { setConfirmDeleteTenant(true); setDeleteConfirmSlug(''); setDeleteError(''); }}
+          className="flex items-center gap-2 text-sm font-semibold text-red-600 border border-red-200 px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
+        >
+          <Trash2 className="h-4 w-4" /> Supprimer le tenant
         </button>
       </div>
 
@@ -489,6 +513,57 @@ export function TenantDetailPage() {
             <div className="flex gap-3">
               <button onClick={() => setConfirmDeletePaiement(null)} className="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">Annuler</button>
               <button onClick={handleDeletePaiement} className="flex-1 px-4 py-2.5 rounded-lg bg-red-500 text-white text-sm font-semibold hover:bg-red-600">Supprimer</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Supprimer le tenant */}
+      {confirmDeleteTenant && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <div className="flex items-start justify-between">
+              <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                <Trash2 className="h-5 w-5 text-red-500" /> Supprimer ce tenant
+              </h2>
+              <button onClick={() => setConfirmDeleteTenant(false)} className="text-gray-400 hover:text-gray-600" aria-label="Fermer">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-2 text-sm text-red-800">
+              <p className="font-semibold flex items-center gap-2"><AlertTriangle className="h-4 w-4 shrink-0" /> Cette action est irréversible.</p>
+              <p>Toutes les données de <strong>{tenant.nomEntreprise}</strong> seront définitivement supprimées :</p>
+              <ul className="list-disc list-inside space-y-0.5 text-xs text-red-700 mt-1">
+                <li>{tenant._count.users} utilisateur(s)</li>
+                <li>{tenant._count.vehicules} véhicule(s)</li>
+                <li>{tenant._count.clients} client(s)</li>
+                <li>{tenant._count.reservations} réservation(s)</li>
+                <li>Contrats, paiements, journal d'activité…</li>
+              </ul>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tapez <span className="font-mono font-bold text-red-600">{tenant.slug}</span> pour confirmer
+              </label>
+              <input
+                value={deleteConfirmSlug}
+                onChange={e => setDeleteConfirmSlug(e.target.value)}
+                placeholder={tenant.slug}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 font-mono"
+              />
+            </div>
+            {deleteError && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{deleteError}</p>}
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDeleteTenant(false)} className="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Annuler
+              </button>
+              <button
+                onClick={handleDeleteTenant}
+                disabled={deletingTenant || deleteConfirmSlug !== tenant.slug}
+                className="flex-1 px-4 py-2.5 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                {deletingTenant ? 'Suppression…' : 'Supprimer définitivement'}
+              </button>
             </div>
           </div>
         </div>

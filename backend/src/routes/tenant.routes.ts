@@ -30,6 +30,7 @@ router.get('/:id/detail', ...SA, tenantController.getDetail.bind(tenantControlle
 router.post('/:id/impersonate', ...SA, tenantController.impersonate.bind(tenantController));
 router.post('/:id/renouveler', ...SA, tenantController.renouveler.bind(tenantController));
 router.put('/:id', ...SA, tenantController.update.bind(tenantController));
+router.delete('/:id', ...SA, tenantController.deleteTenant.bind(tenantController));
 router.get('/:id', ...SA, tenantController.getById.bind(tenantController));
 
 // Paiements abonnement du tenant
