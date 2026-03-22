@@ -97,7 +97,7 @@ export class PublicController {
         orderBy: [{ categorie: 'asc' }, { marque: 'asc' }],
       });
 
-      // Calculer la prochaine date de disponibilité pour chaque véhicule
+      // Récupérer toutes les réservations futures pour chaque véhicule
       const vehiculeIds = vehicules.map((v) => v.id);
       const today = new Date();
       const reservationsActives = vehiculeIds.length > 0
@@ -107,20 +107,37 @@ export class PublicController {
               statut: { in: ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'] },
               dateFin: { gte: today },
             },
-            select: { vehiculeId: true, dateFin: true },
+            select: { vehiculeId: true, dateDebut: true, dateFin: true },
+            orderBy: { dateDebut: 'asc' },
           })
         : [];
 
+      // Pour les véhicules LOUE : dernière dateFin (pour calcul prochaine dispo)
       const latestDateFin = new Map<string, Date>();
+      // Pour les véhicules DISPONIBLE : prochaine réservation future (dateDebut > today)
+      const prochaineResDebut = new Map<string, Date>();
+      const prochaineResFin   = new Map<string, Date>();
+
       for (const r of reservationsActives) {
+        // Calcul dernière dateFin (véhicule LOUE)
         const current = latestDateFin.get(r.vehiculeId);
         if (!current || r.dateFin > current) {
           latestDateFin.set(r.vehiculeId, r.dateFin);
+        }
+        // Prochaine réservation future pour véhicule DISPONIBLE (dateDebut dans le futur)
+        if (r.dateDebut > today) {
+          const existing = prochaineResDebut.get(r.vehiculeId);
+          if (!existing || r.dateDebut < existing) {
+            prochaineResDebut.set(r.vehiculeId, r.dateDebut);
+            prochaineResFin.set(r.vehiculeId, r.dateFin);
+          }
         }
       }
 
       type VehiculePublic = typeof vehicules[0] & {
         prochaineDateDisponible?: Date;
+        prochaineReservationDebut?: Date;
+        prochaineReservationFin?: Date;
         nombreDisponibles: number;
         vehiculeIds: string[];
       };
@@ -131,7 +148,7 @@ export class PublicController {
         // Disponible MAINTENANT = statut DISPONIBLE (pas LOUE)
         const disponibleMaintenant = v.statut === 'DISPONIBLE';
 
-        // Prochaine date uniquement pour les véhicules actuellement LOUE
+        // Prochaine dispo (pour véhicules LOUE)
         let prochaine: Date | undefined;
         if (!disponibleMaintenant) {
           const dateFin = latestDateFin.get(v.id);
@@ -141,11 +158,17 @@ export class PublicController {
           }
         }
 
+        // Prochaine réservation future (pour véhicules DISPONIBLE)
+        const resDebut = disponibleMaintenant ? prochaineResDebut.get(v.id) : undefined;
+        const resFin   = disponibleMaintenant ? prochaineResFin.get(v.id)   : undefined;
+
         const key = `${v.marque}|${v.modele}|${v.annee}|${v.categorie}`;
         if (!groupMap.has(key)) {
           groupMap.set(key, {
             ...v,
             prochaineDateDisponible: disponibleMaintenant ? undefined : prochaine,
+            prochaineReservationDebut: resDebut,
+            prochaineReservationFin: resFin,
             nombreDisponibles: disponibleMaintenant ? 1 : 0,
             vehiculeIds: [v.id],
           });
@@ -154,9 +177,13 @@ export class PublicController {
           g.vehiculeIds.push(v.id);
           if (disponibleMaintenant) {
             g.nombreDisponibles++;
-            g.prochaineDateDisponible = undefined; // au moins un dispo → pas de message "dispo le"
+            g.prochaineDateDisponible = undefined;
+            // Conserver la prochaine réservation la plus proche du groupe
+            if (resDebut && (!g.prochaineReservationDebut || resDebut < g.prochaineReservationDebut)) {
+              g.prochaineReservationDebut = resDebut;
+              g.prochaineReservationFin   = resFin;
+            }
           } else if (g.nombreDisponibles === 0 && prochaine) {
-            // Tous LOUE : garder la date la plus proche
             if (!g.prochaineDateDisponible || prochaine < g.prochaineDateDisponible) {
               g.prochaineDateDisponible = prochaine;
             }

@@ -18,6 +18,8 @@ interface VehiculePublic {
   nombreDisponibles: number;
   vehiculeIds: string[];
   prochaineDateDisponible?: string | null;
+  prochaineReservationDebut?: string | null;
+  prochaineReservationFin?: string | null;
 }
 
 const CATEGORIES = ['TOUTES', 'ECONOMIQUE', 'STANDARD', 'SUV', 'LUXE', 'UTILITAIRE'];
@@ -208,7 +210,14 @@ export function FlottePage() {
                   )}
                   {v.nombreDisponibles === 0 && v.prochaineDateDisponible && (
                     <span className="absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-full text-white shadow" style={{ background: 'var(--color-secondary)' }}>
-                      Dispo le {new Date(v.prochaineDateDisponible).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                      Dispo le {new Date(v.prochaineDateDisponible + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                    </span>
+                  )}
+                  {v.nombreDisponibles > 0 && v.prochaineReservationDebut && (
+                    <span className="absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-full text-white shadow bg-gray-500">
+                      Indispo du {new Date(v.prochaineReservationDebut + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                      {' au '}
+                      {new Date(v.prochaineReservationFin! + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                     </span>
                   )}
                 </div>
@@ -244,11 +253,11 @@ export function FlottePage() {
                   {/* Bouton */}
                   {v.nombreDisponibles === 0 && v.prochaineDateDisponible ? (
                     <button
-                      onClick={() => navigate(`/reserver?vehiculeId=${v.id}`)}
+                      onClick={() => navigate(`/reserver?vehiculeId=${v.id}&dateDebut=${v.prochaineDateDisponible}`)}
                       className="mt-4 w-full flex items-center justify-center gap-2 py-3 text-white font-semibold rounded-xl transition-colors"
                       style={{ background: 'var(--color-secondary)' }}
                     >
-                      Réserver à partir du {new Date(v.prochaineDateDisponible).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                      Réserver à partir du {new Date(v.prochaineDateDisponible + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   ) : (

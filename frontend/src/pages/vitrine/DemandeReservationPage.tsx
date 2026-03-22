@@ -122,6 +122,7 @@ export function DemandeReservationPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const vehiculeIdParam = searchParams.get('vehiculeId') || '';
+  const dateDebutParam = searchParams.get('dateDebut') || '';
 
   const [step, setStep] = useState<1 | 2>(1);
   const [vehicules, setVehicules] = useState<VehiculePublic[]>([]);
@@ -140,7 +141,7 @@ export function DemandeReservationPage() {
 
   // Étape 2 — Réservation
   const [vehiculeId, setVehiculeId] = useState(vehiculeIdParam);
-  const [dateDebut, setDateDebut] = useState('');
+  const [dateDebut, setDateDebut] = useState(dateDebutParam);
   const [dateFin, setDateFin] = useState('');
   const [heureDepart, setHeureDepart] = useState('');
   const [zoneId, setZoneId] = useState('');

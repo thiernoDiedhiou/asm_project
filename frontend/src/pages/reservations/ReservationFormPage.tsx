@@ -4,6 +4,9 @@ import {
   ArrowLeft, Save, Calendar, Search, X, User, Check, Car,
   Plane, Clock, CheckCircle2, MapPin, Banknote, FileText,
 } from 'lucide-react';
+import { DayPicker, DateRange } from 'react-day-picker';
+import { fr } from 'react-day-picker/locale';
+import 'react-day-picker/style.css';
 import { reservationsApi, clientsApi, vehiculesApi, tarificationApi } from '../../services/api';
 import { useQuery } from '../../components/hooks/useQuery';
 import { formatFCFA } from '../../utils/format';
@@ -114,6 +117,34 @@ export function ReservationFormPage() {
 
   interface PeriodeOccupee { dateDebut: string; dateFin: string; statut: string; numero: string; }
   const [periodesOccupees, setPeriodesOccupees] = useState<PeriodeOccupee[]>([]);
+  const [showPicker, setShowPicker] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  // Dates désactivées = périodes réservées + avant aujourd'hui
+  const disabledDates = [
+    { before: new Date() },
+    ...periodesOccupees.map(p => ({
+      from: new Date(p.dateDebut + 'T00:00:00'),
+      to: new Date(p.dateFin + 'T00:00:00'),
+    })),
+  ];
+
+  // Plage sélectionnée pour le DayPicker
+  const selectedRange: DateRange = {
+    from: form.dateDebut ? new Date(form.dateDebut + 'T00:00:00') : undefined,
+    to: form.dateFin ? new Date(form.dateFin + 'T00:00:00') : undefined,
+  };
+
+  // Fermer le picker au clic dehors
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setShowPicker(false);
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
 
   // Combobox client
   const [clientSearch, setClientSearch]     = useState('');
@@ -223,10 +254,12 @@ export function ReservationFormPage() {
     if (field === 'dateDebut' || field === 'dateFin') setDispoError('');
   }
 
-  async function checkDispo() {
-    if (!form.vehiculeId || !form.dateDebut || !form.dateFin) return;
+  async function checkDispo(debut?: string, fin?: string) {
+    const d = debut ?? form.dateDebut;
+    const f = fin ?? form.dateFin;
+    if (!form.vehiculeId || !d || !f) return;
     try {
-      const res = await vehiculesApi.checkDisponibilite(form.vehiculeId, form.dateDebut, form.dateFin);
+      const res = await vehiculesApi.checkDisponibilite(form.vehiculeId, d, f);
       const data = res.data.data;
       if (!data?.disponible) {
         let msg = data?.raison || 'Ce véhicule n\'est pas disponible sur cette période';
@@ -546,83 +579,80 @@ export function ReservationFormPage() {
         ══════════════════════════════════════ */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <SectionHeader icon={Calendar} title={isTransfert ? 'Date de la course' : 'Période'} />
-          {isTransfert ? (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Date de la course <span className="text-red-500">*</span>
-              </label>
-              <input
-                aria-label="Date de la course"
-                required
-                type="date"
-                value={form.dateDebut}
-                onChange={e => set('dateDebut', e.target.value)}
-                onBlur={checkDispo}
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert/30 focus:border-transparent"
-              />
-              <p className="mt-2 text-xs text-gray-400 flex items-center gap-1.5">
-                <Plane className="h-3 w-3" />
-                Transfert aéroport  — durée comptée : 1 jour
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Date de début <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    aria-label="Date de début"
-                    required
-                    type="date"
-                    value={form.dateDebut}
-                    onChange={e => set('dateDebut', e.target.value)}
-                    onBlur={checkDispo}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert/30 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Date de fin <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    aria-label="Date de fin"
-                    required
-                    type="date"
-                    value={form.dateFin}
-                    onChange={e => set('dateFin', e.target.value)}
-                    onBlur={checkDispo}
-                    min={form.dateDebut || new Date().toISOString().split('T')[0]}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert/30 focus:border-transparent"
-                  />
-                </div>
-              </div>
-              {duration > 0 && (
-                <p className="mt-2 text-sm text-gray-500">
-                  Durée : <span className="font-semibold text-gray-800">{duration} jour{duration > 1 ? 's' : ''}</span>
-                </p>
+
+          {/* Bouton d'ouverture du calendrier */}
+          <div ref={pickerRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setShowPicker(v => !v)}
+              className="w-full flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 text-sm hover:border-asm-vert/50 transition-colors text-left"
+            >
+              <Calendar className="h-4 w-4 text-gray-400 shrink-0" />
+              {isTransfert ? (
+                <span className={form.dateDebut ? 'text-gray-900' : 'text-gray-400'}>
+                  {form.dateDebut
+                    ? new Date(form.dateDebut + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+                    : 'Choisir la date de la course'}
+                </span>
+              ) : (
+                <span className={form.dateDebut ? 'text-gray-900' : 'text-gray-400'}>
+                  {form.dateDebut
+                    ? <>
+                        {new Date(form.dateDebut + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {form.dateFin && <> → {new Date(form.dateFin + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</>}
+                        {duration > 0 && <span className="ml-2 text-asm-vert font-semibold">({duration} jour{duration > 1 ? 's' : ''})</span>}
+                      </>
+                    : 'Choisir les dates de début et de fin'}
+                </span>
               )}
-            </>
-          )}
-          {periodesOccupees.length > 0 && (
-            <div className="mt-3 p-3 rounded-xl border" style={{ background: 'var(--color-secondary-pale)', borderColor: 'var(--color-secondary)' }}>
-              <p className="text-xs font-semibold mb-1.5 flex items-center gap-1" style={{ color: 'var(--color-secondary)' }}>
-                <span>⚠</span> Périodes déjà réservées — choisir des dates en dehors
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {periodesOccupees.map((p, i) => (
-                  <span key={i} className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg font-medium text-gray-800" style={{ background: 'var(--color-secondary-pale)', border: '1px solid var(--color-secondary)' }}>
-                    {new Date(p.dateDebut + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                    {' → '}
-                    {new Date(p.dateFin + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </span>
-                ))}
+            </button>
+
+            {/* Calendrier popover */}
+            {showPicker && (
+              <div className="absolute z-50 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 p-3 left-0">
+                {isTransfert ? (
+                  <DayPicker
+                    locale={fr}
+                    mode="single"
+                    selected={form.dateDebut ? new Date(form.dateDebut + 'T00:00:00') : undefined}
+                    onSelect={(day) => {
+                      if (!day) return;
+                      const str = day.toISOString().split('T')[0];
+                      set('dateDebut', str);
+                      setShowPicker(false);
+                    }}
+                    disabled={disabledDates}
+                  />
+                ) : (
+                  <DayPicker
+                    locale={fr}
+                    mode="range"
+                    selected={selectedRange.from ? selectedRange : undefined}
+                    onSelect={(range) => {
+                      const from = range?.from?.toISOString().split('T')[0] ?? '';
+                      const to = range?.to?.toISOString().split('T')[0] ?? '';
+                      setForm(f => ({ ...f, dateDebut: from, dateFin: to }));
+                      setDispoError('');
+                      if (range?.from && range?.to) {
+                        setShowPicker(false);
+                        checkDispo(from, to);
+                      }
+                    }}
+                    disabled={disabledDates}
+                    numberOfMonths={2}
+                  />
+                )}
               </div>
-            </div>
+            )}
+          </div>
+
+          {isTransfert && (
+            <p className="mt-2 text-xs text-gray-400 flex items-center gap-1.5">
+              <Plane className="h-3 w-3" />
+              Transfert aéroport — durée comptée : 1 jour
+            </p>
           )}
+
           {dispoError && (
             <div className="mt-2 text-red-600 text-sm flex items-center gap-1.5">
               <span>⚠</span> {dispoError}
