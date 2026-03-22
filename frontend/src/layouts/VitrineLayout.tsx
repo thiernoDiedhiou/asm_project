@@ -234,6 +234,17 @@ export function VitrineLayout() {
         <Outlet />
       </main>
 
+      {/* ===== BOUTON WHATSAPP FLOTTANT (mobile uniquement) ===== */}
+      <a
+        href={whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Nous contacter sur WhatsApp"
+        className="md:hidden fixed bottom-5 right-5 z-50 flex items-center justify-center h-14 w-14 rounded-full bg-[#25D366] shadow-lg hover:bg-[#1ebe5d] active:scale-95 transition-all"
+      >
+        <WhatsAppIcon className="h-7 w-7 text-white" />
+      </a>
+
       {/* ===== FOOTER ===== */}
       <footer className="bg-asm-vert text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
