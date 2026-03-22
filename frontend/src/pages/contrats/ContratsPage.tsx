@@ -48,14 +48,21 @@ export function ContratsPage() {
   const totalPages = pagination ? Math.ceil(pagination.total / pagination.limit) : 1;
 
   const handleGeneratePdf = async (id: string, numeroContrat: string) => {
+    // Ouvrir la fenêtre immédiatement (contexte du clic) pour éviter le blocage popup
+    const newWindow = window.open('', '_blank');
     setGeneratingPdf(id);
     try {
       const response = await contratsApi.generatePdf(id);
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
+      if (newWindow) {
+        newWindow.location.href = url;
+      } else {
+        window.open(url, '_blank');
+      }
       setTimeout(() => URL.revokeObjectURL(url), 60000);
     } catch {
+      if (newWindow) newWindow.close();
       alert('Erreur lors de la génération du PDF');
     } finally {
       setGeneratingPdf(null);
