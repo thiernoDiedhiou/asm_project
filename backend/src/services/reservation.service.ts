@@ -8,6 +8,7 @@ import {
 } from '../validators/reservation.validator';
 import { vehiculeService } from './vehicule.service';
 import { calculerPrix, calculerNombreJours } from '../utils/pricing';
+import { sendConfirmationClient, sendAnnulationClient } from '../utils/mailer';
 import logger from '../utils/logger';
 
 /**
@@ -277,6 +278,64 @@ export class ReservationService {
     logger.info(
       `Réservation ${reservation.numeroReservation}: ${reservation.statut} → ${dto.statut} (agent: ${userId})`
     );
+
+    // Envoyer un email au client si son adresse est renseignée
+    if (updatedReservation.client.email) {
+      const tenant = await prisma.tenant.findUnique({
+        where: { id: tenantId },
+        select: { nomEntreprise: true, couleurPrimaire: true, couleurSecondaire: true, telephone: true, adresse: true, ville: true },
+      });
+
+      const nomEntreprise = tenant?.nomEntreprise || 'Agence';
+      const couleurPrimaire = tenant?.couleurPrimaire || '#1B5E20';
+      const couleurSecondaire = tenant?.couleurSecondaire || '#F9A825';
+      const telephoneAgence = tenant?.telephone || '';
+      const adresseAgence = [tenant?.adresse, tenant?.ville].filter(Boolean).join(', ');
+
+      if (dto.statut === 'CONFIRMEE') {
+        sendConfirmationClient({
+          numeroReservation: updatedReservation.numeroReservation,
+          nomEntreprise,
+          couleurPrimaire,
+          couleurSecondaire,
+          telephoneAgence,
+          adresseAgence,
+          client: {
+            prenom: updatedReservation.client.prenom,
+            nom: updatedReservation.client.nom,
+            email: updatedReservation.client.email,
+          },
+          vehicule: {
+            marque: updatedReservation.vehicule.marque,
+            modele: updatedReservation.vehicule.modele,
+          },
+          dateDebut: updatedReservation.dateDebut.toISOString(),
+          dateFin: updatedReservation.dateFin.toISOString(),
+          nombreJours: updatedReservation.nombreJours,
+          prixTotal: Number(updatedReservation.prixTotal),
+          lieuPriseEnCharge: updatedReservation.lieuPriseEnCharge,
+          typeTrajet: updatedReservation.typeTrajet,
+          notes: updatedReservation.notes ?? undefined,
+        }).catch((err) => logger.error('Email confirmation client échoué', err));
+      } else if (dto.statut === 'ANNULEE') {
+        sendAnnulationClient({
+          numeroReservation: updatedReservation.numeroReservation,
+          nomEntreprise,
+          couleurPrimaire,
+          couleurSecondaire,
+          telephoneAgence,
+          client: {
+            prenom: updatedReservation.client.prenom,
+            email: updatedReservation.client.email,
+          },
+          vehicule: {
+            marque: updatedReservation.vehicule.marque,
+            modele: updatedReservation.vehicule.modele,
+          },
+          dateDebut: updatedReservation.dateDebut.toISOString(),
+        }).catch((err) => logger.error('Email annulation client échoué', err));
+      }
+    }
 
     return updatedReservation;
   }
