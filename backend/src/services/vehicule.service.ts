@@ -40,7 +40,7 @@ export class VehiculeService {
       // un véhicule LOUE peut être libre sur la période demandée.
       // On exclut seulement les véhicules hors service / en maintenance.
       ...(dateDebut && dateFin
-        ? { statut: { notIn: ['EN_MAINTENANCE', 'HORS_SERVICE'] as const } }
+        ? { statut: { notIn: [StatutVehicule.EN_MAINTENANCE, StatutVehicule.HORS_SERVICE] } }
         : statut ? { statut } : {}),
       ...(categorie && { categorie }),
       ...(vehiculesOccupesIds.length > 0 && {
