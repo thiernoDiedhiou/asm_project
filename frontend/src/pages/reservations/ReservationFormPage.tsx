@@ -112,6 +112,9 @@ export function ReservationFormPage() {
   const [error, setError] = useState('');
   const [dispoError, setDispoError] = useState('');
 
+  interface PeriodeOccupee { dateDebut: string; dateFin: string; statut: string; numero: string; }
+  const [periodesOccupees, setPeriodesOccupees] = useState<PeriodeOccupee[]>([]);
+
   // Combobox client
   const [clientSearch, setClientSearch]     = useState('');
   const [clientOpen, setClientOpen]         = useState(false);
@@ -184,12 +187,16 @@ export function ReservationFormPage() {
     setVehiculeSearch('');
     setVehiculeOpen(false);
     setDispoError('');
+    vehiculesApi.getPeriodesOccupees(v.id)
+      .then(res => setPeriodesOccupees(res.data.data || []))
+      .catch(() => setPeriodesOccupees([]));
   }
   function clearVehicule() {
     setSelectedVehicule(null);
     setForm(f => ({ ...f, vehiculeId: '' }));
     setVehiculeSearch('');
     setDispoError('');
+    setPeriodesOccupees([]);
   }
 
   function set(field: keyof FormData, value: string) {
@@ -599,6 +606,22 @@ export function ReservationFormPage() {
                 </p>
               )}
             </>
+          )}
+          {periodesOccupees.length > 0 && (
+            <div className="mt-3 p-3 rounded-xl border" style={{ background: 'var(--color-secondary-pale)', borderColor: 'var(--color-secondary)' }}>
+              <p className="text-xs font-semibold mb-1.5 flex items-center gap-1" style={{ color: 'var(--color-secondary)' }}>
+                <span>⚠</span> Périodes déjà réservées — choisir des dates en dehors
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {periodesOccupees.map((p, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg font-medium text-gray-800" style={{ background: 'var(--color-secondary-pale)', border: '1px solid var(--color-secondary)' }}>
+                    {new Date(p.dateDebut + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                    {' → '}
+                    {new Date(p.dateFin + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
+                ))}
+              </div>
+            </div>
           )}
           {dispoError && (
             <div className="mt-2 text-red-600 text-sm flex items-center gap-1.5">

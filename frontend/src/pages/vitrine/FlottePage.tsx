@@ -207,7 +207,7 @@ export function FlottePage() {
                     </span>
                   )}
                   {v.nombreDisponibles === 0 && v.prochaineDateDisponible && (
-                    <span className="absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-500 text-white shadow">
+                    <span className="absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-full text-white shadow" style={{ background: 'var(--color-secondary)' }}>
                       Dispo le {new Date(v.prochaineDateDisponible).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                     </span>
                   )}
@@ -245,7 +245,8 @@ export function FlottePage() {
                   {v.nombreDisponibles === 0 && v.prochaineDateDisponible ? (
                     <button
                       onClick={() => navigate(`/reserver?vehiculeId=${v.id}`)}
-                      className="mt-4 w-full flex items-center justify-center gap-2 py-3 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition-colors"
+                      className="mt-4 w-full flex items-center justify-center gap-2 py-3 text-white font-semibold rounded-xl transition-colors"
+                      style={{ background: 'var(--color-secondary)' }}
                     >
                       Réserver à partir du {new Date(v.prochaineDateDisponible).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                       <ChevronRight className="h-4 w-4" />

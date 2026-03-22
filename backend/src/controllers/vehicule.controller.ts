@@ -100,6 +100,15 @@ export class VehiculeController {
     }
   }
 
+  async getPeriodesOccupees(req: Request, res: Response): Promise<void> {
+    try {
+      const periodes = await vehiculeService.getPeriodesOccupees(req.params.id, req.tenantId!);
+      sendSuccess(res, periodes);
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
+    }
+  }
+
   async checkDisponibilite(req: Request, res: Response): Promise<void> {
     try {
       const { debut, fin } = req.query as { debut: string; fin: string };

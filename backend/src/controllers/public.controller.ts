@@ -128,23 +128,35 @@ export class PublicController {
       // Grouper par modèle (marque + modele + annee + categorie)
       const groupMap = new Map<string, VehiculePublic>();
       for (const v of vehicules) {
-        const dateFin = latestDateFin.get(v.id);
-        const prochaine = dateFin
-          ? new Date(new Date(dateFin).setDate(dateFin.getDate() + 1))
-          : undefined;
+        // Disponible MAINTENANT = statut DISPONIBLE (pas LOUE)
+        const disponibleMaintenant = v.statut === 'DISPONIBLE';
+
+        // Prochaine date uniquement pour les véhicules actuellement LOUE
+        let prochaine: Date | undefined;
+        if (!disponibleMaintenant) {
+          const dateFin = latestDateFin.get(v.id);
+          if (dateFin) {
+            prochaine = new Date(dateFin);
+            prochaine.setDate(prochaine.getDate() + 1);
+          }
+        }
 
         const key = `${v.marque}|${v.modele}|${v.annee}|${v.categorie}`;
         if (!groupMap.has(key)) {
-          groupMap.set(key, { ...v, prochaineDateDisponible: prochaine, nombreDisponibles: prochaine ? 0 : 1, vehiculeIds: [v.id] });
+          groupMap.set(key, {
+            ...v,
+            prochaineDateDisponible: disponibleMaintenant ? undefined : prochaine,
+            nombreDisponibles: disponibleMaintenant ? 1 : 0,
+            vehiculeIds: [v.id],
+          });
         } else {
           const g = groupMap.get(key)!;
           g.vehiculeIds.push(v.id);
-          if (!prochaine) {
-            // Ce véhicule est disponible maintenant → le groupe est disponible
+          if (disponibleMaintenant) {
             g.nombreDisponibles++;
-            g.prochaineDateDisponible = undefined;
-          } else if (g.nombreDisponibles === 0) {
-            // Tous occupés jusqu'ici : garder la date la plus proche
+            g.prochaineDateDisponible = undefined; // au moins un dispo → pas de message "dispo le"
+          } else if (g.nombreDisponibles === 0 && prochaine) {
+            // Tous LOUE : garder la date la plus proche
             if (!g.prochaineDateDisponible || prochaine < g.prochaineDateDisponible) {
               g.prochaineDateDisponible = prochaine;
             }

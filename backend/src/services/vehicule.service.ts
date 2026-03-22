@@ -228,6 +228,35 @@ export class VehiculeService {
   }
 
   /**
+   * Retourne toutes les périodes réservées (futures + en cours) d'un véhicule
+   */
+  async getPeriodesOccupees(vehiculeId: string, tenantId: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const reservations = await prisma.reservation.findMany({
+      where: {
+        vehiculeId,
+        tenantId,
+        statut: { in: ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'] },
+        dateFin: { gte: today },
+      },
+      select: {
+        dateDebut: true,
+        dateFin: true,
+        statut: true,
+        numeroReservation: true,
+      },
+      orderBy: { dateDebut: 'asc' },
+    });
+    return reservations.map(r => ({
+      dateDebut: r.dateDebut.toISOString().split('T')[0],
+      dateFin: r.dateFin.toISOString().split('T')[0],
+      statut: r.statut,
+      numero: r.numeroReservation,
+    }));
+  }
+
+  /**
    * Vérifie la disponibilité d'un véhicule pour une période donnée
    */
   async checkDisponibilite(vehiculeId: string, dateDebut: Date, dateFin: Date, tenantId?: string) {

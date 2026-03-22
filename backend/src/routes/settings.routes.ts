@@ -49,4 +49,12 @@ router.post(
   settingsController.uploadLogo.bind(settingsController)
 );
 
+// Admin — supprimer logo
+router.delete(
+  '/logo',
+  authenticateToken,
+  authorize(Role.ADMIN),
+  settingsController.deleteLogo.bind(settingsController)
+);
+
 export default router;
