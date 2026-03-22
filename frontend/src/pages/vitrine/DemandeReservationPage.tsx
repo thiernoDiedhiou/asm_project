@@ -126,6 +126,7 @@ export function DemandeReservationPage() {
   const [step, setStep] = useState<1 | 2>(1);
   const [vehicules, setVehicules] = useState<VehiculePublic[]>([]);
   const [zones, setZones] = useState<ZonePublic[]>([]);
+  const [adresseAgence, setAdresseAgence] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<{ numeroReservation: string; prixTotal: number } | null>(null);
@@ -148,8 +149,17 @@ export function DemandeReservationPage() {
   const [typeTrajet, setTypeTrajet] = useState('LOCATION');
   const [notes, setNotes] = useState('');
 
-  // Charger les zones une seule fois
+  // Charger les zones et l'adresse de l'agence une seule fois
   useEffect(() => {
+    publicApi.getSettings()
+      .then((sRes) => {
+        const s = sRes.data?.data;
+        if (s?.adresse) {
+          setAdresseAgence([s.adresse, s.ville].filter(Boolean).join(', '));
+        }
+      })
+      .catch(() => {});
+
     publicApi.getZones()
       .then((zRes) => {
         const zs: ZonePublic[] = zRes.data?.data || [];
@@ -229,8 +239,9 @@ export function DemandeReservationPage() {
         vehiculeId,
         dateDebut,
         dateFin: dateFinEffective,
-        lieuPriseEnCharge: lieuPriseEnCharge || 'À préciser',
-        lieuRetour: lieuRetour || lieuPriseEnCharge || 'À préciser',
+        // Pour transfert : valeur saisie ; pour location/longue durée : retrait et retour à l'agence
+        lieuPriseEnCharge: isTransfert ? (lieuPriseEnCharge || 'À préciser') : 'Agence',
+        lieuRetour: isTransfert ? (lieuRetour || lieuPriseEnCharge || 'À préciser') : 'Agence',
         typeTrajet,
         notes: notesFinales,
         zoneId: zoneId || undefined,
@@ -694,41 +705,57 @@ export function DemandeReservationPage() {
                 </div>
               )}
 
-              {/* 5. Lieu de prise en charge */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  <span className="flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4" />
-                    Lieu de prise en charge
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  aria-label="Lieu de prise en charge"
-                  value={lieuPriseEnCharge}
-                  onChange={(e) => setLieuPriseEnCharge(e.target.value)}
-                  placeholder={isTransfert ? 'Ex: Aéroport AIBD, Terminal 1' : 'Ex: Plateau, Dakar'}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
-                />
-              </div>
-
+              {/* 5. Lieu de prise/retour — transfert : champs libres ; location/longue durée : adresse agence */}
               {!isTransfert && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="h-4 w-4" />
-                      Lieu de retour <span className="text-gray-400 font-normal">(si différent)</span>
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    aria-label="Lieu de retour"
-                    value={lieuRetour}
-                    onChange={(e) => setLieuRetour(e.target.value)}
-                    placeholder="Identique au lieu de prise en charge par défaut"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
-                  />
+                <div className="flex items-start gap-3 bg-asm-vert/5 border border-asm-vert/20 rounded-xl px-4 py-3">
+                  <MapPin className="h-4 w-4 text-asm-vert mt-0.5 flex-shrink-0" />
+                  <div className="text-sm">
+                    <p className="font-medium text-gray-800">Retrait et retour à l'agence</p>
+                    {adresseAgence && (
+                      <p className="text-gray-500 mt-0.5">{adresseAgence}</p>
+                    )}
+                    <p className="text-gray-400 text-xs mt-1">
+                      Vous pouvez demander une livraison à domicile dans le champ « Notes » ci-dessous.
+                    </p>
+                  </div>
                 </div>
+              )}
+
+              {isTransfert && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      <span className="flex items-center gap-1.5">
+                        <MapPin className="h-4 w-4" />
+                        Lieu de prise en charge
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      aria-label="Lieu de prise en charge"
+                      value={lieuPriseEnCharge}
+                      onChange={(e) => setLieuPriseEnCharge(e.target.value)}
+                      placeholder="Ex: Aéroport AIBD, Terminal 1"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      <span className="flex items-center gap-1.5">
+                        <MapPin className="h-4 w-4" />
+                        Lieu de retour <span className="text-gray-400 font-normal">(si différent)</span>
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      aria-label="Lieu de retour"
+                      value={lieuRetour}
+                      onChange={(e) => setLieuRetour(e.target.value)}
+                      placeholder="Identique au lieu de prise en charge par défaut"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
+                    />
+                  </div>
+                </>
               )}
 
               {/* 6. Notes */}
@@ -744,7 +771,7 @@ export function DemandeReservationPage() {
                   rows={3}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder={isTransfert ? 'Ex: nombre de passagers, bagages, numéro de vol...' : 'Ex: siège enfant, heure de départ précise, etc.'}
+                  placeholder={isTransfert ? 'Ex: nombre de passagers, bagages, numéro de vol...' : 'Ex: siège enfant, heure de départ précise, livraison à domicile, etc.'}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent resize-none"
                 />
               </div>
