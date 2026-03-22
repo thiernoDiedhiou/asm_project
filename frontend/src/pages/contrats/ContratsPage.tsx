@@ -50,6 +50,14 @@ export function ContratsPage() {
   const handleGeneratePdf = async (id: string, numeroContrat: string) => {
     // Ouvrir la fenêtre immédiatement (contexte du clic) pour éviter le blocage popup
     const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>Chargement...</title>
+        <style>body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f4f4f4;font-family:Arial,sans-serif;}
+        .box{text-align:center;}.spinner{width:48px;height:48px;border:5px solid #e0e0e0;border-top-color:#1B5E20;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px;}
+        @keyframes spin{to{transform:rotate(360deg)}}p{color:#555;font-size:16px;}</style></head>
+        <body><div class="box"><div class="spinner"></div><p>Génération du contrat en cours…</p></div></body></html>`);
+      newWindow.document.close();
+    }
     setGeneratingPdf(id);
     try {
       const response = await contratsApi.generatePdf(id);
