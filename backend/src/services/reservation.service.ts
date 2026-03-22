@@ -281,16 +281,22 @@ export class ReservationService {
 
     // Envoyer un email au client si son adresse est renseignée
     if (updatedReservation.client.email) {
-      const tenant = await prisma.tenant.findUnique({
-        where: { id: tenantId },
-        select: { nomEntreprise: true, couleurPrimaire: true, couleurSecondaire: true, telephone: true, adresse: true, ville: true },
-      });
+      const [tenant, parametre] = await Promise.all([
+        prisma.tenant.findUnique({
+          where: { id: tenantId },
+          select: { nomEntreprise: true, couleurPrimaire: true, couleurSecondaire: true },
+        }),
+        prisma.parametre.findUnique({
+          where: { tenantId },
+          select: { telephone: true, adresse: true, ville: true },
+        }),
+      ]);
 
       const nomEntreprise = tenant?.nomEntreprise || 'Agence';
       const couleurPrimaire = tenant?.couleurPrimaire || '#1B5E20';
       const couleurSecondaire = tenant?.couleurSecondaire || '#F9A825';
-      const telephoneAgence = tenant?.telephone || '';
-      const adresseAgence = [tenant?.adresse, tenant?.ville].filter(Boolean).join(', ');
+      const telephoneAgence = parametre?.telephone || '';
+      const adresseAgence = [parametre?.adresse, parametre?.ville].filter(Boolean).join(', ');
 
       if (dto.statut === 'CONFIRMEE') {
         sendConfirmationClient({
