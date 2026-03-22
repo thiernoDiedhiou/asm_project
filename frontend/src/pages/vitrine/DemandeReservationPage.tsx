@@ -147,6 +147,8 @@ export function DemandeReservationPage() {
   const [lieuPriseEnCharge, setLieuPriseEnCharge] = useState('');
   const [lieuRetour, setLieuRetour] = useState('');
   const [typeTrajet, setTypeTrajet] = useState('LOCATION');
+  // Sens du transfert aéroport : 'AEROPORT_VERS_ADRESSE' | 'ADRESSE_VERS_AEROPORT'
+  const [sensTransfert, setSensTransfert] = useState<'AEROPORT_VERS_ADRESSE' | 'ADRESSE_VERS_AEROPORT'>('AEROPORT_VERS_ADRESSE');
   const [notes, setNotes] = useState('');
 
   // Charger les zones et l'adresse de l'agence une seule fois
@@ -224,8 +226,10 @@ export function DemandeReservationPage() {
 
     // Pour un transfert, dateFin = dateDebut (même jour)
     const dateFinEffective = isTransfert ? dateDebut : dateFin;
+    const sensLabel = sensTransfert === 'AEROPORT_VERS_ADRESSE' ? 'Aéroport → Adresse' : 'Adresse → Aéroport';
     const notesFinales = [
       notes,
+      isTransfert ? `Sens du transfert : ${sensLabel}` : '',
       isTransfert && heureDepart ? `Heure de prise en charge : ${heureDepart}` : '',
     ].filter(Boolean).join('\n') || undefined;
 
@@ -723,35 +727,74 @@ export function DemandeReservationPage() {
 
               {isTransfert && (
                 <>
+                  {/* Sens du transfert */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <span className="flex items-center gap-1.5">
+                        <Navigation className="h-4 w-4" />
+                        Sens du trajet
+                      </span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => { setSensTransfert('AEROPORT_VERS_ADRESSE'); setLieuPriseEnCharge(''); setLieuRetour(''); }}
+                        className={`flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
+                          sensTransfert === 'AEROPORT_VERS_ADRESSE'
+                            ? 'border-asm-vert bg-asm-vert/5 text-asm-vert'
+                            : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="text-lg">✈️ → 🏠</span>
+                        <span>Aéroport → Adresse</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setSensTransfert('ADRESSE_VERS_AEROPORT'); setLieuPriseEnCharge(''); setLieuRetour(''); }}
+                        className={`flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
+                          sensTransfert === 'ADRESSE_VERS_AEROPORT'
+                            ? 'border-asm-vert bg-asm-vert/5 text-asm-vert'
+                            : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="text-lg">🏠 → ✈️</span>
+                        <span>Adresse → Aéroport</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Champ aéroport */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
                       <span className="flex items-center gap-1.5">
                         <MapPin className="h-4 w-4" />
-                        Lieu de prise en charge
+                        {sensTransfert === 'AEROPORT_VERS_ADRESSE' ? 'Aéroport de prise en charge' : 'Aéroport de destination'}
                       </span>
                     </label>
                     <input
                       type="text"
-                      aria-label="Lieu de prise en charge"
-                      value={lieuPriseEnCharge}
-                      onChange={(e) => setLieuPriseEnCharge(e.target.value)}
+                      aria-label="Aéroport"
+                      value={sensTransfert === 'AEROPORT_VERS_ADRESSE' ? lieuPriseEnCharge : lieuRetour}
+                      onChange={(e) => sensTransfert === 'AEROPORT_VERS_ADRESSE' ? setLieuPriseEnCharge(e.target.value) : setLieuRetour(e.target.value)}
                       placeholder="Ex: Aéroport AIBD, Terminal 1"
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
                     />
                   </div>
+
+                  {/* Champ adresse */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
                       <span className="flex items-center gap-1.5">
                         <MapPin className="h-4 w-4" />
-                        Lieu de retour <span className="text-gray-400 font-normal">(si différent)</span>
+                        {sensTransfert === 'AEROPORT_VERS_ADRESSE' ? 'Adresse de destination' : 'Adresse de départ'}
                       </span>
                     </label>
                     <input
                       type="text"
-                      aria-label="Lieu de retour"
-                      value={lieuRetour}
-                      onChange={(e) => setLieuRetour(e.target.value)}
-                      placeholder="Identique au lieu de prise en charge par défaut"
+                      aria-label="Adresse"
+                      value={sensTransfert === 'AEROPORT_VERS_ADRESSE' ? lieuRetour : lieuPriseEnCharge}
+                      onChange={(e) => sensTransfert === 'AEROPORT_VERS_ADRESSE' ? setLieuRetour(e.target.value) : setLieuPriseEnCharge(e.target.value)}
+                      placeholder="Ex: Almadies, Rue 10, Dakar"
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
                     />
                   </div>
