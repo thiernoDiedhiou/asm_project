@@ -30,6 +30,7 @@ interface VehiculePublic {
   prixSemaine: string | number;
   photos: string[];
   couleur?: string;
+  prochaineDateDisponible?: string | null;
 }
 
 interface ZonePublic {
@@ -147,21 +148,36 @@ export function DemandeReservationPage() {
   const [typeTrajet, setTypeTrajet] = useState('LOCATION');
   const [notes, setNotes] = useState('');
 
+  // Charger les zones une seule fois
   useEffect(() => {
-    setLoading(true);
-    Promise.all([publicApi.getVehicules(), publicApi.getZones()])
-      .then(([vRes, zRes]) => {
-        const vs: VehiculePublic[] = vRes.data?.data || [];
+    publicApi.getZones()
+      .then((zRes) => {
         const zs: ZonePublic[] = zRes.data?.data || [];
-        setVehicules(vs);
         setZones(zs);
-        // Pré-sélectionner Dakar si disponible
         const dakar = zs.find((z) => z.nom.toLowerCase() === 'dakar');
         if (dakar) setZoneId(dakar.id);
       })
+      .catch(() => {});
+  }, []);
+
+  // Recharger les véhicules à chaque changement de dates pour tenir compte des réservations
+  // existantes : un véhicule LOUE sur une autre période peut être libre sur la période demandée.
+  useEffect(() => {
+    setLoading(true);
+    const params = dateDebut && dateFin ? { dateDebut, dateFin } : undefined;
+    publicApi.getVehicules(params)
+      .then((vRes) => {
+        const vs: VehiculePublic[] = vRes.data?.data || [];
+        setVehicules(vs);
+        // Si le véhicule pré-sélectionné n'est plus disponible sur les nouvelles dates, le désélectionner
+        if (vehiculeId && !vs.find((v) => v.id === vehiculeId)) {
+          setVehiculeId('');
+        }
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateDebut, dateFin]);
 
   const vehiculePreselectionne = !!vehiculeIdParam;
   const vehiculeSelectionne = vehicules.find((v) => v.id === vehiculeId);
@@ -515,24 +531,41 @@ export function DemandeReservationPage() {
                         Aucun véhicule disponible pour le moment.
                       </p>
                     ) : (
-                      vehicules.map((v) => (
+                      vehicules.map((v) => {
+                        const prochaineDate = v.prochaineDateDisponible
+                          ? new Date(v.prochaineDateDisponible).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
+                          : null;
+                        return (
                         <button
                           key={v.id}
                           type="button"
                           onClick={() => setVehiculeId(v.id)}
-                          className="text-left border-2 border-gray-100 rounded-xl overflow-hidden hover:border-asm-vert/60 hover:shadow-md transition-all group"
+                          className={`text-left border-2 rounded-xl overflow-hidden transition-all group ${
+                            vehiculeId === v.id
+                              ? 'border-asm-vert shadow-md'
+                              : 'border-gray-100 hover:border-asm-vert/60 hover:shadow-md'
+                          }`}
                         >
-                          {v.photos?.[0] ? (
-                            <img
-                              src={v.photos[0]}
-                              alt={`${v.marque} ${v.modele}`}
-                              className="w-full h-24 object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                          ) : (
-                            <div className="w-full h-24 bg-gray-100 flex items-center justify-center">
-                              <Car className="h-8 w-8 text-gray-300" />
-                            </div>
-                          )}
+                          <div className="relative">
+                            {v.photos?.[0] ? (
+                              <img
+                                src={v.photos[0]}
+                                alt={`${v.marque} ${v.modele}`}
+                                className={`w-full h-24 object-cover transition-transform duration-300 group-hover:scale-105 ${prochaineDate ? 'opacity-75' : ''}`}
+                              />
+                            ) : (
+                              <div className={`w-full h-24 flex items-center justify-center ${prochaineDate ? 'bg-orange-50' : 'bg-gray-100'}`}>
+                                <Car className={`h-8 w-8 ${prochaineDate ? 'text-orange-300' : 'text-gray-300'}`} />
+                              </div>
+                            )}
+                            {prochaineDate && (
+                              <div className="absolute inset-0 bg-orange-500/10 flex items-center justify-center">
+                                <span className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow">
+                                  Dispo le {prochaineDate}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                           <div className="p-2.5">
                             <p className="font-semibold text-gray-900 text-sm truncate">
                               {v.marque} {v.modele}
@@ -541,12 +574,13 @@ export function DemandeReservationPage() {
                             <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${CATEGORIE_COLORS[v.categorie] || 'bg-gray-100 text-gray-600'}`}>
                               {CATEGORIE_LABELS[v.categorie] || v.categorie}
                             </span>
-                            <p className="text-xs font-bold text-asm-vert mt-1.5">
-                              {formatPrix(v.prixJournalier)}/jour
+                            <p className={`text-xs font-bold mt-1.5 ${prochaineDate ? 'text-orange-500' : 'text-asm-vert'}`}>
+                              {prochaineDate ? `À partir du ${prochaineDate}` : `${formatPrix(v.prixJournalier)}/jour`}
                             </p>
                           </div>
                         </button>
-                      ))
+                        );
+                      })
                     )}
                   </div>
                 )}

@@ -257,7 +257,8 @@ export const journalApi = {
 
 // API publique vitrine (sans token — le même intercepteur s'applique mais sans token si non connecté)
 export const publicApi = {
-  getVehicules: () => api.get('/public/vehicules'),
+  getVehicules: (params?: { dateDebut?: string; dateFin?: string }) =>
+    api.get('/public/vehicules', { params }),
   getZones: () => api.get('/public/zones'),
   createDemande: (data: Record<string, unknown>) =>
     api.post('/public/reservation', data),

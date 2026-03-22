@@ -46,6 +46,8 @@ interface Vehicule {
   prixJournalier: number;
   categorie: string;
   couleur?: string;
+  statut?: string;
+  prochaineDateDisponible?: string | null;
 }
 
 interface TarifZone {
@@ -121,11 +123,17 @@ export function ReservationFormPage() {
   const [selectedVehicule, setSelectedVehicule] = useState<Vehicule | null>(null);
 
   const { data: clientsData }  = useQuery(['clients-list'],   () => clientsApi.getAll({ limit: 200 }));
-  const { data: vehiculesData } = useQuery(['vehicules-dispo'], () => vehiculesApi.getAll({ statut: 'DISPONIBLE', limit: 100 }));
+  // On charge tous les véhicules sans filtrer par statut pour inclure les véhicules LOUE
+  // qui peuvent être libres sur une autre période. Les véhicules EN_MAINTENANCE / HORS_SERVICE
+  // sont masqués côté frontend. La vérification exacte se fait via checkDisponibilite().
+  const { data: vehiculesData } = useQuery(['vehicules-dispo'], () => vehiculesApi.getAll({ limit: 100 }));
   const { data: zonesData }    = useQuery(['tarif-matrix'],   () => tarificationApi.getMatrix());
 
   const clients:  Client[]    = clientsData?.data  || [];
-  const vehicules: Vehicule[] = vehiculesData?.data || [];
+  // Exclure les véhicules hors service / en maintenance (non louables)
+  const vehicules: Vehicule[] = (vehiculesData?.data || []).filter(
+    (v: Vehicule) => v.statut !== 'EN_MAINTENANCE' && v.statut !== 'HORS_SERVICE'
+  );
   const zones: TarifZone[]    = (zonesData?.data || []).filter((z: TarifZone) => z.actif);
 
   // Fermer au clic en dehors
@@ -212,8 +220,16 @@ export function ReservationFormPage() {
     if (!form.vehiculeId || !form.dateDebut || !form.dateFin) return;
     try {
       const res = await vehiculesApi.checkDisponibilite(form.vehiculeId, form.dateDebut, form.dateFin);
-      if (!res.data.data?.disponible) {
-        setDispoError('Ce véhicule est déjà réservé sur cette période');
+      const data = res.data.data;
+      if (!data?.disponible) {
+        let msg = data?.raison || 'Ce véhicule n\'est pas disponible sur cette période';
+        if (data?.prochaineDateDisponible) {
+          const dateStr = new Date(data.prochaineDateDisponible).toLocaleDateString('fr-FR', {
+            day: 'numeric', month: 'long', year: 'numeric',
+          });
+          msg += ` — disponible à partir du ${dateStr}`;
+        }
+        setDispoError(msg);
       }
     } catch { /* ignore */ }
   }
@@ -471,22 +487,30 @@ export function ReservationFormPage() {
                       </div>
                     ) : (
                       <>
-                        {filteredVehicules.map(v => (
+                        {filteredVehicules.map(v => {
+                          const prochaineDate = v.prochaineDateDisponible
+                            ? new Date(v.prochaineDateDisponible).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+                            : null;
+                          return (
                           <button
                             key={v.id}
                             type="button"
                             onClick={() => selectVehicule(v)}
                             className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 text-left transition-colors"
                           >
-                            <div className="h-7 w-7 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                              <Car className="h-3.5 w-3.5 text-gray-500" />
+                            <div className={`h-7 w-7 rounded-full flex items-center justify-center flex-shrink-0 ${prochaineDate ? 'bg-orange-50' : 'bg-gray-100'}`}>
+                              <Car className={`h-3.5 w-3.5 ${prochaineDate ? 'text-orange-400' : 'text-gray-500'}`} />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="text-sm font-medium text-gray-900 truncate">
                                 {v.marque} {v.modele}
                                 <span className="text-gray-400 font-normal"> · {v.immatriculation}</span>
                               </div>
-                              <div className="text-xs text-gray-400">{formatFCFA(v.prixJournalier)}/jour</div>
+                              {prochaineDate ? (
+                                <div className="text-xs text-orange-500 font-medium">Disponible à partir du {prochaineDate}</div>
+                              ) : (
+                                <div className="text-xs text-gray-400">{formatFCFA(v.prixJournalier)}/jour</div>
+                              )}
                             </div>
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${
                               CATEGORIE_COLORS[v.categorie] || 'bg-gray-100 text-gray-600'
@@ -494,7 +518,8 @@ export function ReservationFormPage() {
                               {v.categorie}
                             </span>
                           </button>
-                        ))}
+                          );
+                        })}
                         {vehicules.length > 8 && vehiculeSearch.trim() === '' && (
                           <div className="px-3 py-2 text-xs text-gray-400 text-center border-t border-gray-100">
                             Tapez pour affiner ({vehicules.length} véhicules disponibles)

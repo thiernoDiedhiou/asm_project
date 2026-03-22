@@ -17,6 +17,7 @@ interface VehiculePublic {
   description?: string;
   nombreDisponibles: number;
   vehiculeIds: string[];
+  prochaineDateDisponible?: string | null;
 }
 
 const CATEGORIES = ['TOUTES', 'ECONOMIQUE', 'STANDARD', 'SUV', 'LUXE', 'UTILITAIRE'];
@@ -199,10 +200,15 @@ export function FlottePage() {
                   >
                     {CATEGORIE_LABELS[v.categorie] || v.categorie}
                   </span>
-                  {/* Badge disponibilités */}
+                  {/* Badge disponibilités / prochain retour */}
                   {v.nombreDisponibles > 1 && (
                     <span className="absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-full bg-asm-vert text-white shadow">
                       {v.nombreDisponibles} disponibles
+                    </span>
+                  )}
+                  {v.nombreDisponibles === 0 && v.prochaineDateDisponible && (
+                    <span className="absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-500 text-white shadow">
+                      Dispo le {new Date(v.prochaineDateDisponible).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                     </span>
                   )}
                 </div>
@@ -236,13 +242,23 @@ export function FlottePage() {
                   </div>
 
                   {/* Bouton */}
-                  <button
-                    onClick={() => navigate(`/reserver?vehiculeId=${v.id}`)}
-                    className="mt-4 w-full flex items-center justify-center gap-2 py-3 bg-asm-vert text-white font-semibold rounded-xl hover:bg-asm-vert-clair transition-colors"
-                  >
-                    {v.nombreDisponibles > 1 ? 'Réserver ce modèle' : 'Réserver ce véhicule'}
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
+                  {v.nombreDisponibles === 0 && v.prochaineDateDisponible ? (
+                    <button
+                      onClick={() => navigate(`/reserver?vehiculeId=${v.id}`)}
+                      className="mt-4 w-full flex items-center justify-center gap-2 py-3 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition-colors"
+                    >
+                      Réserver à partir du {new Date(v.prochaineDateDisponible).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => navigate(`/reserver?vehiculeId=${v.id}`)}
+                      className="mt-4 w-full flex items-center justify-center gap-2 py-3 bg-asm-vert text-white font-semibold rounded-xl hover:bg-asm-vert-clair transition-colors"
+                    >
+                      {v.nombreDisponibles > 1 ? 'Réserver ce modèle' : 'Réserver ce véhicule'}
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

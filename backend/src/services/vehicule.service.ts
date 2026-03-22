@@ -25,13 +25,9 @@ export class VehiculeService {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         where: {
           tenantId,
-          statut: { in: ['CONFIRMEE', 'EN_COURS'] },
-          OR: [
-            {
-              dateDebut: { lte: new Date(dateFin) },
-              dateFin: { gte: new Date(dateDebut) },
-            },
-          ],
+          statut: { in: ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'] },
+          dateDebut: { lte: new Date(dateFin) },
+          dateFin: { gte: new Date(dateDebut) },
         },
         select: { vehiculeId: true },
       });
@@ -40,7 +36,12 @@ export class VehiculeService {
 
     const where = {
       tenantId,
-      ...(statut && { statut }),
+      // Quand des dates sont fournies, on filtre par disponibilité (overlap) et non par statut :
+      // un véhicule LOUE peut être libre sur la période demandée.
+      // On exclut seulement les véhicules hors service / en maintenance.
+      ...(dateDebut && dateFin
+        ? { statut: { notIn: ['EN_MAINTENANCE', 'HORS_SERVICE'] as const } }
+        : statut ? { statut } : {}),
       ...(categorie && { categorie }),
       ...(vehiculesOccupesIds.length > 0 && {
         id: { notIn: vehiculesOccupesIds },
@@ -65,7 +66,37 @@ export class VehiculeService {
       prisma.vehicule.count({ where }),
     ]);
 
-    return { vehicules, total };
+    // Enrichir chaque véhicule avec sa prochaine date de disponibilité
+    const vehiculeIds = vehicules.map((v) => v.id);
+    const today = new Date();
+    const reservationsActives = vehiculeIds.length > 0
+      ? await prisma.reservation.findMany({
+          where: {
+            vehiculeId: { in: vehiculeIds },
+            statut: { in: ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'] },
+            dateFin: { gte: today },
+          },
+          select: { vehiculeId: true, dateFin: true },
+        })
+      : [];
+
+    const latestDateFin = new Map<string, Date>();
+    for (const r of reservationsActives) {
+      const current = latestDateFin.get(r.vehiculeId);
+      if (!current || r.dateFin > current) {
+        latestDateFin.set(r.vehiculeId, r.dateFin);
+      }
+    }
+
+    const vehiculesEnrichis = vehicules.map((v) => {
+      const dateFin = latestDateFin.get(v.id);
+      if (!dateFin) return v;
+      const prochaine = new Date(dateFin);
+      prochaine.setDate(prochaine.getDate() + 1);
+      return { ...v, prochaineDateDisponible: prochaine };
+    });
+
+    return { vehicules: vehiculesEnrichis, total };
   }
 
   /**
@@ -213,17 +244,19 @@ export class VehiculeService {
     }
 
     // Vérifier les chevauchements de réservations
-    const conflits = await prisma.reservation.count({
+    const dernierConflitReservation = await prisma.reservation.findFirst({
       where: {
         vehiculeId,
         statut: { in: ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'] },
         dateDebut: { lte: dateFin },
         dateFin: { gte: dateDebut },
       },
+      orderBy: { dateFin: 'desc' },
+      select: { dateFin: true },
     });
 
     // Vérifier les chevauchements de maintenances
-    const maintenances = await prisma.maintenance.count({
+    const dernierConflitMaintenance = await prisma.maintenance.findFirst({
       where: {
         vehiculeId,
         statut: { in: ['PLANIFIEE', 'EN_COURS'] },
@@ -233,9 +266,25 @@ export class VehiculeService {
           { dateFin: null },
         ],
       },
+      orderBy: { dateFin: 'desc' },
+      select: { dateFin: true },
     });
 
+    const conflits = dernierConflitReservation ? 1 : 0;
+    const maintenances = dernierConflitMaintenance ? 1 : 0;
     const disponible = conflits === 0 && maintenances === 0;
+
+    // Calculer la prochaine date de disponibilité (lendemain de la fin du conflit)
+    let prochaineDateDisponible: Date | undefined;
+    if (!disponible) {
+      const dateFinConflit = conflits > 0
+        ? dernierConflitReservation!.dateFin
+        : dernierConflitMaintenance?.dateFin ?? null;
+      if (dateFinConflit) {
+        prochaineDateDisponible = new Date(dateFinConflit);
+        prochaineDateDisponible.setDate(prochaineDateDisponible.getDate() + 1);
+      }
+    }
 
     return {
       disponible,
@@ -244,6 +293,7 @@ export class VehiculeService {
           ? 'Véhicule déjà réservé sur cette période'
           : 'Véhicule en maintenance sur cette période'
         : undefined,
+      prochaineDateDisponible,
     };
   }
 

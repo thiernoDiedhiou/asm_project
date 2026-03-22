@@ -48,12 +48,39 @@ export class PublicController {
 
   /**
    * GET /api/public/vehicules
-   * Retourne tous les véhicules DISPONIBLES pour la vitrine publique
+   * Retourne les véhicules disponibles pour la vitrine publique.
+   * Accepte les query params optionnels `dateDebut` et `dateFin` (ISO strings).
+   * Si des dates sont fournies, filtre par chevauchement de réservation afin qu'un
+   * véhicule actuellement loué mais libre sur la période demandée reste visible.
    */
   async getVehicules(req: Request, res: Response): Promise<void> {
     try {
+      const { dateDebut, dateFin } = req.query as { dateDebut?: string; dateFin?: string };
+      const tenantId = req.tenantId!;
+
+      // Trouver les véhicules occupés sur la période demandée
+      let vehiculesOccupesIds: string[] = [];
+      if (dateDebut && dateFin) {
+        const reservationsConflictuelles = await prisma.reservation.findMany({
+          where: {
+            tenantId,
+            statut: { in: ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'] },
+            dateDebut: { lte: new Date(dateFin) },
+            dateFin: { gte: new Date(dateDebut) },
+          },
+          select: { vehiculeId: true },
+        });
+        vehiculesOccupesIds = reservationsConflictuelles.map((r) => r.vehiculeId);
+      }
+
+      // Toujours inclure DISPONIBLE + LOUE (les véhicules LOUE seront affichés
+      // avec leur prochaine date de disponibilité)
       const vehicules = await prisma.vehicule.findMany({
-        where: { tenantId: req.tenantId!, statut: 'DISPONIBLE' },
+        where: {
+          tenantId,
+          statut: { notIn: ['EN_MAINTENANCE', 'HORS_SERVICE'] },
+          ...(vehiculesOccupesIds.length > 0 && { id: { notIn: vehiculesOccupesIds } }),
+        },
         select: {
           id: true,
           marque: true,
@@ -65,21 +92,63 @@ export class PublicController {
           prixSemaine: true,
           photos: true,
           description: true,
+          statut: true,
         },
         orderBy: [{ categorie: 'asc' }, { marque: 'asc' }],
       });
 
+      // Calculer la prochaine date de disponibilité pour chaque véhicule
+      const vehiculeIds = vehicules.map((v) => v.id);
+      const today = new Date();
+      const reservationsActives = vehiculeIds.length > 0
+        ? await prisma.reservation.findMany({
+            where: {
+              vehiculeId: { in: vehiculeIds },
+              statut: { in: ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'] },
+              dateFin: { gte: today },
+            },
+            select: { vehiculeId: true, dateFin: true },
+          })
+        : [];
+
+      const latestDateFin = new Map<string, Date>();
+      for (const r of reservationsActives) {
+        const current = latestDateFin.get(r.vehiculeId);
+        if (!current || r.dateFin > current) {
+          latestDateFin.set(r.vehiculeId, r.dateFin);
+        }
+      }
+
+      type VehiculePublic = typeof vehicules[0] & {
+        prochaineDateDisponible?: Date;
+        nombreDisponibles: number;
+        vehiculeIds: string[];
+      };
+
       // Grouper par modèle (marque + modele + annee + categorie)
-      // → un seul représentant par modèle avec le compteur de disponibilités
-      const groupMap = new Map<string, typeof vehicules[0] & { nombreDisponibles: number; vehiculeIds: string[] }>();
+      const groupMap = new Map<string, VehiculePublic>();
       for (const v of vehicules) {
+        const dateFin = latestDateFin.get(v.id);
+        const prochaine = dateFin
+          ? new Date(new Date(dateFin).setDate(dateFin.getDate() + 1))
+          : undefined;
+
         const key = `${v.marque}|${v.modele}|${v.annee}|${v.categorie}`;
         if (!groupMap.has(key)) {
-          groupMap.set(key, { ...v, nombreDisponibles: 1, vehiculeIds: [v.id] });
+          groupMap.set(key, { ...v, prochaineDateDisponible: prochaine, nombreDisponibles: prochaine ? 0 : 1, vehiculeIds: [v.id] });
         } else {
           const g = groupMap.get(key)!;
-          g.nombreDisponibles++;
           g.vehiculeIds.push(v.id);
+          if (!prochaine) {
+            // Ce véhicule est disponible maintenant → le groupe est disponible
+            g.nombreDisponibles++;
+            g.prochaineDateDisponible = undefined;
+          } else if (g.nombreDisponibles === 0) {
+            // Tous occupés jusqu'ici : garder la date la plus proche
+            if (!g.prochaineDateDisponible || prochaine < g.prochaineDateDisponible) {
+              g.prochaineDateDisponible = prochaine;
+            }
+          }
         }
       }
 
@@ -169,8 +238,28 @@ export class PublicController {
         return;
       }
 
-      if (vehicule.statut !== 'DISPONIBLE') {
-        sendError(res, 'Ce véhicule n\'est plus disponible', 400);
+      // Vérifier la disponibilité par chevauchement de dates (et non par statut seul),
+      // afin qu'un véhicule LOUE sur une autre période reste réservable.
+      if (vehicule.statut === 'EN_MAINTENANCE' || vehicule.statut === 'HORS_SERVICE') {
+        sendError(res, 'Ce véhicule n\'est pas disponible à la location', 400);
+        return;
+      }
+      const dernierConflitPublic = await prisma.reservation.findFirst({
+        where: {
+          vehiculeId,
+          tenantId,
+          statut: { in: ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'] },
+          dateDebut: { lte: new Date(dateFin) },
+          dateFin: { gte: new Date(dateDebut) },
+        },
+        orderBy: { dateFin: 'desc' },
+        select: { dateFin: true },
+      });
+      if (dernierConflitPublic) {
+        const prochaine = new Date(dernierConflitPublic.dateFin);
+        prochaine.setDate(prochaine.getDate() + 1);
+        const dateStr = prochaine.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+        sendError(res, `Ce véhicule est déjà réservé sur cette période. Il sera disponible à partir du ${dateStr}.`, 400);
         return;
       }
 
