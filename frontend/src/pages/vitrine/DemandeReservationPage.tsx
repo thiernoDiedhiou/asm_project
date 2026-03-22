@@ -471,7 +471,14 @@ export function DemandeReservationPage() {
                       type="button"
                       onClick={() => {
                         setTypeTrajet(value);
-                        if (value === 'TRANSFERT_AEROPORT') { setDateFin(''); setHeureDepart(''); }
+                        if (value === 'TRANSFERT_AEROPORT') {
+                          setDateFin(''); setHeureDepart('');
+                          // Pré-remplir l'aéroport par défaut selon le sens actuel
+                          setSensTransfert('AEROPORT_VERS_ADRESSE');
+                          setLieuPriseEnCharge('AIBD'); setLieuRetour('');
+                        } else {
+                          setLieuPriseEnCharge(''); setLieuRetour('');
+                        }
                       }}
                       className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-xs font-medium transition-all ${
                         typeTrajet === value
@@ -738,7 +745,7 @@ export function DemandeReservationPage() {
                     <div className="grid grid-cols-2 gap-3">
                       <button
                         type="button"
-                        onClick={() => { setSensTransfert('AEROPORT_VERS_ADRESSE'); setLieuPriseEnCharge(''); setLieuRetour(''); }}
+                        onClick={() => { setSensTransfert('AEROPORT_VERS_ADRESSE'); setLieuPriseEnCharge('AIBD'); setLieuRetour(''); }}
                         className={`flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
                           sensTransfert === 'AEROPORT_VERS_ADRESSE'
                             ? 'border-asm-vert bg-asm-vert/5 text-asm-vert'
@@ -750,7 +757,7 @@ export function DemandeReservationPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => { setSensTransfert('ADRESSE_VERS_AEROPORT'); setLieuPriseEnCharge(''); setLieuRetour(''); }}
+                        onClick={() => { setSensTransfert('ADRESSE_VERS_AEROPORT'); setLieuPriseEnCharge(''); setLieuRetour('AIBD'); }}
                         className={`flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
                           sensTransfert === 'ADRESSE_VERS_AEROPORT'
                             ? 'border-asm-vert bg-asm-vert/5 text-asm-vert'
@@ -776,7 +783,7 @@ export function DemandeReservationPage() {
                       aria-label="Aéroport"
                       value={sensTransfert === 'AEROPORT_VERS_ADRESSE' ? lieuPriseEnCharge : lieuRetour}
                       onChange={(e) => sensTransfert === 'AEROPORT_VERS_ADRESSE' ? setLieuPriseEnCharge(e.target.value) : setLieuRetour(e.target.value)}
-                      placeholder="Ex: Aéroport AIBD, Terminal 1"
+                      placeholder="Ex: AIBD, Terminal 1"
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
                     />
                   </div>
