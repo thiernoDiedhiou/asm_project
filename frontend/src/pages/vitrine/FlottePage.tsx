@@ -44,6 +44,20 @@ function formatPrix(prix: string | number) {
   return Number(prix).toLocaleString('fr-FR') + ' FCFA';
 }
 
+// Extrait la partie YYYY-MM-DD d'une date ISO ou d'une chaîne simple
+function parseDate(iso: string | null | undefined): Date | null {
+  if (!iso) return null;
+  const dateOnly = iso.split('T')[0]; // "2024-04-02T00:00:00.000Z" → "2024-04-02"
+  const d = new Date(dateOnly + 'T00:00:00');
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function fmtDate(iso: string | null | undefined, opts?: Intl.DateTimeFormatOptions): string {
+  const d = parseDate(iso);
+  if (!d) return '';
+  return d.toLocaleDateString('fr-FR', opts ?? { day: 'numeric', month: 'short' });
+}
+
 function SkeletonCard() {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
@@ -210,14 +224,12 @@ export function FlottePage() {
                   )}
                   {v.nombreDisponibles === 0 && v.prochaineDateDisponible && (
                     <span className="absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-full text-white shadow" style={{ background: 'var(--color-secondary)' }}>
-                      Dispo le {new Date(v.prochaineDateDisponible + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                      Dispo le {fmtDate(v.prochaineDateDisponible)}
                     </span>
                   )}
                   {v.nombreDisponibles > 0 && v.prochaineReservationDebut && (
                     <span className="absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-full text-white shadow bg-gray-500">
-                      Indispo du {new Date(v.prochaineReservationDebut + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                      {' au '}
-                      {new Date(v.prochaineReservationFin! + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                      Indispo du {fmtDate(v.prochaineReservationDebut)} au {fmtDate(v.prochaineReservationFin)}
                     </span>
                   )}
                 </div>
@@ -253,11 +265,11 @@ export function FlottePage() {
                   {/* Bouton */}
                   {v.nombreDisponibles === 0 && v.prochaineDateDisponible ? (
                     <button
-                      onClick={() => navigate(`/reserver?vehiculeId=${v.id}&dateDebut=${v.prochaineDateDisponible}`)}
+                      onClick={() => navigate(`/reserver?vehiculeId=${v.id}&dateDebut=${v.prochaineDateDisponible!.split('T')[0]}`)}
                       className="mt-4 w-full flex items-center justify-center gap-2 py-3 text-white font-semibold rounded-xl transition-colors"
                       style={{ background: 'var(--color-secondary)' }}
                     >
-                      Réserver à partir du {new Date(v.prochaineDateDisponible + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                      Réserver à partir du {fmtDate(v.prochaineDateDisponible)}
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   ) : (
