@@ -160,8 +160,6 @@ export const vehiculesApi = {
   update: (id: string, data: Record<string, unknown>) =>
     api.put(`/vehicules/${id}`, data),
   delete: (id: string) => api.delete(`/vehicules/${id}`),
-  getPeriodesOccupees: (id: string) =>
-    api.get(`/vehicules/${id}/periodes-occupees`),
   checkDisponibilite: (id: string, debut: string, fin: string) =>
     api.get(`/vehicules/${id}/disponibilite`, { params: { debut, fin } }),
   uploadPhotos: (id: string, formData: FormData) =>
@@ -296,7 +294,6 @@ export const settingsApi = {
     form.append('logo', file);
     return api.post('/settings/logo', form, { headers: { 'Content-Type': 'multipart/form-data' } });
   },
-  deleteLogo: () => api.delete('/settings/logo'),
 };
 
 export { api };

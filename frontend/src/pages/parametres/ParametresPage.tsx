@@ -121,7 +121,6 @@ export function ParametresPage() {
 
   // Logo
   const [logoUploading, setLogoUploading] = useState(false);
-  const [logoDeleting, setLogoDeleting] = useState(false);
   const [logoSuccess, setLogoSuccess] = useState('');
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -333,19 +332,6 @@ export function ParametresPage() {
     finally { setLogoUploading(false); }
   }
 
-  async function handleLogoDelete() {
-    if (!confirm('Supprimer le logo ? Cette action est irréversible.')) return;
-    setLogoDeleting(true); setLogoSuccess('');
-    try {
-      await settingsApi.deleteLogo();
-      setLogoPreview(null);
-      setLogoSuccess('Logo supprimé');
-      window.dispatchEvent(new Event('tenant:updated'));
-      setTimeout(() => setLogoSuccess(''), 3000);
-    } catch { /* silencieux */ }
-    finally { setLogoDeleting(false); }
-  }
-
   async function handleSaveSettings(e: React.FormEvent) {
     e.preventDefault();
     setSavingSettings(true);
@@ -362,18 +348,8 @@ export function ParametresPage() {
     }
   }
 
-  // Toast global : affiche le dernier message de succès toutes sections confondues
-  const toastMessage = settingsSuccess || logoSuccess || matrixSuccess || zoneSuccess || success;
-
   return (
     <div className="space-y-6">
-      {/* Toast fixe en bas de l'écran */}
-      {toastMessage && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-green-600 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg animate-fade-in">
-          <CheckCircle className="h-4 w-4 shrink-0" />
-          {toastMessage}
-        </div>
-      )}
       {/* En-tête */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
@@ -411,6 +387,11 @@ export function ParametresPage() {
 
           <form onSubmit={handleSaveSettings} className="space-y-5">
             {settingsError && <div className="bg-red-50 text-red-700 text-sm p-3 rounded-lg">{settingsError}</div>}
+            {settingsSuccess && (
+              <div className="bg-green-50 text-green-700 text-sm p-3 rounded-lg flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" /> {settingsSuccess}
+              </div>
+            )}
 
             {/* Section Logo */}
             <div>
@@ -437,28 +418,15 @@ export function ParametresPage() {
                     className="hidden"
                     onChange={e => { const f = e.target.files?.[0]; if (f) handleLogoUpload(f); }}
                   />
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => logoInputRef.current?.click()}
-                      disabled={logoUploading || logoDeleting}
-                      className="flex items-center gap-2 px-4 py-2 border border-asm-vert text-asm-vert text-sm font-medium rounded-lg hover:bg-asm-vert/5 transition-colors disabled:opacity-50"
-                    >
-                      <Upload className="h-4 w-4" />
-                      {logoUploading ? 'Upload en cours…' : 'Choisir un logo'}
-                    </button>
-                    {(logoPreview || settingsData?.data?.logo) && (
-                      <button
-                        type="button"
-                        onClick={handleLogoDelete}
-                        disabled={logoUploading || logoDeleting}
-                        className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        {logoDeleting ? 'Suppression…' : 'Supprimer'}
-                      </button>
-                    )}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => logoInputRef.current?.click()}
+                    disabled={logoUploading}
+                    className="flex items-center gap-2 px-4 py-2 border border-asm-vert text-asm-vert text-sm font-medium rounded-lg hover:bg-asm-vert/5 transition-colors disabled:opacity-50"
+                  >
+                    <Upload className="h-4 w-4" />
+                    {logoUploading ? 'Upload en cours…' : 'Choisir un logo'}
+                  </button>
                   <p className="text-xs text-gray-400">PNG, JPG, SVG ou WEBP — max 2 Mo</p>
                   {logoSuccess && (
                     <p className="text-xs text-green-600 flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" />{logoSuccess}</p>

@@ -58,12 +58,6 @@ router.get(
 );
 
 router.get(
-  '/:id/periodes-occupees',
-  authenticateToken,
-  vehiculeController.getPeriodesOccupees.bind(vehiculeController)
-);
-
-router.get(
   '/:id/disponibilite',
   authenticateToken,
   validateQuery(disponibiliteQuerySchema),
