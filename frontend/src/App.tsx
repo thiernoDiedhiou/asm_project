@@ -1,5 +1,5 @@
 // Application principale - Routing et protection des routes
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuthStore } from './store/authStore';
 import { authApi } from './services/api';
@@ -81,9 +81,16 @@ function SuperAdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Remonte en haut de page à chaque changement de route
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
+
 // Composant interne qui vérifie périodiquement la validité de la session
 function SessionWatcher() {
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -117,6 +124,7 @@ function SessionWatcher() {
 export function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <SessionWatcher />
       <Routes>
         {/* ===== Vitrine publique ===== */}
