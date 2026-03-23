@@ -136,7 +136,8 @@ export function ReservationFormPage() {
     () => vehiculesApi.getPeriodesOccupees(form.vehiculeId),
     { enabled: !!form.vehiculeId }
   );
-  const periodesOccupees: { debut: string; fin: string }[] = (periodesData?.data as unknown as { debut: string; fin: string }[]) ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const periodesOccupees: { debut: string; fin: string }[] = (periodesData as any)?.data ?? [];
 
   const clients:  Client[]    = clientsData?.data  || [];
   // Exclure les véhicules hors service / en maintenance (non louables)
