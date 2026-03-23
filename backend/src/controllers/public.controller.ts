@@ -107,20 +107,26 @@ export class PublicController {
               statut: { in: ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'] },
               dateFin: { gte: today },
             },
-            select: { vehiculeId: true, dateFin: true },
+            select: { vehiculeId: true, dateDebut: true, dateFin: true },
           })
         : [];
 
       const latestDateFin = new Map<string, Date>();
+      const earliestDateDebut = new Map<string, Date>();
       for (const r of reservationsActives) {
-        const current = latestDateFin.get(r.vehiculeId);
-        if (!current || r.dateFin > current) {
+        const currentFin = latestDateFin.get(r.vehiculeId);
+        if (!currentFin || r.dateFin > currentFin) {
           latestDateFin.set(r.vehiculeId, r.dateFin);
+        }
+        const currentDebut = earliestDateDebut.get(r.vehiculeId);
+        if (!currentDebut || r.dateDebut < currentDebut) {
+          earliestDateDebut.set(r.vehiculeId, r.dateDebut);
         }
       }
 
       type VehiculePublic = typeof vehicules[0] & {
         prochaineDateDisponible?: Date;
+        dateDebutIndisponible?: Date;
         nombreDisponibles: number;
         vehiculeIds: string[];
       };
@@ -129,13 +135,14 @@ export class PublicController {
       const groupMap = new Map<string, VehiculePublic>();
       for (const v of vehicules) {
         const dateFin = latestDateFin.get(v.id);
+        const dateDebut = earliestDateDebut.get(v.id);
         const prochaine = dateFin
           ? new Date(new Date(dateFin).setDate(dateFin.getDate() + 1))
           : undefined;
 
         const key = `${v.marque}|${v.modele}|${v.annee}|${v.categorie}`;
         if (!groupMap.has(key)) {
-          groupMap.set(key, { ...v, prochaineDateDisponible: prochaine, nombreDisponibles: prochaine ? 0 : 1, vehiculeIds: [v.id] });
+          groupMap.set(key, { ...v, prochaineDateDisponible: prochaine, dateDebutIndisponible: prochaine ? dateDebut : undefined, nombreDisponibles: prochaine ? 0 : 1, vehiculeIds: [v.id] });
         } else {
           const g = groupMap.get(key)!;
           g.vehiculeIds.push(v.id);
@@ -143,10 +150,12 @@ export class PublicController {
             // Ce véhicule est disponible maintenant → le groupe est disponible
             g.nombreDisponibles++;
             g.prochaineDateDisponible = undefined;
+            g.dateDebutIndisponible = undefined;
           } else if (g.nombreDisponibles === 0) {
             // Tous occupés jusqu'ici : garder la date la plus proche
             if (!g.prochaineDateDisponible || prochaine < g.prochaineDateDisponible) {
               g.prochaineDateDisponible = prochaine;
+              g.dateDebutIndisponible = dateDebut;
             }
           }
         }

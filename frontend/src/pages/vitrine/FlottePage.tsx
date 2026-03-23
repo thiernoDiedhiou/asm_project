@@ -18,6 +18,7 @@ interface VehiculePublic {
   nombreDisponibles: number;
   vehiculeIds: string[];
   prochaineDateDisponible?: string | null;
+  dateDebutIndisponible?: string | null;
 }
 
 const CATEGORIES = ['TOUTES', 'ECONOMIQUE', 'STANDARD', 'SUV', 'LUXE', 'UTILITAIRE'];
@@ -206,9 +207,9 @@ export function FlottePage() {
                       {v.nombreDisponibles} disponibles
                     </span>
                   )}
-                  {v.nombreDisponibles === 0 && v.prochaineDateDisponible && (
-                    <span className="absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-500 text-white shadow">
-                      Dispo le {new Date(v.prochaineDateDisponible).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                  {v.nombreDisponibles === 0 && (v.dateDebutIndisponible || v.prochaineDateDisponible) && (
+                    <span className="absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-full bg-red-500 text-white shadow">
+                      Indisponible du {new Date(v.dateDebutIndisponible || v.prochaineDateDisponible!).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                     </span>
                   )}
                 </div>

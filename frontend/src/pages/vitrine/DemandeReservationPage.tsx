@@ -31,6 +31,7 @@ interface VehiculePublic {
   photos: string[];
   couleur?: string;
   prochaineDateDisponible?: string | null;
+  dateDebutIndisponible?: string | null;
 }
 
 interface ZonePublic {
@@ -557,6 +558,9 @@ export function DemandeReservationPage() {
                         const prochaineDate = v.prochaineDateDisponible
                           ? new Date(v.prochaineDateDisponible).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
                           : null;
+                        const dateDebutIndisp = v.dateDebutIndisponible
+                          ? new Date(v.dateDebutIndisponible).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
+                          : null;
                         return (
                         <button
                           key={v.id}
@@ -581,9 +585,9 @@ export function DemandeReservationPage() {
                               </div>
                             )}
                             {prochaineDate && (
-                              <div className="absolute inset-0 bg-orange-500/10 flex items-center justify-center">
-                                <span className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow">
-                                  Dispo le {prochaineDate}
+                              <div className="absolute inset-0 bg-red-500/10 flex items-center justify-center">
+                                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow">
+                                  Indisponible du {dateDebutIndisp || prochaineDate}
                                 </span>
                               </div>
                             )}
