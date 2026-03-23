@@ -121,7 +121,9 @@ export function ParametresPage() {
 
   // Logo
   const [logoUploading, setLogoUploading] = useState(false);
+  const [logoDeleting, setLogoDeleting] = useState(false);
   const [logoSuccess, setLogoSuccess] = useState('');
+  const [logoError, setLogoError] = useState('');
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -146,7 +148,7 @@ export function ParametresPage() {
     { enabled: isAdmin === true }
   );
 
-  const { data: settingsData } = useQuery(
+  const { data: settingsData, refetch: refetchSettings } = useQuery(
     ['settings'],
     () => settingsApi.get(),
     { enabled: isAdmin === true }
@@ -317,7 +319,7 @@ export function ParametresPage() {
   }
 
   async function handleLogoUpload(file: File) {
-    setLogoUploading(true); setLogoSuccess('');
+    setLogoUploading(true); setLogoSuccess(''); setLogoError('');
     // Aperçu local immédiat
     const reader = new FileReader();
     reader.onload = e => setLogoPreview(e.target?.result as string);
@@ -325,11 +327,30 @@ export function ParametresPage() {
     try {
       await settingsApi.uploadLogo(file);
       setLogoSuccess('Logo mis à jour avec succès');
-      // Rafraîchir le branding dans toute l'app (navbar, sidebar...)
+      refetchSettings();
       window.dispatchEvent(new Event('tenant:updated'));
       setTimeout(() => setLogoSuccess(''), 3000);
-    } catch { /* silencieux */ }
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      setLogoError(e?.response?.data?.message || 'Erreur lors de l\'upload du logo');
+      setLogoPreview(null);
+    }
     finally { setLogoUploading(false); }
+  }
+
+  async function handleLogoDelete() {
+    setLogoDeleting(true); setLogoSuccess(''); setLogoError('');
+    try {
+      await settingsApi.deleteLogo();
+      setLogoPreview(null);
+      setLogoSuccess('Logo supprimé avec succès');
+      refetchSettings();
+      window.dispatchEvent(new Event('tenant:updated'));
+      setTimeout(() => setLogoSuccess(''), 3000);
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      setLogoError(e?.response?.data?.message || 'Erreur lors de la suppression du logo');
+    } finally { setLogoDeleting(false); }
   }
 
   async function handleSaveSettings(e: React.FormEvent) {
@@ -416,20 +437,36 @@ export function ParametresPage() {
                     type="file"
                     accept="image/jpeg,image/png,image/svg+xml,image/webp"
                     className="hidden"
-                    onChange={e => { const f = e.target.files?.[0]; if (f) handleLogoUpload(f); }}
+                    onChange={e => { const f = e.target.files?.[0]; if (f) { handleLogoUpload(f); e.target.value = ''; } }}
                   />
-                  <button
-                    type="button"
-                    onClick={() => logoInputRef.current?.click()}
-                    disabled={logoUploading}
-                    className="flex items-center gap-2 px-4 py-2 border border-asm-vert text-asm-vert text-sm font-medium rounded-lg hover:bg-asm-vert/5 transition-colors disabled:opacity-50"
-                  >
-                    <Upload className="h-4 w-4" />
-                    {logoUploading ? 'Upload en cours…' : 'Choisir un logo'}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      disabled={logoUploading || logoDeleting}
+                      className="flex items-center gap-2 px-4 py-2 border border-asm-vert text-asm-vert text-sm font-medium rounded-lg hover:bg-asm-vert/5 transition-colors disabled:opacity-50"
+                    >
+                      <Upload className="h-4 w-4" />
+                      {logoUploading ? 'Upload en cours…' : 'Choisir un logo'}
+                    </button>
+                    {(logoPreview || settingsData?.data?.logo) && (
+                      <button
+                        type="button"
+                        onClick={handleLogoDelete}
+                        disabled={logoUploading || logoDeleting}
+                        className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        {logoDeleting ? 'Suppression…' : 'Supprimer'}
+                      </button>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-400">PNG, JPG, SVG ou WEBP — max 2 Mo</p>
                   {logoSuccess && (
                     <p className="text-xs text-green-600 flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" />{logoSuccess}</p>
+                  )}
+                  {logoError && (
+                    <p className="text-xs text-red-600">{logoError}</p>
                   )}
                 </div>
               </div>

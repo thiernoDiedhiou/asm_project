@@ -294,6 +294,7 @@ export const settingsApi = {
     form.append('logo', file);
     return api.post('/settings/logo', form, { headers: { 'Content-Type': 'multipart/form-data' } });
   },
+  deleteLogo: () => api.delete('/settings/logo'),
 };
 
 export { api };
