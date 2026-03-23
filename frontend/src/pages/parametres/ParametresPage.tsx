@@ -358,7 +358,9 @@ export function ParametresPage() {
     setSavingSettings(true);
     setSettingsError('');
     try {
-      await settingsApi.update(settingsForm as unknown as Record<string, unknown>);
+      // On envoie uniquement les champs de SettingsFormData — jamais `logo` (géré séparément)
+      const { nomEntreprise, slogan, activite, telephone, telephone2, email, adresse, ville, rccm, ninea, heuresLunVen, heuresSamedi, noteTransfert, bannierePromo, promoSousTexte, promoReduction, promoDateFin } = settingsForm;
+      await settingsApi.update({ nomEntreprise, slogan, activite, telephone, telephone2, email, adresse, ville, rccm, ninea, heuresLunVen, heuresSamedi, noteTransfert, bannierePromo, promoSousTexte, promoReduction, promoDateFin });
       setSettingsSuccess('Paramètres enregistrés avec succès');
       setTimeout(() => setSettingsSuccess(''), 3000);
     } catch (err: unknown) {
