@@ -18,6 +18,7 @@ interface DatePickerInputProps {
   min?: string; // "YYYY-MM-DD", défaut = aujourd'hui
   placeholder?: string;
   disabled?: boolean;
+  loading?: boolean;
   'aria-label'?: string;
 }
 
@@ -29,6 +30,7 @@ export function DatePickerInput({
   min,
   placeholder = 'Sélectionner une date',
   disabled = false,
+  loading = false,
   'aria-label': ariaLabel,
 }: DatePickerInputProps) {
   const [open, setOpen] = useState(false);
@@ -61,17 +63,17 @@ export function DatePickerInput({
   }
 
   return (
-    <Popover.Root open={open} onOpenChange={disabled ? undefined : setOpen}>
+    <Popover.Root open={open} onOpenChange={(disabled || loading) ? undefined : setOpen}>
       <Popover.Trigger asChild>
         <button
           type="button"
           aria-label={ariaLabel}
-          disabled={disabled}
+          disabled={disabled || loading}
           className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-left flex items-center gap-2 bg-white focus:outline-none focus:ring-2 focus:ring-asm-vert/30 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed hover:border-gray-300 transition-colors"
         >
           <Calendar className="h-4 w-4 text-gray-400 shrink-0" />
           <span className={value ? 'text-gray-900' : 'text-gray-400'}>
-            {value ? format(parseISO(value), 'dd MMMM yyyy', { locale: fr }) : placeholder}
+            {loading ? 'Chargement des disponibilités…' : value ? format(parseISO(value), 'dd MMMM yyyy', { locale: fr }) : placeholder}
           </span>
         </button>
       </Popover.Trigger>

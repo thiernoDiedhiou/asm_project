@@ -131,7 +131,7 @@ export function ReservationFormPage() {
   const { data: zonesData }    = useQuery(['tarif-matrix'],   () => tarificationApi.getMatrix());
 
   // Périodes occupées du véhicule sélectionné (pour le date picker)
-  const { data: periodesData } = useQuery(
+  const { data: periodesData, isLoading: periodesLoading } = useQuery(
     ['periodes-occupees', form.vehiculeId],
     () => vehiculesApi.getPeriodesOccupees(form.vehiculeId),
     { enabled: !!form.vehiculeId }
@@ -560,6 +560,7 @@ export function ReservationFormPage() {
                 onChange={v => { set('dateDebut', v); }}
                 onBlur={checkDispo}
                 periodesOccupees={periodesOccupees}
+                loading={periodesLoading && !!form.vehiculeId}
                 min={new Date().toISOString().split('T')[0]}
                 placeholder="Sélectionner la date"
               />
@@ -581,6 +582,7 @@ export function ReservationFormPage() {
                     onChange={v => { set('dateDebut', v); }}
                     onBlur={checkDispo}
                     periodesOccupees={periodesOccupees}
+                    loading={periodesLoading && !!form.vehiculeId}
                     min={new Date().toISOString().split('T')[0]}
                     placeholder="Date de début"
                   />
@@ -595,6 +597,7 @@ export function ReservationFormPage() {
                     onChange={v => { set('dateFin', v); }}
                     onBlur={checkDispo}
                     periodesOccupees={periodesOccupees}
+                    loading={periodesLoading && !!form.vehiculeId}
                     min={form.dateDebut || new Date().toISOString().split('T')[0]}
                     placeholder="Date de fin"
                   />
