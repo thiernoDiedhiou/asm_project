@@ -8,6 +8,7 @@ import { reservationsApi, clientsApi, vehiculesApi, tarificationApi } from '../.
 import { useQuery } from '../../components/hooks/useQuery';
 import { formatFCFA } from '../../utils/format';
 import { useTenant } from '../../contexts/TenantContext';
+import { DatePickerInput } from '../../components/ui/DatePickerInput';
 
 const TYPE_TRAJET = [
   {
@@ -128,6 +129,14 @@ export function ReservationFormPage() {
   // sont masqués côté frontend. La vérification exacte se fait via checkDisponibilite().
   const { data: vehiculesData } = useQuery(['vehicules-dispo'], () => vehiculesApi.getAll({ limit: 100 }));
   const { data: zonesData }    = useQuery(['tarif-matrix'],   () => tarificationApi.getMatrix());
+
+  // Périodes occupées du véhicule sélectionné (pour le date picker)
+  const { data: periodesData } = useQuery(
+    ['periodes-occupees', form.vehiculeId],
+    () => vehiculesApi.getPeriodesOccupees(form.vehiculeId),
+    { enabled: !!form.vehiculeId }
+  );
+  const periodesOccupees: { debut: string; fin: string }[] = (periodesData?.data as unknown as { debut: string; fin: string }[]) ?? [];
 
   const clients:  Client[]    = clientsData?.data  || [];
   // Exclure les véhicules hors service / en maintenance (non louables)
@@ -544,15 +553,14 @@ export function ReservationFormPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Date de la course <span className="text-red-500">*</span>
               </label>
-              <input
+              <DatePickerInput
                 aria-label="Date de la course"
-                required
-                type="date"
                 value={form.dateDebut}
-                onChange={e => set('dateDebut', e.target.value)}
+                onChange={v => { set('dateDebut', v); }}
                 onBlur={checkDispo}
+                periodesOccupees={periodesOccupees}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert/30 focus:border-transparent"
+                placeholder="Sélectionner la date"
               />
               <p className="mt-2 text-xs text-gray-400 flex items-center gap-1.5">
                 <Plane className="h-3 w-3" />
@@ -566,30 +574,28 @@ export function ReservationFormPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Date de début <span className="text-red-500">*</span>
                   </label>
-                  <input
+                  <DatePickerInput
                     aria-label="Date de début"
-                    required
-                    type="date"
                     value={form.dateDebut}
-                    onChange={e => set('dateDebut', e.target.value)}
+                    onChange={v => { set('dateDebut', v); }}
                     onBlur={checkDispo}
+                    periodesOccupees={periodesOccupees}
                     min={new Date().toISOString().split('T')[0]}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert/30 focus:border-transparent"
+                    placeholder="Date de début"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Date de fin <span className="text-red-500">*</span>
                   </label>
-                  <input
+                  <DatePickerInput
                     aria-label="Date de fin"
-                    required
-                    type="date"
                     value={form.dateFin}
-                    onChange={e => set('dateFin', e.target.value)}
+                    onChange={v => { set('dateFin', v); }}
                     onBlur={checkDispo}
+                    periodesOccupees={periodesOccupees}
                     min={form.dateDebut || new Date().toISOString().split('T')[0]}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert/30 focus:border-transparent"
+                    placeholder="Date de fin"
                   />
                 </div>
               </div>

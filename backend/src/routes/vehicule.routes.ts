@@ -64,6 +64,12 @@ router.get(
   vehiculeController.checkDisponibilite.bind(vehiculeController)
 );
 
+router.get(
+  '/:id/periodes-occupees',
+  authenticateToken,
+  vehiculeController.getPeriodesOccupees.bind(vehiculeController)
+);
+
 // Routes Admin seulement
 router.post(
   '/',

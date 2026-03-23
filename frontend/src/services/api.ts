@@ -162,6 +162,8 @@ export const vehiculesApi = {
   delete: (id: string) => api.delete(`/vehicules/${id}`),
   checkDisponibilite: (id: string, debut: string, fin: string) =>
     api.get(`/vehicules/${id}/disponibilite`, { params: { debut, fin } }),
+  getPeriodesOccupees: (id: string) =>
+    api.get<{ debut: string; fin: string }[]>(`/vehicules/${id}/periodes-occupees`),
   uploadPhotos: (id: string, formData: FormData) =>
     api.post(`/vehicules/${id}/photos`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },

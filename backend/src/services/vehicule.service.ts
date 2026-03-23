@@ -298,6 +298,50 @@ export class VehiculeService {
   }
 
   /**
+   * Retourne toutes les périodes où le véhicule est occupé (réservations + maintenances actives)
+   */
+  async getPeriodesOccupees(vehiculeId: string, tenantId: string): Promise<{ debut: string; fin: string }[]> {
+    const vehicule = await prisma.vehicule.findFirst({ where: { id: vehiculeId, tenantId } });
+    if (!vehicule) throw new Error('Véhicule introuvable');
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [reservations, maintenances] = await Promise.all([
+      prisma.reservation.findMany({
+        where: {
+          vehiculeId,
+          tenantId,
+          statut: { in: ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'] },
+          dateFin: { gte: today },
+        },
+        select: { dateDebut: true, dateFin: true },
+      }),
+      prisma.maintenance.findMany({
+        where: {
+          vehiculeId,
+          statut: { in: ['PLANIFIEE', 'EN_COURS'] },
+          OR: [{ dateFin: { gte: today } }, { dateFin: null }],
+        },
+        select: { dateDebut: true, dateFin: true },
+      }),
+    ]);
+
+    return [
+      ...reservations.map(r => ({
+        debut: r.dateDebut.toISOString().split('T')[0],
+        fin: r.dateFin.toISOString().split('T')[0],
+      })),
+      ...maintenances
+        .filter(m => m.dateFin !== null)
+        .map(m => ({
+          debut: m.dateDebut.toISOString().split('T')[0],
+          fin: m.dateFin!.toISOString().split('T')[0],
+        })),
+    ];
+  }
+
+  /**
    * Ajoute des photos à un véhicule
    */
   async addPhotos(id: string, photoPaths: string[], tenantId: string) {
