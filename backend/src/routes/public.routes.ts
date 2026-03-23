@@ -41,6 +41,12 @@ router.get(
   publicController.getTenantPublicInfo.bind(publicController)
 );
 
+// GET /api/public/vehicules/:id/periodes-occupees — périodes indisponibles d'un véhicule (vitrine)
+router.get(
+  '/vehicules/:id/periodes-occupees',
+  publicController.getPeriodesOccupees.bind(publicController)
+);
+
 // GET /api/public/plans — plans d'abonnement avec tarifs (pour page /pricing)
 router.get(
   '/plans',

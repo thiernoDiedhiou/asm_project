@@ -535,6 +535,61 @@ export class PublicController {
       sendError(res, error instanceof Error ? error.message : 'Erreur lors de l\'envoi', 500);
     }
   }
+
+  /**
+   * GET /api/public/vehicules/:id/periodes-occupees
+   * Retourne les périodes où le véhicule est indisponible (réservations + maintenances).
+   * Accessible sans authentification pour permettre le blocage des dates sur la vitrine.
+   */
+  async getPeriodesOccupees(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const tenantId = req.tenantId!;
+
+      const vehicule = await prisma.vehicule.findFirst({ where: { id, tenantId } });
+      if (!vehicule) { sendError(res, 'Véhicule introuvable', 404); return; }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const [reservations, maintenances] = await Promise.all([
+        prisma.reservation.findMany({
+          where: {
+            vehiculeId: id,
+            tenantId,
+            statut: { in: ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'] },
+            dateFin: { gte: today },
+          },
+          select: { dateDebut: true, dateFin: true },
+        }),
+        prisma.maintenance.findMany({
+          where: {
+            vehiculeId: id,
+            statut: { in: ['PLANIFIEE', 'EN_COURS'] },
+            OR: [{ dateFin: { gte: today } }, { dateFin: null }],
+          },
+          select: { dateDebut: true, dateFin: true },
+        }),
+      ]);
+
+      const periodes = [
+        ...reservations.map((r) => ({
+          debut: r.dateDebut.toISOString().split('T')[0],
+          fin: r.dateFin.toISOString().split('T')[0],
+        })),
+        ...maintenances
+          .filter((m) => m.dateFin !== null)
+          .map((m) => ({
+            debut: m.dateDebut.toISOString().split('T')[0],
+            fin: m.dateFin!.toISOString().split('T')[0],
+          })),
+      ];
+
+      sendSuccess(res, periodes);
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
+    }
+  }
 }
 
 export const publicController = new PublicController();

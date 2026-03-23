@@ -261,6 +261,8 @@ export const journalApi = {
 export const publicApi = {
   getVehicules: (params?: { dateDebut?: string; dateFin?: string }) =>
     api.get('/public/vehicules', { params }),
+  getPeriodesOccupees: (vehiculeId: string) =>
+    api.get(`/public/vehicules/${vehiculeId}/periodes-occupees`),
   getZones: () => api.get('/public/zones'),
   createDemande: (data: Record<string, unknown>) =>
     api.post('/public/reservation', data),

@@ -19,6 +19,7 @@ import {
   Check,
 } from 'lucide-react';
 import { publicApi } from '../../services/api';
+import { DatePickerInput } from '../../components/ui/DatePickerInput';
 
 interface VehiculePublic {
   id: string;
@@ -141,6 +142,7 @@ export function DemandeReservationPage() {
 
   // Étape 2 — Réservation
   const [vehiculeId, setVehiculeId] = useState(vehiculeIdParam);
+  const [periodesOccupees, setPeriodesOccupees] = useState<{ debut: string; fin: string }[]>([]);
   const [dateDebut, setDateDebut] = useState('');
   const [dateFin, setDateFin] = useState('');
   const [heureDepart, setHeureDepart] = useState('');
@@ -191,6 +193,14 @@ export function DemandeReservationPage() {
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateDebut, dateFin]);
+
+  // Charger les périodes occupées quand le véhicule sélectionné change
+  useEffect(() => {
+    if (!vehiculeId) { setPeriodesOccupees([]); return; }
+    publicApi.getPeriodesOccupees(vehiculeId)
+      .then((res) => setPeriodesOccupees(res.data?.data ?? []))
+      .catch(() => setPeriodesOccupees([]));
+  }, [vehiculeId]);
 
   const vehiculePreselectionne = !!vehiculeIdParam;
   const vehiculeSelectionne = vehicules.find((v) => v.id === vehiculeId);
@@ -622,14 +632,12 @@ export function DemandeReservationPage() {
                         Date du transfert <span className="text-red-500">*</span>
                       </span>
                     </label>
-                    <input
-                      required
-                      type="date"
+                    <DatePickerInput
                       aria-label="Date du transfert"
-                      min={todayStr}
                       value={dateDebut}
-                      onChange={(e) => setDateDebut(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
+                      onChange={setDateDebut}
+                      periodesOccupees={periodesOccupees}
+                      min={todayStr}
                     />
                   </div>
                   <div>
@@ -658,17 +666,15 @@ export function DemandeReservationPage() {
                         Date de début <span className="text-red-500">*</span>
                       </span>
                     </label>
-                    <input
-                      required
-                      type="date"
+                    <DatePickerInput
                       aria-label="Date de début de location"
-                      min={todayStr}
                       value={dateDebut}
-                      onChange={(e) => {
-                        setDateDebut(e.target.value);
-                        if (dateFin && dateFin < e.target.value) setDateFin('');
+                      onChange={(v) => {
+                        setDateDebut(v);
+                        if (dateFin && dateFin < v) setDateFin('');
                       }}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
+                      periodesOccupees={periodesOccupees}
+                      min={todayStr}
                     />
                   </div>
                   <div>
@@ -678,14 +684,12 @@ export function DemandeReservationPage() {
                         Date de fin <span className="text-red-500">*</span>
                       </span>
                     </label>
-                    <input
-                      required
-                      type="date"
+                    <DatePickerInput
                       aria-label="Date de fin de location"
-                      min={dateDebut || todayStr}
                       value={dateFin}
-                      onChange={(e) => setDateFin(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
+                      onChange={setDateFin}
+                      periodesOccupees={periodesOccupees}
+                      min={dateDebut || todayStr}
                     />
                   </div>
                 </div>
