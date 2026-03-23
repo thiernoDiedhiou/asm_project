@@ -38,17 +38,23 @@ export function DatePickerInput({
   const minDate = min ? parseISO(min) : today;
   const selectedDate = value ? parseISO(value) : undefined;
 
-  // Dates à désactiver : avant la date minimale + périodes occupées
-  const disabledMatchers = [
-    { before: minDate },
-    ...periodesOccupees.map(p => ({
-      from: parseISO(p.debut),
-      to: parseISO(p.fin),
-    })),
-  ];
+  // Fonction de désactivation : avant minDate OU dans une période occupée
+  function isDisabled(date: Date): boolean {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    if (d < minDate) return true;
+    return periodesOccupees.some(({ debut, fin }) => {
+      const start = parseISO(debut);
+      const end = parseISO(fin);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      return d >= start && d <= end;
+    });
+  }
 
   function handleSelect(date: Date | undefined) {
-    if (!date) return;
+    // Double sécurité : ne pas accepter une date désactivée
+    if (!date || isDisabled(date)) return;
     onChange(format(date, 'yyyy-MM-dd'));
     setOpen(false);
     onBlur?.();
@@ -71,18 +77,30 @@ export function DatePickerInput({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
-          className="bg-white rounded-xl shadow-xl border border-gray-200 p-2 z-50 animate-in fade-in-0 zoom-in-95"
+          className="bg-white rounded-xl shadow-xl border border-gray-200 p-2 z-50"
           align="start"
           sideOffset={4}
         >
+          <style>{`
+            .rdp-day_button:disabled,
+            .rdp-day_button[disabled],
+            .rdp-day_button[aria-disabled="true"],
+            .rdp-day[data-disabled] .rdp-day_button {
+              pointer-events: none !important;
+              opacity: 0.35 !important;
+              cursor: not-allowed !important;
+              color: #9ca3af !important;
+              text-decoration: line-through !important;
+            }
+          `}</style>
           <DayPicker
             mode="single"
             selected={selectedDate}
             onSelect={handleSelect}
-            disabled={disabledMatchers}
+            disabled={isDisabled}
             startMonth={minDate}
             locale={fr}
-            showOutsideDays
+            showOutsideDays={false}
             style={
               {
                 '--rdp-accent-color': 'var(--color-primary, #1B5E20)',
