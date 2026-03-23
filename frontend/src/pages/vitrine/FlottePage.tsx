@@ -246,7 +246,7 @@ export function FlottePage() {
                   {v.nombreDisponibles === 0 && v.prochaineDateDisponible ? (
                     <button
                       onClick={() => navigate(`/reserver?vehiculeId=${v.id}`)}
-                      className="mt-4 w-full flex items-center justify-center gap-2 py-3 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition-colors"
+                      className="mt-4 w-full flex items-center justify-center gap-2 py-3 bg-asm-or text-white font-semibold rounded-xl hover:bg-asm-or-fonce transition-colors"
                     >
                       Réserver à partir du {new Date(v.prochaineDateDisponible).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                       <ChevronRight className="h-4 w-4" />
