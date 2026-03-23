@@ -409,12 +409,6 @@ export function ParametresPage() {
           <p className="text-xs text-gray-400 mb-5">Ces informations s'affichent sur la vitrine publique.</p>
 
           <form onSubmit={handleSaveSettings} className="space-y-5">
-            {settingsError && <div className="bg-red-50 text-red-700 text-sm p-3 rounded-lg">{settingsError}</div>}
-            {settingsSuccess && (
-              <div className="bg-green-50 text-green-700 text-sm p-3 rounded-lg flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" /> {settingsSuccess}
-              </div>
-            )}
 
             {/* Section Logo */}
             <div>
@@ -641,7 +635,13 @@ export function ParametresPage() {
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 space-y-3">
+              {settingsError && <div className="bg-red-50 text-red-700 text-sm p-3 rounded-lg">{settingsError}</div>}
+              {settingsSuccess && (
+                <div className="bg-green-50 text-green-700 text-sm p-3 rounded-lg flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" /> {settingsSuccess}
+                </div>
+              )}
               <button
                 type="submit"
                 disabled={savingSettings}
