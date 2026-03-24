@@ -114,6 +114,7 @@ img { display: block; max-width: 100%; }
   background: var(--blue-xl); color: var(--blue);
   border: 1px solid rgba(37,99,235,.14);
   margin-bottom: 16px;
+  position: relative; overflow: hidden;
 }
 .sec-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); }
 
@@ -732,6 +733,15 @@ footer {
   gap: 48px; margin-bottom: 48px;
 }
 .ft-about { font-size: 13px; color: var(--muted); line-height: 1.8; max-width: 230px; margin-top: 12px; }
+.ft-contact-item { display: flex; align-items: flex-start; gap: 7px; font-size: 13px; color: var(--muted); margin-bottom: 9px; line-height: 1.55; }
+.ft-contact-item svg { flex-shrink: 0; margin-top: 2px; }
+.ft-contact-item a { color: var(--muted); transition: color .15s; }
+.ft-contact-item a:hover { color: var(--blue); }
+.ft-devby { border-top: 1px solid var(--line); padding-top: 20px; margin-top: 20px; }
+.ft-devby-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--ink); margin-bottom: 8px; }
+.ft-devby p { font-size: 12.5px; color: var(--muted); line-height: 1.7; max-width: 220px; }
+.ft-devby a { color: var(--blue); font-weight: 500; transition: color .15s; }
+.ft-devby a:hover { color: var(--blue-dk); }
 .ft-col-h { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--ink); margin-bottom: 14px; }
 .ft-link { display: block; font-size: 13px; color: var(--muted); margin-bottom: 9px; transition: color .15s; }
 .ft-link:hover { color: var(--ink); }
@@ -748,8 +758,103 @@ footer {
 /* ═══════════════════════════════════════════
    REVEAL ANIMATION
 ═══════════════════════════════════════════ */
-.reveal { opacity: 0; transform: translateY(22px); transition: opacity .55s ease, transform .55s ease; }
-.reveal.in { opacity: 1; transform: none; }
+/* ── Base reveal ── */
+.reveal       { opacity:0; transform:translateY(28px);  transition:opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+.reveal.in    { opacity:1; transform:none; }
+.reveal-left  { opacity:0; transform:translateX(-38px); transition:opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+.reveal-left.in  { opacity:1; transform:none; }
+.reveal-right { opacity:0; transform:translateX(38px);  transition:opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+.reveal-right.in { opacity:1; transform:none; }
+.reveal-zoom  { opacity:0; transform:scale(.88) translateY(14px); transition:opacity .65s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.34,1.4,.64,1); }
+.reveal-zoom.in  { opacity:1; transform:none; }
+
+/* ── Stagger delays ── */
+.d1 { transition-delay: .08s !important; }
+.d2 { transition-delay: .17s !important; }
+.d3 { transition-delay: .26s !important; }
+.d4 { transition-delay: .35s !important; }
+.d5 { transition-delay: .44s !important; }
+.d6 { transition-delay: .53s !important; }
+
+/* ── Hero entrance (plays immediately on load) ── */
+.h-anim { opacity:0; animation: hIn .85s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes hIn { to { opacity:1; transform:none; } }
+.h-anim-1 { transform:translateY(22px); animation-delay:.05s; }
+.h-anim-2 { transform:translateY(26px); animation-delay:.22s; }
+.h-anim-3 { transform:translateY(20px); animation-delay:.40s; }
+.h-anim-4 { transform:translateY(18px); animation-delay:.56s; }
+.h-anim-5 { transform:translateY(14px); animation-delay:.70s; }
+.h-anim-r { transform:translateX(44px) scale(.94); animation-delay:.35s; }
+
+/* ── Bento card hover glow ── */
+.bc::after {
+  content:''; position:absolute; top:0; left:15%; right:15%; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(37,99,235,.55),transparent);
+  opacity:0; transition:opacity .3s;
+}
+.bc:hover::after { opacity:1; }
+.bc:hover {
+  transform:translateY(-7px) scale(1.013);
+  box-shadow:0 28px 70px rgba(15,23,42,.13), 0 0 0 1px rgba(37,99,235,.1);
+}
+
+/* ── Popular plan pulsing glow ── */
+@keyframes popGlow {
+  0%,100% { box-shadow:0 0 0 1px rgba(37,99,235,.18), 0 8px 32px rgba(37,99,235,.12); }
+  50%      { box-shadow:0 0 0 2px rgba(37,99,235,.45), 0 20px 56px rgba(37,99,235,.24); }
+}
+.plan.pop { animation:popGlow 3.5s ease-in-out infinite; }
+.plan.pop:hover { animation:none; transform:translateY(-6px); box-shadow:0 0 0 2px rgba(37,99,235,.5), 0 24px 64px rgba(37,99,235,.28); }
+
+/* ── Step number ring on hover ── */
+@keyframes ringPulse {
+  0%,100% { box-shadow:0 6px 20px rgba(37,99,235,.35); }
+  50%      { box-shadow:0 6px 20px rgba(37,99,235,.35), 0 0 0 10px rgba(37,99,235,.09); }
+}
+.step:hover .step-num { animation:ringPulse 1.3s ease-in-out infinite; }
+
+/* ── Testimonial card enhanced hover ── */
+.tc:hover { transform:translateY(-6px) scale(1.012); box-shadow:0 20px 52px rgba(245,158,11,.12), 0 2px 8px rgba(15,23,42,.07); }
+
+/* ── Metric value flash after counting ── */
+@keyframes valFlash {
+  0%   { filter:brightness(1); }
+  40%  { filter:brightness(1.6) drop-shadow(0 0 14px rgba(147,197,253,.75)); }
+  100% { filter:brightness(1); }
+}
+.metric-val.flashed { animation:valFlash .9s ease; }
+
+/* ── Floating orbs — metrics section ── */
+.m-orb { position:absolute; border-radius:50%; pointer-events:none; filter:blur(72px); }
+.m-orb-1 { width:360px; height:360px; background:rgba(37,99,235,.20); top:-130px; left:-90px; animation:orbF 9s ease-in-out infinite; }
+.m-orb-2 { width:260px; height:260px; background:rgba(245,158,11,.13); bottom:-110px; right:8%;  animation:orbF 11s ease-in-out infinite reverse; }
+.m-orb-3 { width:180px; height:180px; background:rgba(5,150,105,.10);  top:10px;    right:32%; animation:orbF 7s ease-in-out infinite 1.5s; }
+@keyframes orbF { 0%,100%{transform:translate(0,0)} 50%{transform:translate(22px,28px)} }
+
+/* ── Floating orbs — CTA section ── */
+.cta-orb { position:absolute; border-radius:50%; pointer-events:none; filter:blur(80px); opacity:.16; }
+.cta-orb-1 { width:420px; height:420px; background:var(--blue);  top:-170px; right:-100px; animation:orbF 10s ease-in-out infinite; }
+.cta-orb-2 { width:320px; height:320px; background:#7c3aed; bottom:-130px; left:4%;   animation:orbF 8s ease-in-out infinite reverse; }
+
+/* ── Eyebrow shimmer sweep ── */
+.sec-eyebrow { overflow:hidden; }
+.sec-eyebrow::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(90deg, transparent 0%, rgba(255,255,255,.5) 50%, transparent 100%);
+  background-size:200% 100%;
+  animation:ewShimmer 3.2s ease-in-out infinite;
+}
+@keyframes ewShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+
+/* ── Section title gradient ── */
+.sec-h2-grad {
+  background:linear-gradient(135deg, var(--ink) 0%, var(--ink-3) 45%, var(--blue) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+
+/* ── Agence card hover ── */
+.agence-card { transition:transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease !important; }
+.agence-card:hover { transform:translateY(-6px) !important; box-shadow:0 20px 52px rgba(15,23,42,.12) !important; }
 
 /* ═══════════════════════════════════════════
    AGENCES
@@ -909,16 +1014,63 @@ footer {
   .ft-grid { grid-template-columns: 1fr 1fr; }
 }
 
+/* Hamburger button */
+.nav-burger {
+  display: none;
+  flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+  width: 40px; height: 40px; border-radius: 8px;
+  background: transparent; border: none; cursor: pointer;
+  margin-left: auto; flex-shrink: 0;
+  transition: background .15s;
+}
+.nav-burger:hover { background: rgba(255,255,255,.1); }
+#nav.on .nav-burger:hover { background: var(--wash); }
+.nav-burger span {
+  display: block; width: 20px; height: 2px; border-radius: 2px;
+  background: #fff; transition: transform .25s, opacity .25s, background .3s;
+}
+#nav.on .nav-burger span { background: var(--ink-3); }
+.nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { opacity: 0; }
+.nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Mobile menu overlay */
+.nav-mobile {
+  display: none;
+  position: fixed; top: 64px; left: 0; right: 0; z-index: 998;
+  background: rgba(255,255,255,.97);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 8px 32px rgba(15,23,42,.1);
+  padding: 16px 24px 24px;
+  flex-direction: column; gap: 4px;
+}
+.nav-mobile.open { display: flex; }
+.nav-mobile a {
+  padding: 12px 16px; border-radius: 10px;
+  font-size: 15px; font-weight: 500; color: var(--ink-3);
+  transition: background .15s, color .15s;
+}
+.nav-mobile a:hover { background: var(--wash); color: var(--blue); }
+.nav-mobile .nav-mobile-cta { margin-top: 8px; }
+
 @media (max-width: 640px) {
   .agences-grid { grid-template-columns: 1fr; }
   .nav-links { display: none; }
-  .nav-end .btn-stroke { display: none; }
+  .nav-end { display: none; }
+  .nav-burger { display: flex; }
   .hero-inner { padding-top: 48px; padding-bottom: 60px; }
   .hero-h1 { font-size: clamp(34px, 9vw, 48px); }
   .hero-p { font-size: 15px; }
   .btn-xl { padding: 14px 26px; font-size: 15px; }
   .hero-cta { flex-direction: column; align-items: center; }
   .hero-cta .btn { width: 100%; max-width: 320px; justify-content: center; }
+  /* Statistics fixes */
+  .metrics-band { grid-template-columns: 1fr 1fr; }
+  .metric { padding: 28px 16px; border-right: none; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .metric:nth-child(odd) { border-right: 1px solid rgba(255,255,255,.07); }
+  .metric:nth-last-child(-n+2) { border-bottom: none; }
+  .metric-val { font-size: 32px; }
   .bento { grid-template-columns: 1fr; }
   .b12 .mini-grid { grid-template-columns: 1fr 1fr; }
   .metrics-band { grid-template-columns: 1fr 1fr; }
@@ -956,8 +1108,23 @@ footer {
     <div class="nav-end">
       <a href="contact.html" class="btn btn-blue btn-sm">Essai gratuit</a>
     </div>
+
+    <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+
+<!-- Mobile menu -->
+<div class="nav-mobile" id="navMobile">
+  <a href="#features">Fonctionnalités</a>
+  <a href="#how">Démarrage</a>
+  <a href="#pricing">Tarifs</a>
+  <a href="#testi">Avis</a>
+  <a href="#logos">Agences</a>
+  <a href="#logos" style="color:var(--amber);font-weight:600">Louer un véhicule</a>
+  <a href="contact.html" class="btn btn-blue btn-sm nav-mobile-cta" style="text-align:center">Essai gratuit</a>
+</div>
 
 <!-- ── HERO ────────────────────────────────── -->
 <section id="hero">
@@ -968,24 +1135,24 @@ footer {
   <div class="wrap hero-inner">
     <!-- LEFT -->
     <div>
-      <div class="hero-pill">
+      <div class="hero-pill h-anim h-anim-1">
         <span class="hero-pill-ico">🚗</span>
         Plateforme SaaS &nbsp;·&nbsp; Location de véhicules
       </div>
 
-      <h1 class="hero-h1">
+      <h1 class="hero-h1 h-anim h-anim-2">
         Votre agence,<br/>
         <span class="hi">pilotée</span><br/>
         à pleine vitesse.
       </h1>
 
-      <p class="hero-p">
+      <p class="hero-p h-anim h-anim-3">
         InnoSoft Location est le logiciel tout-en-un pour gérer votre flotte,
         vos clients, vos contrats et vos encaissements.
         Moins de paperasse. Plus de locations.
       </p>
 
-      <div class="hero-cta">
+      <div class="hero-cta h-anim h-anim-4">
         <a href="contact.html" class="btn btn-amber btn-xl">
           Démarrer gratuitement
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -1001,7 +1168,7 @@ footer {
         </a>
       </div>
 
-      <div class="hero-trust">
+      <div class="hero-trust h-anim h-anim-5">
         <div class="trust-pile">
           <span class="tpx tp1">BA</span>
           <span class="tpx tp2">ZA</span>
@@ -1013,7 +1180,7 @@ footer {
     </div>
 
     <!-- RIGHT — car visual -->
-    <div class="hero-visual">
+    <div class="hero-visual h-anim h-anim-r">
       <div class="car-wrap">
 
         <div class="fc fc-tl">
@@ -1158,6 +1325,9 @@ footer {
 
 <!-- ── METRICS ─────────────────────────────── -->
 <section id="metrics">
+  <div class="m-orb m-orb-1"></div>
+  <div class="m-orb m-orb-2"></div>
+  <div class="m-orb m-orb-3"></div>
   <div class="wrap">
     <div class="metrics-band reveal">
       <div class="metric">
@@ -1298,19 +1468,19 @@ footer {
       <p class="sec-p">Pas d'installation, pas de configuration complexe. Votre agence est en ligne en trois étapes.</p>
     </div>
     <div class="steps">
-      <div class="step reveal">
+      <div class="step reveal-left d1">
         <div class="step-num">01</div>
         <span class="step-ico">🏢</span>
         <div class="step-h">Créez votre espace</div>
         <div class="step-p">Renseignez le nom de votre agence, choisissez votre sous-domaine, importez votre logo. Votre tableau de bord est actif immédiatement.</div>
       </div>
-      <div class="step reveal">
+      <div class="step reveal-left d2">
         <div class="step-num">02</div>
         <span class="step-ico">🚗</span>
         <div class="step-h">Ajoutez votre flotte</div>
         <div class="step-p">Importez vos véhicules avec photos, immatriculations, catégories et tarifs. La disponibilité se met à jour automatiquement.</div>
       </div>
-      <div class="step reveal">
+      <div class="step reveal-left d3">
         <div class="step-num">03</div>
         <span class="step-ico">💰</span>
         <div class="step-h">Louez & encaissez</div>
@@ -1330,7 +1500,7 @@ footer {
     </div>
     <div class="plans">
 
-      <div class="plan reveal">
+      <div class="plan reveal-zoom d1">
         <div class="plan-tier">Starter</div>
         <div class="plan-price">Gratuit</div>
         <div class="plan-billing">14 jours · toutes fonctionnalités</div>
@@ -1346,7 +1516,7 @@ footer {
         <a href="#cta" class="btn btn-stroke plan-btn">Commencer l'essai</a>
       </div>
 
-      <div class="plan pop reveal">
+      <div class="plan pop reveal-zoom d2">
         <div class="plan-badge">⭐ Le plus populaire</div>
         <div class="plan-tier">Pro</div>
         <div class="plan-price">49 000<sub> F</sub></div>
@@ -1363,7 +1533,7 @@ footer {
         <a href="#cta" class="btn btn-blue plan-btn">Choisir Pro</a>
       </div>
 
-      <div class="plan reveal">
+      <div class="plan reveal-zoom d3">
         <div class="plan-tier">Entreprise</div>
         <div class="plan-price" style="font-size:32px">Sur mesure</div>
         <div class="plan-billing">Devis personnalisé</div>
@@ -1392,7 +1562,7 @@ footer {
     </div>
     <div class="testi-grid">
 
-      <div class="tc reveal">
+      <div class="tc reveal d1">
         <div class="tc-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
         <div class="tc-txt">"Avant InnoSoft Location, on gérait tout sur papier. Aujourd'hui nos contrats sont prêts en 30 secondes et on ne perd plus aucun paiement. Le ROI est immédiat."</div>
         <div class="tc-author">
@@ -1401,7 +1571,7 @@ footer {
         </div>
       </div>
 
-      <div class="tc reveal">
+      <div class="tc reveal d2">
         <div class="tc-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
         <div class="tc-txt">"La gestion multi-rôles est parfaite. Mes agents voient uniquement ce dont ils ont besoin, mon comptable a ses rapports en temps réel. C'est propre."</div>
         <div class="tc-author">
@@ -1410,7 +1580,7 @@ footer {
         </div>
       </div>
 
-      <div class="tc reveal">
+      <div class="tc reveal d3">
         <div class="tc-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
         <div class="tc-txt">"Le QR code sur les contrats a tout changé. Nos clients scannent et vérifient l'authenticité en quelques secondes. On a gagné en crédibilité."</div>
         <div class="tc-author">
@@ -1426,6 +1596,8 @@ footer {
 
 <!-- ── CTA ──────────────────────────────────── -->
 <section id="cta">
+  <div class="cta-orb cta-orb-1"></div>
+  <div class="cta-orb cta-orb-2"></div>
   <div class="cta-ring cr1"></div>
   <div class="cta-ring cr2"></div>
   <div class="cta-ring cr3"></div>
@@ -1507,11 +1679,25 @@ footer {
         <a href="#" class="ft-link">Blog</a>
       </div>
       <div>
-        <div class="ft-col-h">Innosoft</div>
-        <a href="#" class="ft-link">À propos</a>
-        <a href="mailto:contact@innosft.com" class="ft-link">Contact</a>
-        <a href="#" class="ft-link">Mentions légales</a>
-        <a href="#" class="ft-link">Confidentialité</a>
+        <div class="ft-col-h">Nous Contacter</div>
+        <div class="ft-contact-item">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Cité Verte, VCN<br/>Thiès, Sénégal
+        </div>
+        <div class="ft-contact-item">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.63 19.79 19.79 0 01.04 4.18 2 2 0 012 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 9.91a16 16 0 006.18 6.18l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          <span>+221 76 936 58 11<br/>+221 77 648 45 58</span>
+        </div>
+        <div class="ft-contact-item">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <a href="mailto:innosoftcreation@gmail.com">innosoftcreation@gmail.com</a>
+        </div>
+
+        <div class="ft-devby">
+          <div class="ft-devby-label">Développé par</div>
+          <p>Cette plateforme est conçue et maintenue par InnoSoft, agence spécialisée dans le développement de solutions numériques sur mesure.</p>
+          <a href="https://innosft.com" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:13px;">innosft.com →</a>
+        </div>
       </div>
     </div>
     <div class="ft-bottom">
@@ -1530,26 +1716,51 @@ footer {
   const nav = document.getElementById('nav');
   window.addEventListener('scroll', () => nav.classList.toggle('on', scrollY > 20), { passive: true });
 
-  // Scroll reveal with stagger
+  // Mobile menu toggle
+  const burger = document.getElementById('navBurger');
+  const mobileMenu = document.getElementById('navMobile');
+  burger.addEventListener('click', () => {
+    const open = burger.classList.toggle('open');
+    mobileMenu.classList.toggle('open', open);
+    burger.setAttribute('aria-expanded', open);
+  });
+  // Close menu on link click
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    burger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+    burger.setAttribute('aria-expanded', false);
+  }));
+
+  // Scroll reveal with stagger — all variants
+  const REVEAL_CLASSES = ['.reveal', '.reveal-left', '.reveal-right', '.reveal-zoom'];
   const ro = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
       if (!e.isIntersecting) return;
-      const peers = [...e.target.parentElement.querySelectorAll('.reveal:not(.in)')];
-      peers.forEach((el, i) => setTimeout(() => el.classList.add('in'), i * 70));
+      const SELS = REVEAL_CLASSES.map(c => `${c}:not(.in)`).join(',');
+      const peers = [...e.target.parentElement.querySelectorAll(SELS)];
+      // If d1-d6 classes are present, CSS handles delay; otherwise stagger via JS
+      const noDCSS = peers.filter(el => !['d1','d2','d3','d4','d5','d6'].some(d => el.classList.contains(d)));
+      noDCSS.forEach((el, i) => setTimeout(() => el.classList.add('in'), i * 80));
+      peers.filter(el => !noDCSS.includes(el)).forEach(el => el.classList.add('in'));
       e.target.classList.add('in');
       ro.unobserve(e.target);
     });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+  }, { threshold: 0.12 });
+  REVEAL_CLASSES.forEach(c => document.querySelectorAll(c).forEach(el => ro.observe(el)));
 
-  // Counter animation
+  // Counter animation with glow flash at the end
   function runCounter(el) {
-    const end = +el.dataset.count, sfx = el.dataset.suffix || '', dur = 1500;
+    const end = +el.dataset.count, sfx = el.dataset.suffix || '', dur = 1600;
     const t0 = performance.now();
     const tick = (t) => {
       const p = Math.min((t - t0) / dur, 1);
       el.textContent = Math.floor(end * (1 - Math.pow(1 - p, 3))).toLocaleString('fr-FR') + sfx;
-      if (p < 1) requestAnimationFrame(tick);
+      if (p < 1) {
+        requestAnimationFrame(tick);
+      } else {
+        el.classList.add('flashed');
+        el.addEventListener('animationend', () => el.classList.remove('flashed'), { once: true });
+      }
     };
     requestAnimationFrame(tick);
   }
