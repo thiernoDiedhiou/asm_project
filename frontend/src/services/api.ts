@@ -56,15 +56,27 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Pages publiques (vitrine) : pas besoin d'être connecté
+const PUBLIC_PATHS = ['/', '/flotte', '/reserver', '/tarifs', '/login', '/forgot-password', '/reset-password'];
+
+function isPublicPage(): boolean {
+  const { pathname } = window.location;
+  return PUBLIC_PATHS.includes(pathname) || pathname.startsWith('/contrats/verifier/');
+}
+
 // Force la déconnexion et redirige vers /login avec un message optionnel
+// Si on est sur une page publique (vitrine), on efface les tokens sans rediriger
 function forceLogout(reason?: string) {
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
   localStorage.removeItem('tenantSlug');
   // Émettre un événement global pour que l'app puisse réagir (toast, etc.)
   window.dispatchEvent(new CustomEvent('auth:forceLogout', { detail: { reason } }));
-  const url = reason ? `/login?reason=${encodeURIComponent(reason)}` : '/login';
-  window.location.href = url;
+  // Ne pas rediriger vers /login depuis une page publique — le client n'a pas besoin de se connecter
+  if (!isPublicPage()) {
+    const url = reason ? `/login?reason=${encodeURIComponent(reason)}` : '/login';
+    window.location.href = url;
+  }
 }
 
 // Intercepteur: rafraîchissement automatique du token expiré + gestion suspension tenant
@@ -100,7 +112,11 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
 
       if (!refreshToken) {
-        forceLogout();
+        // Seulement forcer la déconnexion si l'utilisateur était authentifié
+        // (accessToken présent = session active expirée, pas juste un visiteur anonyme)
+        if (localStorage.getItem('accessToken')) {
+          forceLogout();
+        }
         return Promise.reject(error);
       }
 
