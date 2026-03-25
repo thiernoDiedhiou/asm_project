@@ -1048,6 +1048,33 @@ footer {
 }
 .agences-empty p { margin-top: 8px; font-size: 13px; color: var(--soft); }
 
+/* Search bar */
+.agences-search-wrap {
+  display: flex; align-items: center; gap: 10px;
+  max-width: 520px; margin: 0 auto 32px;
+  background: var(--white); border: 1.5px solid var(--line);
+  border-radius: 100px; padding: 0 18px;
+  box-shadow: var(--s1);
+  transition: border-color .18s, box-shadow .18s;
+}
+.agences-search-wrap:focus-within {
+  border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+.agences-search-wrap svg { color: var(--soft); flex-shrink: 0; }
+.agences-search-input {
+  flex: 1; border: none; outline: none; background: transparent;
+  font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink-3);
+  padding: 13px 0;
+}
+.agences-search-input::placeholder { color: var(--soft); }
+.agences-search-clear {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  color: var(--soft); border-radius: 50%; display: none;
+  line-height: 1; transition: color .15s;
+}
+.agences-search-clear:hover { color: var(--ink-3); }
+.agences-search-clear.visible { display: flex; }
+
 /* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
@@ -1118,7 +1145,46 @@ footer {
 .nav-mobile .nav-mobile-cta { margin-top: 8px; }
 
 @media (max-width: 640px) {
-  .agences-grid { grid-template-columns: 1fr; }
+  /* Agences — 4 par ligne, mode compact logo + nom */
+  .agences-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .agence-card {
+    border-radius: 14px;
+    padding: 0;
+    box-shadow: var(--s1);
+  }
+  .agence-banner {
+    height: 72px;
+    border-radius: 14px 14px 0 0;
+  }
+  .agence-logo {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    border-width: 2px;
+  }
+  .agence-head {
+    padding: 6px 6px 8px;
+    gap: 0;
+  }
+  .agence-name {
+    font-size: 11px;
+    text-align: center;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+  .agence-head { border-bottom: none; }
+  .agence-activ,
+  .agence-ville { display: none; }
+  .agence-body  { display: none; }
+  .agence-footer { display: none; }
+  /* Carte entière cliquable sur mobile */
+  .agence-card[data-vitrine] { cursor: pointer; }
   .nav-links { display: none; }
   .nav-end { display: none; }
   .nav-burger { display: flex; }
@@ -1129,14 +1195,14 @@ footer {
   .hero-cta { flex-direction: column; align-items: center; }
   .hero-cta .btn { width: 100%; max-width: 320px; justify-content: center; }
   /* Statistics fixes */
-  .metrics-band { grid-template-columns: 1fr 1fr; }
-  .metric { padding: 28px 16px; border-right: none; border-bottom: 1px solid rgba(255,255,255,.07); }
-  .metric:nth-child(odd) { border-right: 1px solid rgba(255,255,255,.07); }
-  .metric:nth-last-child(-n+2) { border-bottom: none; }
-  .metric-val { font-size: 32px; }
+  .metrics-band { grid-template-columns: repeat(4, 1fr); }
+  .metric { padding: 20px 8px; border-right: 1px solid rgba(255,255,255,.07); border-bottom: none; }
+  .metric:last-child { border-right: none; }
+  .metric-icon { font-size: 16px; margin-bottom: 6px; }
+  .metric-val { font-size: 18px; margin-bottom: 4px; }
+  .metric-lbl { font-size: 10px; }
   .bento { grid-template-columns: 1fr; }
   .b12 .mini-grid { grid-template-columns: 1fr 1fr; }
-  .metrics-band { grid-template-columns: 1fr 1fr; }
   .ft-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
   .ft-grid > div:first-child { grid-column: 1 / -1; }
   .ft-grid > div:last-child  { grid-column: 1 / -1; }
@@ -1150,7 +1216,7 @@ footer {
 
 <!-- ── NAVBAR ─────────────────────────────── -->
 <nav id="nav">
-  <div class="wrap nav-row">
+  <div class="nav-row" style="padding-inline:24px">
     <a href="/" class="brand">
       <div class="brand-ico">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
@@ -1328,6 +1394,15 @@ footer {
       <h2 class="sec-h2">Trouvez une agence,<br/>réservez votre véhicule.</h2>
       <p class="sec-p">Ces agences utilisent InnoSoft Location. Consultez leurs coordonnées et accédez directement à leurs véhicules disponibles.</p>
     </div>
+    <div class="agences-search-wrap reveal">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input id="agences-search" class="agences-search-input" type="search" placeholder="Rechercher une agence par nom ou adresse…" autocomplete="off"/>
+      <button id="agences-search-clear" class="agences-search-clear" aria-label="Effacer la recherche">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
     <div class="agences-grid" id="agences-grid">
       <!-- Skeletons pendant le chargement -->
       <div class="agence-card agence-skeleton">
@@ -1397,22 +1472,22 @@ footer {
     <div class="metrics-band reveal">
       <div class="metric">
         <span class="metric-icon">🏢</span>
-        <div class="metric-val" data-count="50" data-suffix="+">0+</div>
+        <div class="metric-val">50+</div>
         <div class="metric-lbl">Agences actives</div>
       </div>
       <div class="metric">
         <span class="metric-icon">📄</span>
-        <div class="metric-val" data-count="5000" data-suffix="+">0+</div>
+        <div class="metric-val">5 000+</div>
         <div class="metric-lbl">Contrats générés</div>
       </div>
       <div class="metric">
         <span class="metric-icon">⚡</span>
-        <div class="metric-val" data-count="99" data-suffix=".9%">0%</div>
+        <div class="metric-val">99,9%</div>
         <div class="metric-lbl">Uptime garanti</div>
       </div>
       <div class="metric">
         <span class="metric-icon">🌍</span>
-        <div class="metric-val" data-count="6" data-suffix=" pays">0</div>
+        <div class="metric-val">6 pays</div>
         <div class="metric-lbl">Pays couverts</div>
       </div>
     </div>
@@ -1839,32 +1914,6 @@ footer {
   }, { threshold: 0.12 });
   REVEAL_CLASSES.forEach(c => document.querySelectorAll(c).forEach(el => ro.observe(el)));
 
-  // Counter animation with glow flash at the end
-  function runCounter(el) {
-    const end = +el.dataset.count, sfx = el.dataset.suffix || '', dur = 1600;
-    const t0 = performance.now();
-    const tick = (t) => {
-      const p = Math.min((t - t0) / dur, 1);
-      el.textContent = Math.floor(end * (1 - Math.pow(1 - p, 3))).toLocaleString('fr-FR') + sfx;
-      if (p < 1) {
-        requestAnimationFrame(tick);
-      } else {
-        el.classList.add('flashed');
-        el.addEventListener('animationend', () => el.classList.remove('flashed'), { once: true });
-      }
-    };
-    requestAnimationFrame(tick);
-  }
-  const co = new IntersectionObserver((entries) => {
-    entries.forEach((e) => {
-      if (!e.isIntersecting) return;
-      e.target.querySelectorAll('[data-count]').forEach(runCounter);
-      co.unobserve(e.target);
-    });
-  }, { threshold: 0.4 });
-  const mb = document.querySelector('.metrics-band');
-  if (mb) co.observe(mb);
-
   // ── Chargement dynamique des agences ──────────────────────
   const PLATFORM_DOMAIN = 'location.innosft.com';
   const API_BASE = 'https://admin.location.innosft.com';
@@ -1911,7 +1960,7 @@ footer {
       ? `<div class="agence-ville">${svg(10,10,pinPath)} ${a.ville}</div>` : '';
 
     return `
-      <div class="agence-card reveal">
+      <div class="agence-card reveal" data-vitrine="${vitrineUrl}">
         <div class="agence-banner" style="background:${color}">
           <div class="agence-logo">${logoHtml}</div>
         </div>
@@ -1933,6 +1982,38 @@ footer {
       </div>`;
   }
 
+  let allAgences = [];
+
+  function normalise(str) {
+    return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function renderFiltered(query) {
+    const grid = document.getElementById('agences-grid');
+    const q = normalise(query.trim());
+    const results = q
+      ? allAgences.filter(a =>
+          normalise(a.nomEntreprise).includes(q) ||
+          normalise(a.adresse).includes(q) ||
+          normalise(a.ville).includes(q)
+        )
+      : allAgences;
+
+    if (!results.length) {
+      grid.innerHTML = `<div class="agences-empty">🔍 Aucune agence trouvée pour « ${query} ».<p>Essayez un autre nom ou une autre ville.</p></div>`;
+      return;
+    }
+    grid.innerHTML = results.map(renderAgenceCard).join('');
+    grid.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+    // Clic sur toute la carte (utile sur mobile où le CTA est masqué)
+    grid.querySelectorAll('.agence-card[data-vitrine]').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('a')) return; // laisser les vrais liens fonctionner
+        window.open(card.dataset.vitrine, '_blank', 'noopener');
+      });
+    });
+  }
+
   async function loadAgences() {
     const grid = document.getElementById('agences-grid');
     try {
@@ -1942,20 +2023,36 @@ footer {
         throw new Error(`HTTP ${res.status} — ${body.slice(0, 120)}`);
       }
       const json = await res.json();
-      const agences = json.data || json;
+      allAgences = json.data || json;
 
-      if (!Array.isArray(agences) || !agences.length) {
+      if (!Array.isArray(allAgences) || !allAgences.length) {
         grid.innerHTML = `<div class="agences-empty">🏢 Aucune agence disponible pour le moment.<p>Soyez la première agence à rejoindre la plateforme !</p></div>`;
         return;
       }
 
-      grid.innerHTML = agences.map(renderAgenceCard).join('');
-      grid.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+      renderFiltered('');
     } catch (err) {
       console.error('[agences] fetch error:', err);
       grid.innerHTML = `<div class="agences-empty">⚠️ Impossible de charger les agences.<p style="font-family:monospace;font-size:11px;color:#ef4444">${err.message}</p></div>`;
     }
   }
+
+  // Search logic
+  const searchInput = document.getElementById('agences-search');
+  const searchClear = document.getElementById('agences-search-clear');
+
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value;
+    searchClear.classList.toggle('visible', q.length > 0);
+    renderFiltered(q);
+  });
+
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    searchClear.classList.remove('visible');
+    renderFiltered('');
+    searchInput.focus();
+  });
 
   loadAgences();
 </script>
