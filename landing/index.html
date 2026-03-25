@@ -572,7 +572,7 @@ img { display: block; max-width: 100%; }
 ═══════════════════════════════════════════ */
 #pricing { padding: 56px 0; background: #fff; }
 
-.plans { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; align-items: start; }
+.plans { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; align-items: start; max-width: 780px; margin-inline: auto; }
 
 .plan {
   background: #fff; border: 1px solid var(--line);
@@ -605,9 +605,9 @@ img { display: block; max-width: 100%; }
   color: var(--blue); margin-bottom: 14px;
 }
 .plan.pop .plan-tier { color: var(--blue-dk); }
-.plan-price { font-family: 'Sora', sans-serif; font-size: 48px; font-weight: 900; line-height: 1; color: var(--ink); margin-bottom: 3px; }
-.plan-price sub { font-size: 18px; font-weight: 400; color: var(--muted); vertical-align: middle; }
-.plan-billing { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.plan-price { font-family: 'Sora', sans-serif; font-size: 34px; font-weight: 900; line-height: 1; color: var(--ink); margin-bottom: 3px; }
+.plan-price sub { font-size: 14px; font-weight: 400; color: var(--muted); vertical-align: middle; }
+.plan-billing { font-size: 12px; color: var(--muted); margin-bottom: 18px; }
 .plan-sep { height: 1px; background: var(--line); margin-bottom: 22px; }
 .plan-feats { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
 .pf { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; color: var(--ink-3); }
@@ -1273,9 +1273,7 @@ footer {
       </div>
 
       <h1 class="hero-h1 h-anim h-anim-2">
-        Gérez votre agence.<br/>
-        <span class="hi">Développez</span><br/>
-        votre business.
+        Gérez votre agence.        <span class="hi">Développez</span>        votre business.
       </h1>
 
       <p class="hero-p h-anim h-anim-3">
@@ -1392,7 +1390,7 @@ footer {
   <div class="wrap">
     <div class="sec-head sec-head-center reveal">
       <div class="sec-eyebrow"><span class="sec-eyebrow-dot"></span>Nos agences partenaires</div>
-      <h2 class="sec-h2">Trouvez une agence,<br/>réservez votre véhicule.</h2>
+      <h2 class="sec-h2">Trouvez une agence, réservez votre véhicule.</h2>
       <p class="sec-p">Ces agences utilisent InnoSoft Location. Consultez leurs coordonnées et accédez directement à leurs véhicules disponibles.</p>
     </div>
     <div class="agences-search-wrap reveal">
@@ -1500,7 +1498,7 @@ footer {
   <div class="wrap">
     <div class="sec-head reveal">
       <div class="sec-eyebrow"><span class="sec-eyebrow-dot"></span>Fonctionnalités</div>
-      <h2 class="sec-h2">Tout ce qu'une agence<br/>moderne exige.</h2>
+      <h2 class="sec-h2">Tout ce qu'une agence moderne exige.</h2>
       <p class="sec-p">Du premier appel client à la restitution des clés — chaque étape automatisée, tracée, sécurisée.</p>
     </div>
 
@@ -1605,7 +1603,7 @@ footer {
   <div class="wrap">
     <div class="sec-head sec-head-center reveal">
       <div class="sec-eyebrow"><span class="sec-eyebrow-dot"></span>Démarrage</div>
-      <h2 class="sec-h2">Opérationnel en<br/>moins de 30 minutes.</h2>
+      <h2 class="sec-h2">Opérationnel en moins de 30 minutes.</h2>
       <p class="sec-p">Pas d'installation, pas de configuration complexe. Votre agence est en ligne en trois étapes.</p>
     </div>
     <div class="steps">
@@ -1636,26 +1634,10 @@ footer {
   <div class="wrap">
     <div class="sec-head reveal">
       <div class="sec-eyebrow"><span class="sec-eyebrow-dot"></span>Tarifs</div>
-      <h2 class="sec-h2">Simple, transparent,<br/>sans surprise.</h2>
+      <h2 class="sec-h2">Simple, transparent, sans surprise.</h2>
       <p class="sec-p">Commencez gratuitement. Évoluez quand vous le souhaitez. Aucun frais caché.</p>
     </div>
     <div class="plans">
-
-      <div class="plan reveal-zoom d1">
-        <div class="plan-tier">Starter</div>
-        <div class="plan-price">Gratuit</div>
-        <div class="plan-billing">14 jours · toutes fonctionnalités</div>
-        <div class="plan-sep"></div>
-        <div class="plan-feats">
-          <div class="pf"><span class="pf-ok">✓</span> Jusqu'à 10 véhicules</div>
-          <div class="pf"><span class="pf-ok">✓</span> 50 contrats / mois</div>
-          <div class="pf"><span class="pf-ok">✓</span> 1 utilisateur</div>
-          <div class="pf"><span class="pf-ok">✓</span> Tableau de bord</div>
-          <div class="pf off"><span class="pf-no">✗</span> Rapports avancés</div>
-          <div class="pf off"><span class="pf-no">✗</span> Vitrine publique</div>
-        </div>
-        <a href="#cta" class="btn btn-stroke plan-btn">Commencer l'essai</a>
-      </div>
 
       <div class="plan pop reveal-zoom d2">
         <div class="plan-badge">⭐ Le plus populaire</div>
@@ -1687,7 +1669,7 @@ footer {
           <div class="pf"><span class="pf-ok">✓</span> Onboarding dédié</div>
           <div class="pf"><span class="pf-ok">✓</span> Accès API complet</div>
         </div>
-        <a href="mailto:contact@innosft.com" class="btn btn-stroke plan-btn">Nous contacter</a>
+        <a href="contact.html" class="btn btn-stroke plan-btn">Nous contacter</a>
       </div>
 
     </div>
@@ -1699,7 +1681,7 @@ footer {
   <div class="wrap">
     <div class="sec-head reveal">
       <div class="sec-eyebrow"><span class="sec-eyebrow-dot"></span>Témoignages</div>
-      <h2 class="sec-h2">Ils ont transformé<br/>leur agence.</h2>
+      <h2 class="sec-h2">Ils ont transformé leur agence.</h2>
     </div>
     <div class="testi-grid">
 
@@ -1746,8 +1728,7 @@ footer {
 
   <div class="wrap cta-inner">
     <h2 class="cta-h2 reveal">
-      Location de véhicules,<br/>
-      <span>simple et rapide.</span>
+      Location de véhicules,      <span>simple et rapide.</span>
     </h2>
     <p class="cta-sub reveal">Vous êtes une agence ou un particulier — InnoSoft Location a la solution pour vous.</p>
 
