@@ -624,7 +624,39 @@ img { display: block; max-width: 100%; }
   background: var(--wash);
 }
 
-.testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+/* ── Carousel témoignages ── */
+.testi-carousel { position: relative; overflow: hidden; }
+.testi-track {
+  display: flex;
+  transition: transform .55s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+.testi-track .tc {
+  flex: 0 0 100%;
+  max-width: 720px;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+.testi-nav {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; margin-top: 28px;
+}
+.testi-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1.5px solid var(--line); background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--ink-3);
+  transition: border-color .18s, background .18s, transform .18s;
+  flex-shrink: 0;
+}
+.testi-btn:hover { border-color: var(--blue); background: var(--blue-xl); transform: scale(1.08); }
+.testi-dots { display: flex; gap: 8px; align-items: center; }
+.testi-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--line); border: none; cursor: pointer; padding: 0;
+  transition: background .25s, width .25s, border-radius .25s;
+}
+.testi-dot.active { width: 24px; border-radius: 4px; background: var(--blue); }
 
 .tc {
   background: #fff; border: 1px solid var(--line);
@@ -1089,7 +1121,7 @@ footer {
   .steps { grid-template-columns: 1fr; }
   .steps::before { display: none; }
   .plans { grid-template-columns: 1fr; max-width: 440px; }
-  .testi-grid { grid-template-columns: 1fr; }
+
   .metrics-band { grid-template-columns: 1fr 1fr; }
   .ft-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
   .ft-grid > div:first-child { grid-column: 1 / -1; }
@@ -1675,35 +1707,46 @@ footer {
       <div class="sec-eyebrow"><span class="sec-eyebrow-dot"></span>Témoignages</div>
       <h2 class="sec-h2">Ils ont transformé leur agence.</h2>
     </div>
-    <div class="testi-grid">
+    <div class="testi-carousel reveal" id="testiCarousel">
+      <div class="testi-track" id="testiTrack">
 
-      <div class="tc reveal d1">
-        <div class="tc-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
-        <div class="tc-txt">"Avant InnoSoft Location, on gérait tout sur papier. Aujourd'hui nos contrats sont prêts en 30 secondes et on ne perd plus aucun paiement. Le ROI est immédiat."</div>
-        <div class="tc-author">
-          <div class="tc-av ta1">BA</div>
-          <div><div class="tc-name">Boubacar A.</div><div class="tc-role">Directeur · Boucotte Auto, Dakar</div></div>
+        <div class="tc">
+          <div class="tc-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+          <div class="tc-txt">"Avant InnoSoft Location, on gérait tout sur papier. Aujourd'hui nos contrats sont prêts en 30 secondes et on ne perd plus aucun paiement. Le ROI est immédiat."</div>
+          <div class="tc-author">
+            <div class="tc-av ta1">BA</div>
+            <div><div class="tc-name">Boubacar A.</div><div class="tc-role">Directeur · Boucotte Auto, Dakar</div></div>
+          </div>
         </div>
-      </div>
 
-      <div class="tc reveal d2">
-        <div class="tc-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
-        <div class="tc-txt">"La gestion multi-rôles est parfaite. Mes agents voient uniquement ce dont ils ont besoin, mon comptable a ses rapports en temps réel. C'est propre."</div>
-        <div class="tc-author">
-          <div class="tc-av ta2">ZK</div>
-          <div><div class="tc-name">Zikora K.</div><div class="tc-role">Gérant · ZigAuto, Abidjan</div></div>
+        <div class="tc">
+          <div class="tc-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+          <div class="tc-txt">"La gestion multi-rôles est parfaite. Mes agents voient uniquement ce dont ils ont besoin, mon comptable a ses rapports en temps réel. C'est propre."</div>
+          <div class="tc-author">
+            <div class="tc-av ta2">ZK</div>
+            <div><div class="tc-name">Zikora K.</div><div class="tc-role">Gérant · ZigAuto, Abidjan</div></div>
+          </div>
         </div>
-      </div>
 
-      <div class="tc reveal d3">
-        <div class="tc-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
-        <div class="tc-txt">"Le QR code sur les contrats a tout changé. Nos clients scannent et vérifient l'authenticité en quelques secondes. On a gagné en crédibilité."</div>
-        <div class="tc-author">
-          <div class="tc-av ta3">KD</div>
-          <div><div class="tc-name">Kadiatou D.</div><div class="tc-role">Fondatrice · KaranCars, Conakry</div></div>
+        <div class="tc">
+          <div class="tc-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+          <div class="tc-txt">"Le QR code sur les contrats a tout changé. Nos clients scannent et vérifient l'authenticité en quelques secondes. On a gagné en crédibilité."</div>
+          <div class="tc-author">
+            <div class="tc-av ta3">KD</div>
+            <div><div class="tc-name">Kadiatou D.</div><div class="tc-role">Fondatrice · KaranCars, Conakry</div></div>
+          </div>
         </div>
-      </div>
 
+      </div>
+      <div class="testi-nav">
+        <button class="testi-btn" id="testiPrev" aria-label="Précédent">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="testi-dots" id="testiDots"></div>
+        <button class="testi-btn" id="testiNext" aria-label="Suivant">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
     </div>
   </div>
 </section>
@@ -1882,10 +1925,11 @@ footer {
   }
 
   // Observer pour les conteneurs de cartes (stagger enfants un par un)
-  const CARD_CONTAINERS = '.bento, .steps, .plans, .testi-grid, .metrics-band';
+  const CARD_CONTAINERS = '.bento, .steps, .plans, .metrics-band';
   const containerObs = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (!e.isIntersecting) return;
+      e.target.classList.add('in'); // au cas où le conteneur lui-même a .reveal
       staggerReveal(e.target);
       containerObs.unobserve(e.target);
     });
@@ -2004,6 +2048,59 @@ footer {
       });
     });
   }
+
+  // ── Carousel témoignages ───────────────────────────────────
+  (function () {
+    const track  = document.getElementById('testiTrack');
+    const dotsWrap = document.getElementById('testiDots');
+    const prevBtn  = document.getElementById('testiPrev');
+    const nextBtn  = document.getElementById('testiNext');
+    if (!track) return;
+
+    const cards = [...track.children];
+    const total = cards.length;
+    let current = 0;
+    let timer;
+
+    // Créer les dots
+    cards.forEach((_, i) => {
+      const d = document.createElement('button');
+      d.className = 'testi-dot' + (i === 0 ? ' active' : '');
+      d.setAttribute('aria-label', `Témoignage ${i + 1}`);
+      d.addEventListener('click', () => goTo(i));
+      dotsWrap.appendChild(d);
+    });
+
+    function goTo(idx) {
+      current = (idx + total) % total;
+      track.style.transform = `translateX(-${current * 100}%)`;
+      dotsWrap.querySelectorAll('.testi-dot').forEach((d, i) =>
+        d.classList.toggle('active', i === current)
+      );
+    }
+
+    function startAuto() {
+      timer = setInterval(() => goTo(current + 1), 4500);
+    }
+    function stopAuto() { clearInterval(timer); }
+
+    prevBtn.addEventListener('click', () => { stopAuto(); goTo(current - 1); startAuto(); });
+    nextBtn.addEventListener('click', () => { stopAuto(); goTo(current + 1); startAuto(); });
+
+    // Pause au survol
+    track.closest('.testi-carousel').addEventListener('mouseenter', stopAuto);
+    track.closest('.testi-carousel').addEventListener('mouseleave', startAuto);
+
+    // Swipe tactile
+    let startX = 0;
+    track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend', e => {
+      const diff = startX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) { stopAuto(); goTo(current + (diff > 0 ? 1 : -1)); startAuto(); }
+    });
+
+    startAuto();
+  })();
 
   async function loadAgences() {
     const grid = document.getElementById('agences-grid');
