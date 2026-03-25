@@ -820,22 +820,14 @@ footer {
    REVEAL ANIMATION
 ═══════════════════════════════════════════ */
 /* ── Base reveal ── */
-.reveal       { opacity:0; transform:translateY(28px);  transition:opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+.reveal       { opacity:0; transform:translateY(36px) scale(.97); transition:opacity .75s cubic-bezier(.22,1,.36,1), transform .75s cubic-bezier(.22,1,.36,1); }
 .reveal.in    { opacity:1; transform:none; }
-.reveal-left  { opacity:0; transform:translateX(-38px); transition:opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+.reveal-left  { opacity:0; transform:translateX(-42px) scale(.97); transition:opacity .75s cubic-bezier(.22,1,.36,1), transform .75s cubic-bezier(.22,1,.36,1); }
 .reveal-left.in  { opacity:1; transform:none; }
-.reveal-right { opacity:0; transform:translateX(38px);  transition:opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+.reveal-right { opacity:0; transform:translateX(42px) scale(.97);  transition:opacity .75s cubic-bezier(.22,1,.36,1), transform .75s cubic-bezier(.22,1,.36,1); }
 .reveal-right.in { opacity:1; transform:none; }
-.reveal-zoom  { opacity:0; transform:scale(.88) translateY(14px); transition:opacity .65s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.34,1.4,.64,1); }
+.reveal-zoom  { opacity:0; transform:scale(.88) translateY(20px); transition:opacity .75s cubic-bezier(.22,1,.36,1), transform .8s cubic-bezier(.34,1.45,.64,1); }
 .reveal-zoom.in  { opacity:1; transform:none; }
-
-/* ── Stagger delays ── */
-.d1 { transition-delay: .08s !important; }
-.d2 { transition-delay: .17s !important; }
-.d3 { transition-delay: .26s !important; }
-.d4 { transition-delay: .35s !important; }
-.d5 { transition-delay: .44s !important; }
-.d6 { transition-delay: .53s !important; }
 
 /* ── Hero entrance (plays immediately on load) ── */
 .h-anim { opacity:0; animation: hIn .85s cubic-bezier(.22,1,.36,1) forwards; }
@@ -1879,22 +1871,39 @@ footer {
     burger.setAttribute('aria-expanded', false);
   }));
 
-  // Scroll reveal with stagger — all variants
-  const REVEAL_CLASSES = ['.reveal', '.reveal-left', '.reveal-right', '.reveal-zoom'];
-  const ro = new IntersectionObserver((entries) => {
-    entries.forEach((e) => {
+  // ── Scroll reveal — stagger par conteneur ──────────────────
+  const REVEAL_SEL = '.reveal:not(.in),.reveal-left:not(.in),.reveal-right:not(.in),.reveal-zoom:not(.in)';
+
+  function staggerReveal(container) {
+    const items = [...container.querySelectorAll(REVEAL_SEL)];
+    items.forEach((el, i) => {
+      setTimeout(() => el.classList.add('in'), i * 120);
+    });
+  }
+
+  // Observer pour les conteneurs de cartes (stagger enfants un par un)
+  const CARD_CONTAINERS = '.bento, .steps, .plans, .testi-grid, .metrics-band';
+  const containerObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
       if (!e.isIntersecting) return;
-      const SELS = REVEAL_CLASSES.map(c => `${c}:not(.in)`).join(',');
-      const peers = [...e.target.parentElement.querySelectorAll(SELS)];
-      // If d1-d6 classes are present, CSS handles delay; otherwise stagger via JS
-      const noDCSS = peers.filter(el => !['d1','d2','d3','d4','d5','d6'].some(d => el.classList.contains(d)));
-      noDCSS.forEach((el, i) => setTimeout(() => el.classList.add('in'), i * 80));
-      peers.filter(el => !noDCSS.includes(el)).forEach(el => el.classList.add('in'));
+      staggerReveal(e.target);
+      containerObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll(CARD_CONTAINERS).forEach(el => containerObs.observe(el));
+
+  // Observer pour les éléments seuls (sec-head, search bar, etc.)
+  const ro = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
       e.target.classList.add('in');
       ro.unobserve(e.target);
     });
-  }, { threshold: 0.12 });
-  REVEAL_CLASSES.forEach(c => document.querySelectorAll(c).forEach(el => ro.observe(el)));
+  }, { threshold: 0.15 });
+  document.querySelectorAll(REVEAL_SEL.split(',').map(s => s.replace(':not(.in)','')).join(','))
+    .forEach(el => {
+      if (!el.closest(CARD_CONTAINERS)) ro.observe(el);
+    });
 
   // ── Chargement dynamique des agences ──────────────────────
   const PLATFORM_DOMAIN = 'location.innosft.com';
@@ -1986,7 +1995,7 @@ footer {
       return;
     }
     grid.innerHTML = results.map(renderAgenceCard).join('');
-    grid.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+    staggerReveal(grid);
     // Clic sur toute la carte (utile sur mobile où le CTA est masqué)
     grid.querySelectorAll('.agence-card[data-vitrine]').forEach(card => {
       card.addEventListener('click', (e) => {
