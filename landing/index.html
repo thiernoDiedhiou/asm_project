@@ -7,7 +7,10 @@
   <meta name="description" content="Pilotez votre flotte, gérez vos contrats et encaissez vos paiements depuis une seule plateforme. La solution SaaS pensée pour les agences de location en Afrique."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
+  <!-- Chargement non-bloquant des fontes -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@800;900&display=swap"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@800;900&display=swap" rel="stylesheet"/></noscript>
   <style>
 
 /* ═══════════════════════════════════════════
@@ -48,7 +51,7 @@
 html { scroll-behavior: smooth; font-size: 16px; }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   background: var(--white);
   color: var(--ink-3);
   line-height: 1.65;
@@ -632,10 +635,10 @@ img { display: block; max-width: 100%; }
   will-change: transform;
 }
 .testi-track .tc {
-  flex: 0 0 100%;
-  max-width: 720px;
-  margin-inline: auto;
+  flex: 0 0 auto;
+  width: 100%;
   box-sizing: border-box;
+  max-width: 100%;
 }
 .testi-nav {
   display: flex; align-items: center; justify-content: center;
@@ -1914,40 +1917,40 @@ footer {
     burger.setAttribute('aria-expanded', false);
   }));
 
-  // ── Scroll reveal — stagger par conteneur ──────────────────
-  const REVEAL_SEL = '.reveal:not(.in),.reveal-left:not(.in),.reveal-right:not(.in),.reveal-zoom:not(.in)';
+  // ── Scroll reveal ──────────────────────────────────────────
+  const REVEAL_SEL = '.reveal, .reveal-left, .reveal-right, .reveal-zoom';
+  const CARD_CONTAINERS = '.bento, .steps, .plans, .metrics-band, .testi-carousel';
 
   function staggerReveal(container) {
-    const items = [...container.querySelectorAll(REVEAL_SEL)];
-    items.forEach((el, i) => {
-      setTimeout(() => el.classList.add('in'), i * 120);
-    });
+    if (container.matches(REVEAL_SEL)) container.classList.add('in');
+    const items = [...container.querySelectorAll(REVEAL_SEL + ':not(.in)')];
+    items.forEach((el, i) => setTimeout(() => el.classList.add('in'), i * 120));
   }
 
-  // Observer pour les conteneurs de cartes (stagger enfants un par un)
-  const CARD_CONTAINERS = '.bento, .steps, .plans, .metrics-band';
   const containerObs = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (!e.isIntersecting) return;
-      e.target.classList.add('in'); // au cas où le conteneur lui-même a .reveal
       staggerReveal(e.target);
       containerObs.unobserve(e.target);
     });
   }, { threshold: 0.08 });
   document.querySelectorAll(CARD_CONTAINERS).forEach(el => containerObs.observe(el));
 
-  // Observer pour les éléments seuls (sec-head, search bar, etc.)
-  const ro = new IntersectionObserver((entries) => {
+  const elemObs = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (!e.isIntersecting) return;
       e.target.classList.add('in');
-      ro.unobserve(e.target);
+      elemObs.unobserve(e.target);
     });
-  }, { threshold: 0.15 });
-  document.querySelectorAll(REVEAL_SEL.split(',').map(s => s.replace(':not(.in)','')).join(','))
-    .forEach(el => {
-      if (!el.closest(CARD_CONTAINERS)) ro.observe(el);
-    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll(REVEAL_SEL).forEach(el => {
+    if (!el.closest(CARD_CONTAINERS)) elemObs.observe(el);
+  });
+
+  // Fallback : force l'affichage si l'observer ne déclenche pas
+  setTimeout(() => {
+    document.querySelectorAll(REVEAL_SEL + ':not(.in)').forEach(el => el.classList.add('in'));
+  }, 800);
 
   // ── Chargement dynamique des agences ──────────────────────
   const PLATFORM_DOMAIN = 'location.innosft.com';
@@ -2073,7 +2076,8 @@ footer {
 
     function goTo(idx) {
       current = (idx + total) % total;
-      track.style.transform = `translateX(-${current * 100}%)`;
+      const w = track.parentElement.offsetWidth;
+      track.style.transform = `translateX(-${current * w}px)`;
       dotsWrap.querySelectorAll('.testi-dot').forEach((d, i) =>
         d.classList.toggle('active', i === current)
       );
