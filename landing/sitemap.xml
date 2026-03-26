@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sitemap principal — InnoSoft Location
+  Ce fichier est un index de sitemaps :
+    1. Les pages statiques de la landing page
+    2. Le sitemap dynamique des vitrines agences (généré par le backend)
+
+  Le sitemap dynamique (/api/public/sitemap) est mis à jour
+  automatiquement à chaque création d'un nouveau tenant.
+-->
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Pages statiques de la plateforme -->
+  <sitemap>
+    <loc>https://location.innosft.com/sitemap-static.xml</loc>
+    <lastmod>2025-01-01</lastmod>
+  </sitemap>
+
+  <!-- Vitrines de toutes les agences (dynamique — généré par le backend) -->
+  <sitemap>
+    <loc>https://location.innosft.com/api/public/sitemap</loc>
+  </sitemap>
+
+</sitemapindex>

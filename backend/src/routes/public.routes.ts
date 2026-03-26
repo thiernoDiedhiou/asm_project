@@ -53,4 +53,18 @@ router.get(
   planController.getAll.bind(planController)
 );
 
+// GET /api/public/sitemap — sitemap XML dynamique (toutes les agences ou un tenant)
+// Consommé par location.innosft.com/sitemap.xml (via nginx) et par chaque {slug}.location.innosft.com/sitemap.xml
+router.get(
+  '/sitemap',
+  publicController.getSitemap.bind(publicController)
+);
+
+// GET /api/public/robots — robots.txt dynamique pour les sous-domaines tenant
+// Consommé par {slug}.location.innosft.com/robots.txt (via nginx)
+router.get(
+  '/robots',
+  publicController.getRobotsTxt.bind(publicController)
+);
+
 export default router;

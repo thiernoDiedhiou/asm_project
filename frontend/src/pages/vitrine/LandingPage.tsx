@@ -265,6 +265,68 @@ export function LandingPage() {
     }).catch(() => {});
   }, []);
 
+  // ── Mise à jour des meta tags SEO selon le tenant ──────────────────────
+  useEffect(() => {
+    if (!nomEntreprise) return;
+
+    const locationLabel = ville ? `${nomEntreprise} — Location de voiture à ${ville}` : `${nomEntreprise} — Location de véhicules`;
+    const description = ville
+      ? `${nomEntreprise} : location de voiture à ${ville}. Réservez en ligne, flotte disponible, tarifs transparents.`
+      : `${nomEntreprise} : location de véhicules. Réservez en ligne facilement, flotte disponible, tarifs transparents.`;
+
+    // Titre
+    document.title = locationLabel;
+
+    const setMeta = (selector: string, attr: string, value: string) => {
+      let el = document.querySelector(selector) as HTMLMetaElement | null;
+      if (!el) {
+        el = document.createElement('meta');
+        const [attrName, attrValue] = selector.replace('meta[', '').replace(']', '').split('=');
+        el.setAttribute(attrName, attrValue.replace(/"/g, ''));
+        document.head.appendChild(el);
+      }
+      el.setAttribute(attr, value);
+    };
+
+    setMeta('meta[name="description"]',       'content', description);
+    setMeta('meta[name="keywords"]',          'content', `${nomEntreprise}, location voiture${ville ? ` ${ville}` : ''}, location de voiture, réservation véhicule en ligne`);
+    setMeta('meta[property="og:title"]',      'content', locationLabel);
+    setMeta('meta[property="og:description"]','content', description);
+    setMeta('meta[property="og:url"]',        'content', window.location.origin + '/');
+    setMeta('meta[name="twitter:title"]',     'content', locationLabel);
+    setMeta('meta[name="twitter:description"]','content', description);
+
+    // Canonical
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.href = window.location.origin + '/';
+
+    // JSON-LD structuré pour l'agence
+    const ldId = 'ld-agency-schema';
+    document.getElementById(ldId)?.remove();
+    const script = document.createElement('script');
+    script.id = ldId;
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'LocalBusiness',
+      'name': nomEntreprise,
+      ...(ville && { 'address': { '@type': 'PostalAddress', 'addressLocality': ville } }),
+      'url': window.location.origin,
+      'description': description,
+      'priceRange': '$$',
+      'hasOfferCatalog': {
+        '@type': 'OfferCatalog',
+        'name': 'Location de véhicules',
+      },
+    });
+    document.head.appendChild(script);
+  }, [nomEntreprise, ville]);
+
   const promoActive = Boolean(promo.bannierePromo) &&
     (!promo.promoDateFin || new Date(promo.promoDateFin) >= new Date());
 

@@ -513,6 +513,104 @@ export class PublicController {
    * Reçoit le formulaire de contact de la landing page et envoie un email.
    * Aucune résolution de tenant requise.
    */
+  /**
+   * GET /api/public/sitemap
+   * Génère un sitemap XML dynamique.
+   *
+   * — Appelé depuis location.innosft.com (sans tenant) :
+   *   Retourne un <urlset> listant toutes les vitrines de toutes les agences actives
+   *   (utilisé comme entrée dans le sitemapindex principal).
+   *
+   * — Appelé depuis {slug}.location.innosft.com (avec tenant) :
+   *   Retourne un <urlset> listant les pages publiques de ce tenant.
+   */
+  async getSitemap(req: Request, res: Response): Promise<void> {
+    try {
+      const platformDomain = process.env.PLATFORM_DOMAIN || 'location.innosft.com';
+      const now = new Date().toISOString().split('T')[0];
+
+      // Pages de vitrine par tenant (chemins publics)
+      const vitrinePaths = [
+        { path: '/',        priority: '1.0', changefreq: 'weekly'  },
+        { path: '/flotte',  priority: '0.9', changefreq: 'daily'   },
+        { path: '/tarifs',  priority: '0.7', changefreq: 'weekly'  },
+      ];
+
+      let urls: string[] = [];
+
+      if (req.tenantId) {
+        // ── Mode tenant : sitemap de ce tenant uniquement ─────────────────
+        const tenant = await prisma.tenant.findUnique({
+          where: { id: req.tenantId },
+          select: { slug: true, domaine: true, nomEntreprise: true, updatedAt: true },
+        });
+        if (!tenant) { res.status(404).send('Tenant introuvable'); return; }
+
+        const base = `https://${tenant.domaine || `${tenant.slug}.${platformDomain}`}`;
+        const lastmod = tenant.updatedAt.toISOString().split('T')[0];
+
+        urls = vitrinePaths.map(({ path, priority, changefreq }) => `
+  <url>
+    <loc>${base}${path}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>`);
+      } else {
+        // ── Mode plateforme : sitemap de toutes les agences actives ───────
+        const tenants = await prisma.tenant.findMany({
+          where: { actif: true },
+          select: { slug: true, domaine: true, updatedAt: true },
+          orderBy: { nomEntreprise: 'asc' },
+        });
+
+        for (const tenant of tenants) {
+          const base = `https://${tenant.domaine || `${tenant.slug}.${platformDomain}`}`;
+          const lastmod = tenant.updatedAt.toISOString().split('T')[0];
+          for (const { path, priority, changefreq } of vitrinePaths) {
+            urls.push(`
+  <url>
+    <loc>${base}${path}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>`);
+          }
+        }
+      }
+
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.join('\n')}
+</urlset>`;
+
+      res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 h de cache
+      res.status(200).send(xml);
+    } catch (error) {
+      res.status(500).send('Erreur génération sitemap');
+    }
+  }
+
+  /**
+   * GET /api/public/robots
+   * Génère le robots.txt pour un sous-domaine tenant.
+   * Appelé depuis {slug}.location.innosft.com/robots.txt via nginx.
+   */
+  async getRobotsTxt(req: Request, res: Response): Promise<void> {
+    try {
+      const host = req.hostname || req.headers.host || '';
+      const sitemapUrl = `https://${host}/sitemap.xml`;
+
+      const content = `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${sitemapUrl}\n`;
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 h
+      res.status(200).send(content);
+    } catch (error) {
+      res.status(500).send('Erreur');
+    }
+  }
+
   async sendContactForm(req: Request, res: Response): Promise<void> {
     try {
       const { prenom, nom, email, telephone, agence, flotte, message } = req.body;

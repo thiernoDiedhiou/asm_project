@@ -2,6 +2,28 @@ import prisma from '../utils/prisma';
 import bcrypt from 'bcryptjs';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
 import { emailService } from './email.service';
+import https from 'https';
+import http from 'http';
+
+/**
+ * Notifie les moteurs de recherche qu'un nouveau sitemap est disponible.
+ * Appel silencieux — n'interrompt pas la création du tenant en cas d'échec.
+ */
+function pingSitemapSearchEngines(sitemapUrl: string): void {
+  const engines = [
+    `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`,
+    `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`,
+  ];
+
+  for (const url of engines) {
+    const client = url.startsWith('https') ? https : http;
+    const req = client.get(url, (res) => {
+      res.resume(); // Consomme la réponse sans la stocker
+    });
+    req.on('error', () => {}); // Silencieux
+    req.end();
+  }
+}
 
 interface CreateTenantDto {
   slug: string;
@@ -98,6 +120,12 @@ export const tenantService = {
       motDePasseTemporaire: dto.adminPassword,
       loginUrl,
     }).catch(() => {});
+
+    // Ping Google & Bing pour indexer le nouveau tenant (silencieux en dev)
+    if (process.env.NODE_ENV === 'production') {
+      const mainSitemap = `https://${process.env.PLATFORM_DOMAIN || 'location.innosft.com'}/api/public/sitemap`;
+      pingSitemapSearchEngines(mainSitemap);
+    }
 
     return result;
   },
