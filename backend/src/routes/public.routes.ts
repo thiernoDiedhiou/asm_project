@@ -53,6 +53,12 @@ router.get(
   planController.getAll.bind(planController)
 );
 
+// GET /api/public/vitrine-meta — JSON-LD LocalBusiness du tenant (pour SEO vitrine React)
+router.get(
+  '/vitrine-meta',
+  publicController.getVitrineMeta.bind(publicController)
+);
+
 // GET /api/public/sitemap — sitemap XML dynamique (toutes les agences ou un tenant)
 // Consommé par location.innosft.com/sitemap.xml (via nginx) et par chaque {slug}.location.innosft.com/sitemap.xml
 router.get(

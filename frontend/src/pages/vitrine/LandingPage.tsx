@@ -14,6 +14,7 @@ import {
   CalendarClock,
 } from 'lucide-react';
 import { publicApi } from '../../services/api';
+import { useTenant } from '../../contexts/TenantContext';
 
 // ── Keyframes injected once for the floating car animation ──
 const CAR_ANIM_CSS = `
@@ -240,12 +241,20 @@ function VehiculeCard({ v, onReserver }: { v: VehiculePublic; onReserver: () => 
 
 export function LandingPage() {
   const navigate = useNavigate();
+  const tenant = useTenant();
   const [vehicules, setVehicules] = useState<VehiculePublic[]>([]);
   const [totalDisponibles, setTotalDisponibles] = useState(0);
   const [promo, setPromo] = useState<PromoSettings>({});
   const [nomEntreprise, setNomEntreprise] = useState('');
   const [ville, setVille] = useState('');
   const [activite, setActivite] = useState('');
+
+  // Remet le canonical sur / quand l'utilisateur revient sur la page d'accueil
+  useEffect(() => {
+    if (tenant.slug === 'default') return;
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', window.location.origin + '/');
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', window.location.origin + '/');
+  }, [tenant]);
 
   useEffect(() => {
     publicApi.getVehicules().then((res) => {

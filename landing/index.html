@@ -23,6 +23,10 @@
   <meta property="og:title"       content="InnoSoft Location · Logiciel SaaS pour agences de location de véhicules"/>
   <meta property="og:description" content="Pilotez votre flotte, gérez vos contrats et encaissez vos paiements depuis une seule plateforme. La solution SaaS pensée pour les agences de location en Afrique."/>
   <meta property="og:locale"      content="fr_FR"/>
+  <meta property="og:image"       content="https://location.innosft.com/og-image.png"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height"content="630"/>
+  <meta property="og:image:alt"   content="InnoSoft Location — Logiciel SaaS pour agences de location de véhicules"/>
 
   <!-- ══════════════════════════════════════════
        Twitter / X Cards
@@ -30,6 +34,7 @@
   <meta name="twitter:card"        content="summary_large_image"/>
   <meta name="twitter:title"       content="InnoSoft Location · Logiciel SaaS pour agences de location de véhicules"/>
   <meta name="twitter:description" content="Pilotez votre flotte, gérez vos contrats et encaissez vos paiements depuis une seule plateforme. La solution SaaS pensée pour les agences de location en Afrique."/>
+  <meta name="twitter:image"       content="https://location.innosft.com/og-image.png"/>
 
   <!-- ══════════════════════════════════════════
        JSON-LD — Données structurées
@@ -76,6 +81,52 @@
         "url": "https://location.innosft.com/",
         "name": "InnoSoft Location",
         "publisher": { "@id": "https://location.innosft.com/#organization" }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://location.innosft.com/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Qu'est-ce que InnoSoft Location ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "InnoSoft Location est une plateforme SaaS complète pour les agences de location de véhicules en Afrique. Elle centralise la gestion de la flotte, des contrats, des réservations en ligne et des encaissements depuis une seule interface."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "InnoSoft Location est-il gratuit ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "InnoSoft Location propose un essai gratuit de 14 jours sans carte bancaire. Trois plans sont ensuite disponibles : STARTER, PRO et ENTERPRISE, adaptés à chaque taille d'agence."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Puis-je créer une vitrine en ligne pour mon agence ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Oui. Chaque agence inscrite sur InnoSoft Location obtient automatiquement une vitrine publique personnalisée (logo, couleurs, flotte disponible) accessible par les clients sur internet."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "InnoSoft Location fonctionne-t-il en Afrique de l'Ouest ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Oui, InnoSoft Location est conçu spécifiquement pour les agences en Afrique de l'Ouest. Les données sont hébergées localement et la plateforme supporte les devises locales (FCFA, etc.)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Comment les clients peuvent-ils réserver un véhicule ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Les clients accèdent à la vitrine de l'agence, consultent les véhicules disponibles et soumettent une demande de réservation en ligne. L'agence reçoit une notification instantanée et confirme la demande depuis son back-office."
+            }
+          }
+        ]
       }
     ]
   }
@@ -829,6 +880,36 @@ img { display: block; max-width: 100%; }
   font-size: 13px; color: rgba(255,255,255,.55);
 }
 .cta-trust-item svg { flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════
+   FAQ
+═══════════════════════════════════════════ */
+.faq-item {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  transition: box-shadow .18s;
+}
+.faq-item[open] { box-shadow: var(--s2); }
+.faq-q {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 22px;
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  cursor: pointer; list-style: none;
+  gap: 12px;
+}
+.faq-q::-webkit-details-marker { display: none; }
+.faq-q::after {
+  content: "+";
+  font-size: 20px; font-weight: 400; color: var(--blue);
+  flex-shrink: 0; transition: transform .2s;
+}
+.faq-item[open] .faq-q::after { transform: rotate(45deg); }
+.faq-a {
+  padding: 0 22px 18px;
+  font-size: 14px; color: var(--muted); line-height: 1.7;
+}
 
 /* ═══════════════════════════════════════════
    FOOTER
@@ -1830,6 +1911,44 @@ footer {
   </div>
 </section>
 
+<!-- ── FAQ ──────────────────────────────────── -->
+<section id="faq" style="padding:80px 0;background:var(--wash)">
+  <div class="wrap">
+    <div class="sec-head sec-head-center reveal" style="margin-bottom:48px">
+      <div class="sec-eyebrow"><span class="sec-eyebrow-dot"></span>Questions fréquentes</div>
+      <h2 class="sec-h2">Tout ce que vous voulez savoir.</h2>
+      <p class="sec-p">Vous avez d'autres questions ? <a href="contact.html" style="color:var(--blue);font-weight:600">Contactez-nous</a>.</p>
+    </div>
+    <div style="max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px">
+
+      <details class="faq-item reveal" open>
+        <summary class="faq-q">Qu'est-ce que InnoSoft Location ?</summary>
+        <p class="faq-a">InnoSoft Location est une plateforme SaaS complète pour les agences de location de véhicules en Afrique. Elle centralise la gestion de la flotte, des contrats, des réservations en ligne et des encaissements depuis une seule interface.</p>
+      </details>
+
+      <details class="faq-item reveal">
+        <summary class="faq-q">InnoSoft Location est-il gratuit ?</summary>
+        <p class="faq-a">InnoSoft Location propose un essai gratuit de 14 jours sans carte bancaire. Trois plans sont ensuite disponibles : STARTER, PRO et ENTERPRISE, adaptés à chaque taille d'agence.</p>
+      </details>
+
+      <details class="faq-item reveal">
+        <summary class="faq-q">Puis-je créer une vitrine en ligne pour mon agence ?</summary>
+        <p class="faq-a">Oui. Chaque agence inscrite obtient automatiquement une vitrine publique personnalisée (logo, couleurs, flotte disponible) accessible par les clients sur internet, avec une URL dédiée.</p>
+      </details>
+
+      <details class="faq-item reveal">
+        <summary class="faq-q">InnoSoft Location fonctionne-t-il en Afrique de l'Ouest ?</summary>
+        <p class="faq-a">Oui, InnoSoft Location est conçu spécifiquement pour les agences en Afrique de l'Ouest. Les données sont hébergées localement et la plateforme supporte les devises locales (FCFA, etc.).</p>
+      </details>
+
+      <details class="faq-item reveal">
+        <summary class="faq-q">Comment les clients peuvent-ils réserver un véhicule ?</summary>
+        <p class="faq-a">Les clients accèdent à la vitrine de l'agence, consultent les véhicules disponibles et soumettent une demande de réservation en ligne. L'agence reçoit une notification instantanée et confirme depuis son back-office.</p>
+      </details>
+
+    </div>
+  </div>
+</section>
 
 <!-- ── CTA ──────────────────────────────────── -->
 <section id="cta">

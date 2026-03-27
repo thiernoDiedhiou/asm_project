@@ -46,6 +46,47 @@ function applyTheme(couleurPrimaire: string, couleurSecondaire: string) {
   root.style.setProperty('--color-secondary-pale', `${couleurSecondaire}1A`);
 }
 
+// Met à jour ou crée une balise <meta> dans le <head>
+function setMeta(selector: string, attr: string, value: string) {
+  let el = document.querySelector<HTMLMetaElement>(selector);
+  if (!el) {
+    el = document.createElement('meta');
+    const [attrName, attrValue] = selector.replace('meta[', '').replace(']', '').split('="');
+    el.setAttribute(attrName, attrValue.replace('"', ''));
+    document.head.appendChild(el);
+  }
+  el.setAttribute(attr, value);
+}
+
+// Met à jour ou crée la balise <link rel="canonical">
+function setCanonical(url: string) {
+  let el = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!el) {
+    el = document.createElement('link');
+    el.setAttribute('rel', 'canonical');
+    document.head.appendChild(el);
+  }
+  el.setAttribute('href', url);
+}
+
+function applyVitrineSeo(t: TenantInfo) {
+  const origin = window.location.origin;
+  const title = `${t.nomEntreprise} — ${t.slogan}`;
+  const description = `${t.nomEntreprise} : réservez votre véhicule en ligne facilement. `
+    + `${t.slogan}. Flotte disponible, tarifs transparents, réservation rapide.`;
+
+  document.title = title;
+  setCanonical(origin + '/');
+  setMeta('meta[name="description"]',        'content', description);
+  setMeta('meta[property="og:title"]',       'content', title);
+  setMeta('meta[property="og:description"]', 'content', description);
+  setMeta('meta[property="og:url"]',         'content', origin + '/');
+  setMeta('meta[property="og:site_name"]',   'content', t.nomEntreprise);
+  setMeta('meta[property="og:type"]',        'content', 'website');
+  setMeta('meta[name="twitter:title"]',      'content', title);
+  setMeta('meta[name="twitter:description"]','content', description);
+}
+
 export function TenantProvider({ children }: { children: ReactNode }) {
   const [tenant, setTenant] = useState<TenantInfo>(DEFAULTS);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
@@ -66,7 +107,13 @@ export function TenantProvider({ children }: { children: ReactNode }) {
           const t: TenantInfo = { ...DEFAULTS, ...res.data.data };
           setTenant(t);
           applyTheme(t.couleurPrimaire, t.couleurSecondaire);
-          document.title = `${t.nomEntreprise} — ${t.slogan}`;
+          if (auth) {
+            // Back-office : titre simple sans modifier les autres meta
+            document.title = `${t.nomEntreprise} — ${t.slogan}`;
+          } else {
+            // Vitrine publique : mise à jour complète des balises SEO
+            applyVitrineSeo(t);
+          }
           if (t.slug && t.slug !== 'default') {
             localStorage.setItem('tenantSlug', t.slug);
           }

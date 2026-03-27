@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Car, ChevronRight, Filter, SlidersHorizontal } from 'lucide-react';
 import { publicApi } from '../../services/api';
+import { useTenant } from '../../contexts/TenantContext';
 
 interface VehiculePublic {
   id: string;
@@ -61,10 +62,25 @@ function SkeletonCard() {
 
 export function FlottePage() {
   const navigate = useNavigate();
+  const tenant = useTenant();
   const [vehicules, setVehicules] = useState<VehiculePublic[]>([]);
   const [loading, setLoading] = useState(true);
   const [categorie, setCategorie] = useState('TOUTES');
   const [prixMax, setPrixMax] = useState<number>(500000);
+
+  // Meta SEO spécifiques à la page flotte
+  useEffect(() => {
+    if (tenant.slug === 'default') return;
+    const title = `Flotte disponible — ${tenant.nomEntreprise}`;
+    const description = `Découvrez tous les véhicules disponibles chez ${tenant.nomEntreprise}. `
+      + `Économique, SUV, Luxe — réservez en ligne en quelques minutes.`;
+    document.title = title;
+    document.querySelector('meta[name="description"]')?.setAttribute('content', description);
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
+    document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', window.location.origin + '/flotte');
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', window.location.origin + '/flotte');
+  }, [tenant]);
 
   useEffect(() => {
     setLoading(true);

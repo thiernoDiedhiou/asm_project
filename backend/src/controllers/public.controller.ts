@@ -593,6 +593,81 @@ ${urls.join('\n')}
   }
 
   /**
+   * GET /api/public/vitrine-meta
+   * Retourne le JSON-LD LocalBusiness + WebSite du tenant courant.
+   * Utilisé par le frontend React pour injecter les données structurées
+   * dans le <head> de chaque vitrine (améliore le SEO des sous-domaines).
+   */
+  async getVitrineMeta(req: Request, res: Response): Promise<void> {
+    try {
+      const platformDomain = process.env.PLATFORM_DOMAIN || 'location.innosft.com';
+
+      const tenant = await prisma.tenant.findUnique({
+        where: { id: req.tenantId! },
+        select: {
+          slug: true,
+          domaine: true,
+          nomEntreprise: true,
+          slogan: true,
+          activite: true,
+          couleurPrimaire: true,
+          logo: true,
+          parametre: {
+            select: {
+              telephone: true,
+              email: true,
+              adresse: true,
+              ville: true,
+            },
+          },
+        },
+      });
+
+      if (!tenant) { sendError(res, 'Tenant introuvable', 404); return; }
+
+      const base = `https://${tenant.domaine || `${tenant.slug}.${platformDomain}`}`;
+      const param = tenant.parametre;
+
+      const jsonLd = {
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'LocalBusiness',
+            '@id': `${base}/#business`,
+            'name': tenant.nomEntreprise,
+            'description': tenant.slogan || tenant.activite || `Agence de location de véhicules — ${tenant.nomEntreprise}`,
+            'url': base,
+            'logo': tenant.logo ? `https://${platformDomain}/uploads/${tenant.logo}` : undefined,
+            'telephone': param?.telephone || undefined,
+            'email': param?.email || undefined,
+            'address': param?.adresse ? {
+              '@type': 'PostalAddress',
+              'streetAddress': param.adresse,
+              'addressLocality': param.ville || '',
+              'addressCountry': 'CI',
+            } : undefined,
+            'priceRange': '$$',
+            'currenciesAccepted': 'XOF',
+            'openingHours': 'Mo-Fr 08:00-18:00',
+          },
+          {
+            '@type': 'WebSite',
+            '@id': `${base}/#website`,
+            'url': base,
+            'name': tenant.nomEntreprise,
+            'publisher': { '@id': `${base}/#business` },
+          },
+        ],
+      };
+
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      sendSuccess(res, jsonLd);
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
+    }
+  }
+
+  /**
    * GET /api/public/robots
    * Génère le robots.txt pour un sous-domaine tenant.
    * Appelé depuis {slug}.location.innosft.com/robots.txt via nginx.

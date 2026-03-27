@@ -5,6 +5,7 @@
   <!-- Page d'accueil -->
   <url>
     <loc>https://location.innosft.com/</loc>
+    <lastmod>2026-03-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -12,6 +13,7 @@
   <!-- Page contact -->
   <url>
     <loc>https://location.innosft.com/contact</loc>
+    <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
