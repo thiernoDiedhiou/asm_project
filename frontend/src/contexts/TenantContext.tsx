@@ -99,6 +99,10 @@ export function TenantProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Domaine admin : pas de tenant à résoudre côté public, éviter le 404
+    const isAdminDomain = window.location.hostname.startsWith('admin.');
+    if (isAdminDomain && !auth) return;
+
     const fetchFn = auth ? settingsApi.get() : publicApi.getTenantInfo();
 
     fetchFn
