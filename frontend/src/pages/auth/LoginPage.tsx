@@ -18,6 +18,8 @@ export function LoginPage() {
   const suspensionReason = searchParams.get('reason');
 
   useEffect(() => {
+    // Sur le domaine admin, pas de tenant à résoudre
+    if (window.location.hostname.startsWith('admin.')) return;
     publicApi.getSettings().then(res => {
       const s = res.data?.data;
       if (s?.nomEntreprise) setNomEntreprise(s.nomEntreprise);
