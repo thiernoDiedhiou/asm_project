@@ -128,13 +128,15 @@ export function App() {
       <ScrollToTop />
       <SessionWatcher />
       <Routes>
-        {/* ===== Vitrine publique ===== */}
-        <Route element={<VitrineLayout />}>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/flotte" element={<FlottePage />} />
-          <Route path="/reserver" element={<DemandeReservationPage />} />
-          <Route path="/tarifs" element={<FlottePage />} />
-        </Route>
+        {/* ===== Vitrine publique (jamais rendue sur le domaine admin) ===== */}
+        {!window.location.hostname.startsWith('admin.') && (
+          <Route element={<VitrineLayout />}>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/flotte" element={<FlottePage />} />
+            <Route path="/reserver" element={<DemandeReservationPage />} />
+            <Route path="/tarifs" element={<FlottePage />} />
+          </Route>
+        )}
 
         {/* ===== Vérification de contrat (navbar minimale) ===== */}
         <Route element={<ContratVerifLayout />}>

@@ -93,15 +93,20 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   const userRole = useAuthStore(state => state.user?.role);
 
   function fetchTenant(auth: boolean, role: string | undefined) {
-    // Super Admin : pas de tenant — titre fixe SenLocaDesk
+    // Domaine admin : aucun tenant à résoudre (ni public ni back-office), éviter les 404
+    const isAdminDomain = window.location.hostname.startsWith('admin.');
+    if (isAdminDomain) {
+      if (auth && role === 'SUPER_ADMIN') {
+        document.title = 'InnoSoft Location — Gestion de la Plateforme';
+      }
+      return;
+    }
+
+    // Super Admin hors domaine admin (ne devrait pas arriver)
     if (auth && role === 'SUPER_ADMIN') {
       document.title = 'InnoSoft Location — Gestion de la Plateforme';
       return;
     }
-
-    // Domaine admin : pas de tenant à résoudre côté public, éviter le 404
-    const isAdminDomain = window.location.hostname.startsWith('admin.');
-    if (isAdminDomain && !auth) return;
 
     const fetchFn = auth ? settingsApi.get() : publicApi.getTenantInfo();
 
