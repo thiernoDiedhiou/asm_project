@@ -42,6 +42,7 @@ import { ParametresPage } from './pages/parametres/ParametresPage';
 import { JournalPage } from './pages/journal/JournalPage';
 import { TenantsPage } from './pages/superadmin/TenantsPage';
 import { TenantDetailPage } from './pages/superadmin/TenantDetailPage';
+import { FlotteGlobalePage } from './pages/superadmin/FlotteGlobalePage';
 
 // URL du tableau de bord Super Admin (définie dans .env / .env.production)
 const SUPERADMIN_URL = import.meta.env.VITE_SUPERADMIN_URL || '/tenants';
@@ -213,6 +214,7 @@ export function App() {
         >
           <Route path="/tenants" element={<TenantsPage />} />
           <Route path="/tenants/:id" element={<TenantDetailPage />} />
+          <Route path="/flotte" element={<FlotteGlobalePage />} />
         </Route>
 
         {/* Redirection par défaut */}

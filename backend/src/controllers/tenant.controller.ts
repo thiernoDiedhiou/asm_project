@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { tenantService } from '../services/tenant.service';
 import { sendSuccess, sendError, sendPaginatedSuccess } from '../utils/response';
+import prisma from '../utils/prisma';
 
 export class TenantController {
   async getAll(_req: Request, res: Response): Promise<void> {
@@ -103,6 +104,60 @@ export class TenantController {
       sendSuccess(res, null, 'Tenant et toutes ses données supprimés définitivement');
     } catch (error) {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
+    }
+  }
+
+  /**
+   * GET /api/tenants/vehicules
+   * Retourne tous les véhicules de tous les tenants actifs (SUPER_ADMIN uniquement).
+   * Inclut les infos du tenant pour affichage groupé.
+   */
+  async getAllVehicules(req: Request, res: Response): Promise<void> {
+    try {
+      const { statut, categorie, search, tenantId } = req.query as Record<string, string>;
+
+      const vehicules = await prisma.vehicule.findMany({
+        where: {
+          tenant: { actif: true },
+          ...(tenantId && { tenantId }),
+          ...(statut && { statut: statut as never }),
+          ...(categorie && { categorie: categorie as never }),
+          ...(search && {
+            OR: [
+              { marque: { contains: search, mode: 'insensitive' } },
+              { modele: { contains: search, mode: 'insensitive' } },
+              { immatriculation: { contains: search, mode: 'insensitive' } },
+            ],
+          }),
+        },
+        select: {
+          id: true,
+          marque: true,
+          modele: true,
+          annee: true,
+          couleur: true,
+          immatriculation: true,
+          categorie: true,
+          statut: true,
+          kilometrage: true,
+          prixJournalier: true,
+          prixSemaine: true,
+          photos: true,
+          tenant: {
+            select: {
+              id: true,
+              slug: true,
+              nomEntreprise: true,
+              couleurPrimaire: true,
+            },
+          },
+        },
+        orderBy: [{ tenant: { nomEntreprise: 'asc' } }, { marque: 'asc' }],
+      });
+
+      sendSuccess(res, vehicules);
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
     }
   }
 }

@@ -306,8 +306,16 @@ export function VitrineLayout() {
           </div>
 
           {/* Bas de footer */}
-          <div className="border-t border-white/20 mt-8 pt-6 text-center text-xs text-white/50">
+          <div className="border-t border-white/20 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/50">
             <span>© {new Date().getFullYear()} {settings.nomEntreprise}. Tous droits réservés.</span>
+            <a
+              href="https://location.innosft.com"
+              target="_blank"
+              rel="noopener"
+              className="hover:text-white/80 transition-colors"
+            >
+              Propulsé par InnoSoft Location
+            </a>
           </div>
         </div>
       </footer>

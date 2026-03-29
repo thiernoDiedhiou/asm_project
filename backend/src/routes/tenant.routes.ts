@@ -13,9 +13,10 @@ const SA = [authenticateToken, authorize(Role.SUPER_ADMIN)];
 router.use(logSuperAdminAction);
 
 // ---- Routes statiques AVANT /:id ----
-router.get('/stats', ...SA, tenantController.getPlatformStats.bind(tenantController));
-router.get('/mrr', ...SA, tenantController.getMrrStats.bind(tenantController));
-router.get('/journal', ...SA, tenantController.getGlobalJournal.bind(tenantController));
+router.get('/stats',     ...SA, tenantController.getPlatformStats.bind(tenantController));
+router.get('/mrr',       ...SA, tenantController.getMrrStats.bind(tenantController));
+router.get('/journal',   ...SA, tenantController.getGlobalJournal.bind(tenantController));
+router.get('/vehicules', ...SA, tenantController.getAllVehicules.bind(tenantController));
 
 // Plans d'abonnement (plateforme)
 router.get('/plans', ...SA, planController.getAll.bind(planController));

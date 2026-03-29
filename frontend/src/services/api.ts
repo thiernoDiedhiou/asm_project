@@ -317,5 +317,11 @@ export const settingsApi = {
   deleteLogo: () => api.delete('/settings/logo'),
 };
 
+// Super Admin — flotte globale (tous les véhicules de tous les tenants)
+export const superAdminApi = {
+  getAllVehicules: (params?: Record<string, string>) =>
+    api.get('/tenants/vehicules', { params }),
+};
+
 export { api };
 export default api;

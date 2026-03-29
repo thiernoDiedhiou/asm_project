@@ -146,6 +146,8 @@ export function DemandeReservationPage() {
   const [dateDebut, setDateDebut] = useState('');
   const [dateFin, setDateFin] = useState('');
   const [heureDepart, setHeureDepart] = useState('');
+  const [heureDebutLocation, setHeureDebutLocation] = useState('');
+  const [heureFinLocation, setHeureFinLocation] = useState('');
   const [zoneId, setZoneId] = useState('');
   const [lieuPriseEnCharge, setLieuPriseEnCharge] = useState('');
   const [lieuRetour, setLieuRetour] = useState('');
@@ -234,6 +236,18 @@ export function DemandeReservationPage() {
       setError('La date de fin doit être après la date de début.');
       return;
     }
+    if (isTransfert && !heureDepart) {
+      setError("Veuillez indiquer l'heure de prise en charge pour le transfert aéroport.");
+      return;
+    }
+    if (!isTransfert && !heureDebutLocation) {
+      setError("Veuillez indiquer l'heure de départ.");
+      return;
+    }
+    if (!isTransfert && !heureFinLocation) {
+      setError("Veuillez indiquer l'heure de retour.");
+      return;
+    }
 
     // Pour un transfert, dateFin = dateDebut (même jour)
     const dateFinEffective = isTransfert ? dateDebut : dateFin;
@@ -241,7 +255,9 @@ export function DemandeReservationPage() {
     const notesFinales = [
       notes,
       isTransfert ? `Sens du transfert : ${sensLabel}` : '',
-      isTransfert && heureDepart ? `Heure de prise en charge : ${heureDepart}` : '',
+      isTransfert ? `Heure de prise en charge : ${heureDepart}` : '',
+      !isTransfert && heureDebutLocation ? `Heure de départ : ${heureDebutLocation}` : '',
+      !isTransfert && heureFinLocation   ? `Heure de retour : ${heureFinLocation}`   : '',
     ].filter(Boolean).join('\n') || undefined;
 
     setSubmitting(true);
@@ -644,13 +660,13 @@ export function DemandeReservationPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
                       <span className="flex items-center gap-1.5">
                         <Clock className="h-4 w-4" />
-                        Heure de prise en charge
-                        <span className="text-gray-400 font-normal">(optionnel)</span>
+                        Heure de prise en charge <span className="text-red-500">*</span>
                       </span>
                     </label>
                     <input
                       type="time"
                       aria-label="Heure de prise en charge"
+                      required
                       value={heureDepart}
                       onChange={(e) => setHeureDepart(e.target.value)}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
@@ -659,8 +675,9 @@ export function DemandeReservationPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {/* Date de début + heure */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
                       <span className="flex items-center gap-1.5">
                         <CalendarDays className="h-4 w-4" />
                         Date de début <span className="text-red-500">*</span>
@@ -676,9 +693,27 @@ export function DemandeReservationPage() {
                       periodesOccupees={periodesOccupees}
                       min={todayStr}
                     />
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          Heure de départ <span className="text-red-500">*</span>
+                        </span>
+                      </label>
+                      <input
+                        type="time"
+                        aria-label="Heure de départ"
+                        required
+                        value={heureDebutLocation}
+                        onChange={(e) => setHeureDebutLocation(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+
+                  {/* Date de fin + heure */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
                       <span className="flex items-center gap-1.5">
                         <CalendarDays className="h-4 w-4" />
                         Date de fin <span className="text-red-500">*</span>
@@ -691,6 +726,22 @@ export function DemandeReservationPage() {
                       periodesOccupees={periodesOccupees}
                       min={dateDebut || todayStr}
                     />
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          Heure de retour <span className="text-red-500">*</span>
+                        </span>
+                      </label>
+                      <input
+                        type="time"
+                        aria-label="Heure de retour"
+                        required
+                        value={heureFinLocation}
+                        onChange={(e) => setHeureFinLocation(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert focus:border-transparent"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -701,7 +752,7 @@ export function DemandeReservationPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     <span className="flex items-center gap-1.5">
                       <Navigation className="h-4 w-4" />
-                      Région de prise en charge
+                      Zone de déplacement
                       <span className="text-gray-400 font-normal">(pour estimer le tarif)</span>
                     </span>
                   </label>
