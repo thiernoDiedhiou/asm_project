@@ -128,8 +128,16 @@ export function App() {
       <ScrollToTop />
       <SessionWatcher />
       <Routes>
-        {/* ===== Vitrine publique (jamais rendue sur le domaine admin) ===== */}
-        {!window.location.hostname.startsWith('admin.') && (
+        {/* ===== Vitrine publique ===== */}
+        {window.location.hostname.startsWith('admin.') ? (
+          /* Sur le domaine admin, les pages vitrine redirigent vers /login */
+          <>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/flotte" element={<Navigate to="/login" replace />} />
+            <Route path="/reserver" element={<Navigate to="/login" replace />} />
+            <Route path="/tarifs" element={<Navigate to="/login" replace />} />
+          </>
+        ) : (
           <Route element={<VitrineLayout />}>
             <Route path="/" element={<LandingPage />} />
             <Route path="/flotte" element={<FlottePage />} />
