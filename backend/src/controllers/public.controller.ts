@@ -763,6 +763,58 @@ ${urls.join('\n')}
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
     }
   }
+
+  /**
+   * GET /api/public/flotte-globale
+   * Retourne tous les véhicules de toutes les agences actives — sans authentification.
+   * Utilisé par la page publique admin.location.innosft.com/flotte.
+   */
+  async getFlotteGlobale(req: Request, res: Response): Promise<void> {
+    try {
+      const { statut, categorie, search, tenantId } = req.query as Record<string, string>;
+
+      const vehicules = await prisma.vehicule.findMany({
+        where: {
+          tenant: { actif: true },
+          ...(tenantId && { tenantId }),
+          ...(statut && { statut: statut as never }),
+          ...(categorie && { categorie: categorie as never }),
+          ...(search && {
+            OR: [
+              { marque: { contains: search, mode: 'insensitive' } },
+              { modele: { contains: search, mode: 'insensitive' } },
+              { immatriculation: { contains: search, mode: 'insensitive' } },
+              { tenant: { nomEntreprise: { contains: search, mode: 'insensitive' } } },
+            ],
+          }),
+        },
+        select: {
+          id: true,
+          marque: true,
+          modele: true,
+          annee: true,
+          couleur: true,
+          categorie: true,
+          statut: true,
+          prixJournalier: true,
+          prixSemaine: true,
+          photos: true,
+          tenant: {
+            select: {
+              slug: true,
+              nomEntreprise: true,
+              couleurPrimaire: true,
+            },
+          },
+        },
+        orderBy: [{ statut: 'asc' }, { tenant: { nomEntreprise: 'asc' } }, { marque: 'asc' }],
+      });
+
+      sendSuccess(res, vehicules);
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
+    }
+  }
 }
 
 export const publicController = new PublicController();

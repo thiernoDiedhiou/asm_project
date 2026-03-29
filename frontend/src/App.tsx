@@ -43,6 +43,7 @@ import { JournalPage } from './pages/journal/JournalPage';
 import { TenantsPage } from './pages/superadmin/TenantsPage';
 import { TenantDetailPage } from './pages/superadmin/TenantDetailPage';
 import { FlotteGlobalePage } from './pages/superadmin/FlotteGlobalePage';
+import { FlottePubliquePage } from './pages/public/FlottePubliquePage';
 
 // URL du tableau de bord Super Admin (définie dans .env / .env.production)
 const SUPERADMIN_URL = import.meta.env.VITE_SUPERADMIN_URL || '/tenants';
@@ -130,10 +131,10 @@ export function App() {
       <Routes>
         {/* ===== Vitrine publique ===== */}
         {window.location.hostname.startsWith('admin.') ? (
-          /* Sur le domaine admin, les pages vitrine redirigent vers /login */
+          /* Sur le domaine admin : /flotte est public, le reste redirige vers /login */
           <>
             <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/flotte" element={<Navigate to="/login" replace />} />
+            <Route path="/flotte" element={<FlottePubliquePage />} />
             <Route path="/reserver" element={<Navigate to="/login" replace />} />
             <Route path="/tarifs" element={<Navigate to="/login" replace />} />
           </>

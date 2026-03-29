@@ -59,6 +59,12 @@ router.get(
   publicController.getVitrineMeta.bind(publicController)
 );
 
+// GET /api/public/flotte-globale — tous les véhicules de toutes les agences (public)
+router.get(
+  '/flotte-globale',
+  publicController.getFlotteGlobale.bind(publicController)
+);
+
 // GET /api/public/sitemap — sitemap XML dynamique (toutes les agences ou un tenant)
 // Consommé par location.innosft.com/sitemap.xml (via nginx) et par chaque {slug}.location.innosft.com/sitemap.xml
 router.get(
