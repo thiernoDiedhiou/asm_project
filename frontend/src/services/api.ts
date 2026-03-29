@@ -283,7 +283,6 @@ export const publicApi = {
   createDemande: (data: Record<string, unknown>) =>
     api.post('/public/reservation', data),
   getSettings: () => api.get('/settings'),
-  getFlotteGlobale: (params?: Record<string, string>) => api.get('/public/flotte-globale', { params }),
   verifierContrat: (numero: string) => api.get(`/public/contrats/verifier/${numero}`),
   getTenantInfo: () => api.get('/public/tenant'),
   getPlans: () => api.get('/public/plans'),
