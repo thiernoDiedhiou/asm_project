@@ -41,7 +41,7 @@ export function FlotteGlobalePage() {
     () => superAdminApi.getAllVehicules()
   );
 
-  const tous: Vehicule[] = data?.data?.data ?? data?.data ?? [];
+  const tous: Vehicule[] = data?.data ?? [];
 
   // Filtrage local
   const vehicules = tous.filter((v) => {
