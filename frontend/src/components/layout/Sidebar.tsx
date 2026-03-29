@@ -104,7 +104,10 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const navigate = useNavigate();
 
   const filteredNavItems = isSuperAdmin
-    ? [{ label: 'Tenants', href: '/tenants', icon: Building2 }]
+    ? [
+        { label: 'Tenants',        href: '/tenants',        icon: Building2 },
+        { label: 'Flotte globale', href: '/flotte-globale', icon: Car       },
+      ]
     : navItems.filter((item) => {
         if (item.adminOnly && !isAdmin) return false;
         if (item.comptableAccess && !isComptable && !isAdmin) return false;

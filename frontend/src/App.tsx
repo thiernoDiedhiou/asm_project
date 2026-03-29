@@ -214,7 +214,7 @@ export function App() {
         >
           <Route path="/tenants" element={<TenantsPage />} />
           <Route path="/tenants/:id" element={<TenantDetailPage />} />
-          <Route path="/flotte" element={<FlotteGlobalePage />} />
+          <Route path="/flotte-globale" element={<FlotteGlobalePage />} />
         </Route>
 
         {/* Redirection par défaut */}
