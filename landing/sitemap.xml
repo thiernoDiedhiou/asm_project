@@ -18,7 +18,7 @@
 
   <!-- Vitrines de toutes les agences (dynamique — généré par le backend) -->
   <sitemap>
-    <loc>https://location.innosft.com/api/public/sitemap</loc>
+    <loc>https://location.innosft.com/sitemap-agences.xml</loc>
   </sitemap>
 
 </sitemapindex>
