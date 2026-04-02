@@ -1,5 +1,5 @@
 User-agent: *
-Allow: /
+Allow: /api/public/sitemap
 Disallow: /api/
 
 Sitemap: https://location.innosft.com/sitemap.xml
