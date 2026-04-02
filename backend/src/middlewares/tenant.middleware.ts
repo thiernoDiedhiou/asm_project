@@ -42,10 +42,11 @@ export async function resolveTenant(req: Request, res: Response, next: NextFunct
     }
 
     if (!tenant) {
-      // Les routes d'auth (login, refresh, reset password) doivent fonctionner même sans tenant actif
-      // pour permettre la connexion SUPER_ADMIN quand tous les tenants sont désactivés
+      // Les routes d'auth et SEO globales passent sans tenant
       const isAuthRoute = req.originalUrl.startsWith('/api/auth/');
-      if (isAuthRoute) {
+      const isSeoRoute = req.originalUrl.startsWith('/api/public/sitemap') ||
+                         req.originalUrl.startsWith('/api/public/robots');
+      if (isAuthRoute || isSeoRoute) {
         next();
         return;
       }
