@@ -102,14 +102,14 @@ const globalLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Rate limiting strict pour l'authentification (5 tentatives/15min par email)
+// Rate limiting pour l'authentification (15 tentatives/15min par IP+email)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 15,
   keyGenerator: (req) => {
-    // Clé basée sur l'email pour ne bloquer que le compte ciblé, pas toute l'IP
+    // Clé combinée IP + email pour éviter de bloquer une IP entière à cause d'un seul compte
     const email = req.body?.email?.toLowerCase?.() ?? '';
-    return email || req.ip;
+    return `${req.ip}:${email}`;
   },
   message: {
     success: false,
