@@ -160,6 +160,21 @@ export class TenantController {
       sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 500);
     }
   }
+
+  async updateAdminEmail(req: Request, res: Response): Promise<void> {
+    try {
+      const { id, userId } = req.params;
+      const { email } = req.body;
+      if (!email || typeof email !== 'string' || !email.includes('@')) {
+        sendError(res, 'Email invalide', 400);
+        return;
+      }
+      const user = await tenantService.updateAdminEmail(id, userId, email.trim().toLowerCase());
+      sendSuccess(res, user, 'Email mis à jour avec succès');
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
+    }
+  }
 }
 
 export const tenantController = new TenantController();

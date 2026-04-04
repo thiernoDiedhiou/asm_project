@@ -122,12 +122,12 @@ export function FlottePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filtres */}
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
             {/* Filtre catégorie */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex items-center gap-1.5 text-sm font-medium text-gray-600 mr-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 text-sm font-medium text-gray-600">
                 <Filter className="h-4 w-4" />
-                Catégorie :
+                <span>Catégorie :</span>
               </div>
               {CATEGORIES.map((cat) => (
                 <button
@@ -145,30 +145,34 @@ export function FlottePage() {
             </div>
 
             {/* Filtre prix */}
-            <div className="flex items-center gap-3 lg:ml-auto">
-              <SlidersHorizontal className="h-4 w-4 text-gray-500 flex-shrink-0" />
-              <span className="text-sm text-gray-600 whitespace-nowrap">Prix max / jour :</span>
-              <input
-                type="range"
-                aria-label="Prix maximum par jour"
-                min={10000}
-                max={prixMax || 200000}
-                step={5000}
-                value={prixFiltre ?? (prixMax || 200000)}
-                onChange={(e) => setPrixFiltre(Number(e.target.value))}
-                className="w-36 accent-asm-vert"
-              />
-              <span className="text-sm font-semibold text-asm-vert whitespace-nowrap">
-                {formatPrix(prixFiltre ?? (prixMax || 200000))}
-              </span>
-              {prixFiltre !== null && (
-                <button
-                  onClick={() => setPrixFiltre(null)}
-                  className="text-xs text-gray-400 hover:text-gray-600 underline"
-                >
-                  Reset
-                </button>
-              )}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 lg:ml-auto">
+              <div className="flex items-center gap-1.5 text-sm text-gray-600 shrink-0">
+                <SlidersHorizontal className="h-4 w-4 text-gray-500 shrink-0" />
+                <span className="whitespace-nowrap">Prix max / jour :</span>
+              </div>
+              <div className="flex items-center gap-2 min-w-0">
+                <input
+                  type="range"
+                  aria-label="Prix maximum par jour"
+                  min={10000}
+                  max={prixMax || 200000}
+                  step={5000}
+                  value={prixFiltre ?? (prixMax || 200000)}
+                  onChange={(e) => setPrixFiltre(Number(e.target.value))}
+                  className="flex-1 min-w-0 accent-asm-vert"
+                />
+                <span className="text-sm font-semibold text-asm-vert whitespace-nowrap">
+                  {formatPrix(prixFiltre ?? (prixMax || 200000))}
+                </span>
+                {prixFiltre !== null && (
+                  <button
+                    onClick={() => setPrixFiltre(null)}
+                    className="text-xs text-gray-400 hover:text-gray-600 underline shrink-0"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -321,4 +321,23 @@ export const tenantService = {
     // La suppression en cascade est gérée par Prisma (onDelete: Cascade sur toutes les relations)
     await prisma.tenant.delete({ where: { id } });
   },
+
+  async updateAdminEmail(tenantId: string, userId: string, newEmail: string) {
+    const user = await prisma.user.findFirst({
+      where: { id: userId, tenantId },
+    });
+    if (!user) throw new Error('Utilisateur introuvable dans ce tenant');
+
+    // Vérifier que le nouvel email n'est pas déjà utilisé
+    const existing = await prisma.user.findFirst({
+      where: { email: newEmail, id: { not: userId } },
+    });
+    if (existing) throw new Error('Cet email est déjà utilisé par un autre compte');
+
+    return prisma.user.update({
+      where: { id: userId },
+      data: { email: newEmail },
+      select: { id: true, email: true, nom: true, prenom: true, role: true },
+    });
+  },
 };
