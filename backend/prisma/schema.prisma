@@ -209,6 +209,8 @@ model Reservation {
   lieuRetour         String
   nombreJours        Int
   prixTotal          Decimal           @db.Decimal(10, 2)
+  remiseManuelle     Decimal           @default(0) @db.Decimal(10, 2)
+  typeRemise         String            @default("MONTANT")
   avance             Decimal           @default(0) @db.Decimal(10, 2)
   statut             StatutReservation @default(EN_ATTENTE)
   typeTrajet         TypeTrajet        @default(LOCATION)

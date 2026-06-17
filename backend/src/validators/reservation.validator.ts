@@ -12,6 +12,8 @@ export const createReservationSchema = z.object({
     .enum(['LOCATION', 'TRANSFERT_AEROPORT', 'LONGUE_DUREE'])
     .default('LOCATION'),
   avance: z.number().min(0).default(0),
+  remiseManuelle: z.number().min(0).default(0),
+  typeRemise: z.enum(['MONTANT', 'POURCENTAGE']).default('MONTANT'),
   notes: z.string().optional(),
   zoneId: z.string().uuid().optional(),
 }).refine(

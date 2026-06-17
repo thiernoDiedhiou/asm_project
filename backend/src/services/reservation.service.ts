@@ -179,6 +179,12 @@ export class ReservationService {
 
     const nombreJours = calculerNombreJours(dateDebut, dateFin);
 
+    // Appliquer la remise manuelle (montant fixe ou pourcentage)
+    const remiseMontant = dto.typeRemise === 'POURCENTAGE'
+      ? Math.round(prixCalc.prixTotal * (dto.remiseManuelle / 100))
+      : Math.round(dto.remiseManuelle || 0);
+    const prixFinal = Math.max(0, prixCalc.prixTotal - remiseMontant);
+
     // Retry jusqu'à 5 fois en cas de collision sur numeroReservation (P2002)
     let reservation;
     for (let attempt = 0; attempt < 5; attempt++) {
@@ -195,7 +201,9 @@ export class ReservationService {
             lieuPriseEnCharge: dto.lieuPriseEnCharge,
             lieuRetour: dto.lieuRetour,
             nombreJours,
-            prixTotal: prixCalc.prixTotal,
+            prixTotal: prixFinal,
+            remiseManuelle: remiseMontant,
+            typeRemise: dto.typeRemise || 'MONTANT',
             avance: dto.avance || 0,
             typeTrajet: dto.typeTrajet || 'LOCATION',
             notes: dto.notes,

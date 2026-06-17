@@ -229,6 +229,11 @@ export function ReservationDetailPage() {
       <div className="bg-asm-vert-pale rounded-xl p-5 border border-asm-vert/20">
         <div className="flex items-center justify-between">
           <div>
+            {Number(r.remiseManuelle) > 0 && (
+              <div className="text-xs text-gray-500 mb-0.5">
+                Remise accordée : <span className="font-medium text-asm-vert">− {formatFCFA(r.remiseManuelle)}</span>
+              </div>
+            )}
             <div className="text-sm text-gray-600">Montant total</div>
             <div className="text-3xl font-bold text-asm-vert">{formatFCFA(r.prixTotal)}</div>
           </div>
@@ -315,6 +320,7 @@ export function ReservationDetailPage() {
               </label>
               <input
                 type="date"
+                aria-label="Nouvelle date de fin"
                 value={nouvelleDataFin}
                 min={minDateProlonger}
                 onChange={e => { setNouvelleDataFin(e.target.value); setProlongerError(''); }}
