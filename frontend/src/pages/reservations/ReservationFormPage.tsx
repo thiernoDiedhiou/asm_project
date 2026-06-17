@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Save, Calendar, Search, X, User, Check, Car,
-  Plane, Clock, CheckCircle2, MapPin, Banknote, FileText,
+  Plane, Clock, CheckCircle2, MapPin, Banknote, FileText, Tag,
 } from 'lucide-react';
 import { reservationsApi, clientsApi, vehiculesApi, tarificationApi } from '../../services/api';
 import { useQuery } from '../../components/hooks/useQuery';
@@ -65,6 +65,8 @@ interface FormData {
   avance: string;
   notes: string;
   zoneId: string;
+  remiseManuelle: string;
+  typeRemise: 'MONTANT' | 'POURCENTAGE';
 }
 
 const CATEGORIE_COLORS: Record<string, string> = {
@@ -102,6 +104,7 @@ export function ReservationFormPage() {
     dateDebut: '', dateFin: '',
     lieuPriseEnCharge: 'Agence ASM', lieuRetour: 'Agence ASM',
     typeTrajet: 'LOCATION', avance: '', notes: '', zoneId: '',
+    remiseManuelle: '', typeRemise: 'MONTANT',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -229,6 +232,13 @@ export function ReservationFormPage() {
     : 0;
   const prixEffectif = prixMatrice > 0 ? prixMatrice : (selectedVehicule?.prixJournalier ?? 0);
 
+  const estimatedBase = prixEffectif * effectiveDuration;
+  const remiseVal = parseFloat(form.remiseManuelle) || 0;
+  const remiseMontantEstime = form.typeRemise === 'POURCENTAGE'
+    ? Math.round(estimatedBase * (remiseVal / 100))
+    : remiseVal;
+  const estimatedTotal = Math.max(0, estimatedBase - remiseMontantEstime);
+
   const showEstimation = Boolean(selectedVehicule) && !dispoError;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -245,6 +255,7 @@ export function ReservationFormPage() {
         lieuPriseEnCharge: form.lieuPriseEnCharge, lieuRetour: form.lieuRetour,
         typeTrajet: form.typeTrajet,
         ...(form.avance && { avance: parseFloat(form.avance) }),
+        ...(form.remiseManuelle && { remiseManuelle: parseFloat(form.remiseManuelle), typeRemise: form.typeRemise }),
         ...(form.notes  && { notes: form.notes }),
         ...(form.zoneId && { zoneId: form.zoneId }),
       };
@@ -629,9 +640,9 @@ export function ReservationFormPage() {
                 onChange={e => set('avance', e.target.value)}
                 className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert/30 focus:border-transparent"
               />
-              {form.avance && prixEffectif > 0 && effectiveDuration > 0 && (
+              {form.avance && estimatedBase > 0 && (
                 <p className="mt-1 text-xs text-gray-400">
-                  {Math.round((parseFloat(form.avance) / (prixEffectif * effectiveDuration)) * 100)}% du total estimé
+                  {Math.round((parseFloat(form.avance) / estimatedBase) * 100)}% du total estimé
                 </p>
               )}
             </div>
@@ -662,6 +673,55 @@ export function ReservationFormPage() {
                   </p>
                 )}
               </div>
+            )}
+          </div>
+
+          {/* Remise manuelle */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
+              <Tag className="h-3.5 w-3.5 text-gray-400" />
+              Remise (optionnel)
+            </label>
+            <div className="flex gap-2">
+              <div className="flex rounded-xl border border-gray-200 overflow-hidden flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, typeRemise: 'MONTANT', remiseManuelle: '' }))}
+                  className={`px-3 py-2.5 text-sm font-medium transition-colors ${
+                    form.typeRemise === 'MONTANT'
+                      ? 'bg-asm-vert text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  FCFA
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, typeRemise: 'POURCENTAGE', remiseManuelle: '' }))}
+                  className={`px-3 py-2.5 text-sm font-medium transition-colors border-l border-gray-200 ${
+                    form.typeRemise === 'POURCENTAGE'
+                      ? 'bg-asm-vert text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  %
+                </button>
+              </div>
+              <input
+                aria-label="Remise"
+                type="number"
+                min={0}
+                max={form.typeRemise === 'POURCENTAGE' ? 100 : undefined}
+                placeholder={form.typeRemise === 'POURCENTAGE' ? 'Ex: 10' : 'Ex: 5000'}
+                value={form.remiseManuelle}
+                onChange={e => setForm(f => ({ ...f, remiseManuelle: e.target.value }))}
+                className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-asm-vert/30 focus:border-transparent"
+              />
+            </div>
+            {remiseMontantEstime > 0 && (
+              <p className="mt-1 text-xs text-asm-vert font-medium">
+                Réduction de {formatFCFA(remiseMontantEstime)} appliquée
+              </p>
             )}
           </div>
 
@@ -713,11 +773,22 @@ export function ReservationFormPage() {
                       }
                     </span>
                   </div>
+                  {remiseMontantEstime > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-white/70">
+                        Remise
+                        {form.typeRemise === 'POURCENTAGE' && remiseVal > 0 && (
+                          <span className="ml-1 text-white/50 text-xs">({remiseVal}%)</span>
+                        )}
+                      </span>
+                      <span className="text-asm-or font-medium">− {formatFCFA(remiseMontantEstime)}</span>
+                    </div>
+                  )}
                   {(isTransfert || effectiveDuration > 0) && (
                     <div className="border-t border-white/20 pt-2.5 mt-1 flex justify-between items-center">
                       <span className="text-white font-semibold">Total estimé</span>
                       <span className="text-2xl font-extrabold text-asm-or">
-                        {formatFCFA(prixEffectif * effectiveDuration)}
+                        {formatFCFA(estimatedTotal)}
                       </span>
                     </div>
                   )}
