@@ -24,6 +24,11 @@ export const createReservationSchema = z.object({
   }
 );
 
+export const applyRemiseSchema = z.object({
+  remiseManuelle: z.number().min(0),
+  typeRemise: z.enum(['MONTANT', 'POURCENTAGE']).default('MONTANT'),
+});
+
 export const updateStatutReservationSchema = z.object({
   statut: z.enum([
     'EN_ATTENTE',
@@ -53,5 +58,6 @@ export const calendrierQuerySchema = z.object({
 });
 
 export type CreateReservationDto = z.infer<typeof createReservationSchema>;
+export type ApplyRemiseDto = z.infer<typeof applyRemiseSchema>;
 export type UpdateStatutReservationDto = z.infer<typeof updateStatutReservationSchema>;
 export type ReservationFilters = z.infer<typeof reservationFiltresSchema>;

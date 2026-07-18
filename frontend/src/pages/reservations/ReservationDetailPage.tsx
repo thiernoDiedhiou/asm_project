@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Car, User, Calendar, FileText, CheckCircle, XCircle, CalendarPlus } from 'lucide-react';
+import { ArrowLeft, Car, User, Calendar, FileText, CheckCircle, XCircle, CalendarPlus, Tag } from 'lucide-react';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { reservationsApi } from '../../services/api';
 import { useQuery } from '../../components/hooks/useQuery';
@@ -19,6 +19,12 @@ export function ReservationDetailPage() {
   const [nouvelleDataFin, setNouvelleDataFin] = useState('');
   const [prolongerLoading, setProlongerLoading] = useState(false);
   const [prolongerError, setProlongerError] = useState('');
+
+  const [showRemiseEdit, setShowRemiseEdit] = useState(false);
+  const [remiseInput, setRemiseInput] = useState('');
+  const [typeRemiseInput, setTypeRemiseInput] = useState<'MONTANT' | 'POURCENTAGE'>('MONTANT');
+  const [remiseLoading, setRemiseLoading] = useState(false);
+  const [remiseError, setRemiseError] = useState('');
 
   const { data, isLoading, refetch } = useQuery(
     ['reservation', id],
@@ -92,6 +98,31 @@ export function ReservationDetailPage() {
       setProlongerError((err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? msg);
     } finally {
       setProlongerLoading(false);
+    }
+  }
+
+  function openRemiseEdit() {
+    setRemiseInput(Number(r?.remiseManuelle) > 0 ? String(r?.remiseManuelle) : '');
+    setTypeRemiseInput((r?.typeRemise as 'MONTANT' | 'POURCENTAGE') || 'MONTANT');
+    setRemiseError('');
+    setShowRemiseEdit(true);
+  }
+
+  async function handleAppliquerRemise() {
+    setRemiseLoading(true);
+    setRemiseError('');
+    try {
+      await reservationsApi.appliquerRemise(id!, {
+        remiseManuelle: parseFloat(remiseInput) || 0,
+        typeRemise: typeRemiseInput,
+      });
+      setShowRemiseEdit(false);
+      refetch();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur lors de l\'application de la remise';
+      setRemiseError((err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? msg);
+    } finally {
+      setRemiseLoading(false);
     }
   }
 
@@ -242,6 +273,77 @@ export function ReservationDetailPage() {
             <div className="text-sm font-medium text-red-600">Reste : {formatFCFA((r.prixTotal || 0) - (r.avance || 0))}</div>
           </div>
         </div>
+
+        {canEdit && r.statut === 'EN_ATTENTE' && (
+          <div className="mt-4 pt-4 border-t border-asm-vert/20">
+            {!showRemiseEdit ? (
+              <button
+                type="button"
+                onClick={openRemiseEdit}
+                className="flex items-center gap-1.5 text-sm font-medium text-asm-vert hover:underline"
+              >
+                <Tag className="h-3.5 w-3.5" />
+                {Number(r.remiseManuelle) > 0 ? 'Modifier la remise' : 'Appliquer une remise'}
+              </button>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <div className="flex rounded-xl border border-gray-200 overflow-hidden flex-shrink-0 bg-white">
+                    <button
+                      type="button"
+                      onClick={() => setTypeRemiseInput('MONTANT')}
+                      className={`px-3 py-2 text-sm font-medium transition-colors ${
+                        typeRemiseInput === 'MONTANT' ? 'bg-asm-vert text-white' : 'text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      FCFA
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTypeRemiseInput('POURCENTAGE')}
+                      className={`px-3 py-2 text-sm font-medium transition-colors border-l border-gray-200 ${
+                        typeRemiseInput === 'POURCENTAGE' ? 'bg-asm-vert text-white' : 'text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      %
+                    </button>
+                  </div>
+                  <input
+                    aria-label="Remise"
+                    type="number"
+                    min={0}
+                    max={typeRemiseInput === 'POURCENTAGE' ? 100 : undefined}
+                    placeholder={typeRemiseInput === 'POURCENTAGE' ? 'Ex: 10' : 'Ex: 5000'}
+                    value={remiseInput}
+                    onChange={e => setRemiseInput(e.target.value)}
+                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-asm-vert/30 focus:border-transparent"
+                  />
+                </div>
+                {remiseError && (
+                  <p className="text-xs text-red-600">{remiseError}</p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowRemiseEdit(false)}
+                    disabled={remiseLoading}
+                    className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-white transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAppliquerRemise}
+                    disabled={remiseLoading}
+                    className="px-3 py-1.5 rounded-lg bg-asm-vert text-white text-xs font-semibold hover:bg-asm-vert/90 disabled:opacity-60 transition-colors"
+                  >
+                    {remiseLoading ? 'Application…' : 'Appliquer'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Contrat associé */}

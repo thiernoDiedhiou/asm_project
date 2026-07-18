@@ -75,6 +75,31 @@ export class ReservationController {
     }
   }
 
+  async appliquerRemise(req: Request, res: Response): Promise<void> {
+    try {
+      if (!req.user) { sendError(res, 'Non authentifié', 401); return; }
+      const reservation = await reservationService.appliquerRemise(
+        req.params.id,
+        req.body,
+        req.tenantId!
+      );
+
+      logAction({
+        userId: req.user.userId,
+        tenantId: req.tenantId!,
+        userRole: req.user.role,
+        action: ACTIONS.RESERVATION_STATUT_MODIFIE,
+        entite: ENTITES.RESERVATION,
+        entiteId: req.params.id,
+        details: { action: 'REMISE', remiseManuelle: req.body.remiseManuelle, typeRemise: req.body.typeRemise },
+      }).catch(() => {});
+
+      sendSuccess(res, reservation, 'Remise appliquée');
+    } catch (error) {
+      sendError(res, error instanceof Error ? error.message : 'Erreur serveur', 400);
+    }
+  }
+
   async updateStatut(req: Request, res: Response): Promise<void> {
     try {
       if (!req.user) { sendError(res, 'Non authentifié', 401); return; }

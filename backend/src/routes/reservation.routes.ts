@@ -5,6 +5,7 @@ import { authenticateToken, authorize } from '../middlewares/auth.middleware';
 import { validateBody, validateQuery } from '../middlewares/validate.middleware';
 import {
   createReservationSchema,
+  applyRemiseSchema,
   updateStatutReservationSchema,
   reservationFiltresSchema,
   calendrierQuerySchema,
@@ -47,6 +48,14 @@ router.put(
   authorize(Role.ADMIN, Role.AGENT),
   validateBody(updateStatutReservationSchema),
   reservationController.updateStatut.bind(reservationController)
+);
+
+router.put(
+  '/:id/remise',
+  authenticateToken,
+  authorize(Role.ADMIN, Role.AGENT),
+  validateBody(applyRemiseSchema),
+  reservationController.appliquerRemise.bind(reservationController)
 );
 
 router.put(

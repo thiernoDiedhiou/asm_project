@@ -3,6 +3,7 @@ import { StatutReservation } from '@prisma/client';
 import prisma from '../utils/prisma';
 import {
   CreateReservationDto,
+  ApplyRemiseDto,
   UpdateStatutReservationDto,
   ReservationFilters,
 } from '../validators/reservation.validator';
@@ -226,6 +227,36 @@ export class ReservationService {
 
     logger.info(`Réservation créée: ${(reservation as { numeroReservation: string }).numeroReservation}`);
     return { reservation, prixDetail: prixCalc };
+  }
+
+  async appliquerRemise(id: string, dto: ApplyRemiseDto, tenantId: string) {
+    const reservation = await prisma.reservation.findFirst({ where: { id, tenantId } });
+    if (!reservation) {
+      throw new Error('Réservation introuvable');
+    }
+    if (reservation.statut !== 'EN_ATTENTE') {
+      throw new Error('La remise ne peut être modifiée que sur une réservation en attente');
+    }
+
+    const prixBase = Number(reservation.prixTotal) + Number(reservation.remiseManuelle);
+    const remiseMontant = dto.typeRemise === 'POURCENTAGE'
+      ? Math.round(prixBase * (dto.remiseManuelle / 100))
+      : Math.round(dto.remiseManuelle);
+    const prixFinal = Math.max(0, prixBase - remiseMontant);
+
+    return prisma.reservation.update({
+      where: { id },
+      data: {
+        prixTotal: prixFinal,
+        remiseManuelle: remiseMontant,
+        typeRemise: dto.typeRemise,
+      },
+      include: {
+        client: true,
+        vehicule: true,
+        agent: { select: { id: true, nom: true, prenom: true } },
+      },
+    });
   }
 
   async updateStatut(
