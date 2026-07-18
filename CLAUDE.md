@@ -7,7 +7,7 @@ Développé par **Innosoft Creation** (innosft.com) pour le marché sénégalais
 
 ## Architecture
 
-```
+```text
 asm-location/
 ├── backend/     Node.js + Express + TypeScript + Prisma + PostgreSQL
 ├── frontend/    React 18 + TypeScript + Tailwind CSS + Zustand + Axios
@@ -38,7 +38,8 @@ cd frontend && npm run dev         # Vite port 3000
 ## Patterns de données critiques
 
 ### useQuery hook
-```
+
+```text
 setData(response.data)  →  data = { success, data, pagination }
 data?.data       ✓  (items)
 data?.pagination ✓
@@ -46,6 +47,7 @@ data?.data?.data ✗  (toujours undefined)
 ```
 
 ### Champs Prisma
+
 - Réservation : `prixTotal` (PAS `montantTotal`)
 - Réservation : `remiseManuelle` (Decimal, défaut 0) + `typeRemise` (`MONTANT` | `POURCENTAGE`)
 - `numeroReservation` : unique **par tenant** → `@@unique([tenantId, numeroReservation])`
@@ -53,6 +55,7 @@ data?.data?.data ✗  (toujours undefined)
 - ContratDetailPage : calcule `montantPaye`/`resteAPayer` localement depuis `paiements[]`
 
 ### API_FILE_BASE
+
 ```typescript
 // frontend/src/services/api.ts
 export const API_FILE_BASE = import.meta.env.VITE_API_FILE_BASE || 'http://localhost:5000';
@@ -63,7 +66,7 @@ src={`${API_FILE_BASE}${path}`}
 ## Routes backend
 
 | Fichier | Monté sur |
-|---|---|
+| --- | --- |
 | `auth.routes.ts` | `/api/auth` |
 | `public.routes.ts` | `/api/public` (sans auth, sans tenant requis pour SUPER_ADMIN) |
 | `contrat.routes.ts` | `/api` (contrats + paiements) |
@@ -81,6 +84,7 @@ Rate limit : 500 req/15min (dev)
 ## Vitrine publique
 
 Routes sans auth : `/`, `/flotte`, `/reserver`
+
 - Layout : `frontend/src/layouts/VitrineLayout.tsx`
 - Pages : `frontend/src/pages/vitrine/`
 - Backend : `GET /api/public/vehicules`, `POST /api/public/reservation`, `GET /api/public/tenant`
@@ -106,11 +110,11 @@ Routes sans auth : `/`, `/flotte`, `/reserver`
 ## Comptes demo
 
 | Rôle | Email | Mot de passe |
-|---|---|---|
-| Super Admin | superadmin@asm-platform.sn | (voir .env seed) |
-| Admin ASM | admin@asm.sn | Admin123! |
-| Agent | agent1@asm.sn | Agent123! |
-| Comptable | comptable@asm.sn | Compta123! |
+| --- | --- | --- |
+| Super Admin | `superadmin@asm-platform.sn` | (voir .env seed) |
+| Admin ASM | `admin@asm.sn` | Admin123! |
+| Agent | `agent1@asm.sn` | Agent123! |
+| Comptable | `comptable@asm.sn` | Compta123! |
 
 ## Variables d'environnement clés
 
@@ -135,6 +139,7 @@ VITE_API_FILE_BASE=   # vide = même domaine (nginx proxy)
 ## Prisma sur Windows
 
 Si `prisma generate` échoue (DLL verrouillée) :
+
 ```bash
 # Arrêter le backend d'abord, puis :
 rm -f node_modules/.prisma/client/query_engine-windows.dll.node
